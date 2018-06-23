@@ -26,17 +26,34 @@ source-repository   head
 
 library
   exposed-modules:     Data.Aviation.VFR_Waypoints
+                     , Data.Aviation.VFR_Waypoints.Search
   build-depends:       base >=4.8 && <4.11
                      , lens >=4.15 && < 4.17
-  hs-source-dirs:      src
+                     , containers
+  hs-source-dirs:      src/library
   default-language:    Haskell2010
   ghc-options:         -Wall
+
+executable vfr-waypoints
+  default-language:    Haskell2010
+
+  hs-source-dirs:      src/executable
+
+  main-is:             Main.hs
+
+  build-depends:        base >=4.8 && <4.11                    
+                      , lens >=4.15 && <4.17
+                      , vfr-waypoints
+                    
+  ghc-options:         -Wall
+
+  other-modules:       Data.Aviation.VFR_Waypoints
+                     , Data.Aviation.VFR_Waypoints.Search
 
 test-suite             tests
   build-depends:       QuickCheck >=2.9.2 && <2.12
                      , base >=4.8 && <4.11
                      , checkers >=0.4.6 && <0.5
-                     , vfr-waypoints
                      , hedgehog >=0.5 && <0.6
                      , lens >=4.15 && <4.17
                      , tasty >=0.11 && <1.1
@@ -44,6 +61,7 @@ test-suite             tests
                      , tasty-hedgehog >= 0.1 && <0.3
                      , tasty-quickcheck >=0.8.4 && <0.11
                      , transformers >=0.4.1 && <5.5
+                     , vfr-waypoints
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   hs-source-dirs:      test

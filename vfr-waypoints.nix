@@ -1,12 +1,15 @@
-{ mkDerivation, base, checkers, hedgehog, lens, QuickCheck, stdenv
-, tasty, tasty-hedgehog, tasty-hunit, tasty-quickcheck
-, transformers
+{ mkDerivation, base, checkers, containers, hedgehog, lens
+, QuickCheck, stdenv, tasty, tasty-hedgehog, tasty-hunit
+, tasty-quickcheck, transformers
 }:
 mkDerivation {
   pname = "vfr-waypoints";
   version = "0.1.0.0";
   src = ./.;
-  libraryHaskellDepends = [ base lens ];
+  isLibrary = true;
+  isExecutable = true;
+  libraryHaskellDepends = [ base containers lens ];
+  executableHaskellDepends = [ base lens ];
   testHaskellDepends = [
     base checkers hedgehog lens QuickCheck tasty tasty-hedgehog
     tasty-hunit tasty-quickcheck transformers
