@@ -8,7 +8,6 @@ import Data.Char
 import Data.Map(Map)
 import qualified Data.Map as Map
 import Prelude
-import Text.Regex
 
 all_VFR_Waypoint_codes_index ::
   Map String (String, Maybe String, Double, Double)
@@ -26,13 +25,6 @@ searchIndexCode ::
 searchIndexCode s =
   let s' = filter isAlpha . fmap toUpper $ s
   in  (\(_name, _state, _lat, _lon) -> VFR_Waypoint _name _state s' _lat _lon) <$> Map.lookup s' all_VFR_Waypoint_codes_index
-
-searchRegex ::
-  String
-  -> [VFR_Waypoint]
-searchRegex =
-  let r = (\(VFR_Waypoint _name _state _code _lat _lon) -> undefined) <$> all_VFR_Waypoint ^. _Wrapped
-  in  undefined
 
 -- https://hackage.haskell.org/package/fuzzy
 
