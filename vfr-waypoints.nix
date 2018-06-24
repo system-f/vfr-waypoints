@@ -1,6 +1,7 @@
 { mkDerivation, base, checkers, containers, fuzzy, hedgehog, lens
-, QuickCheck, stdenv, tasty, tasty-hedgehog, tasty-hunit
-, tasty-quickcheck, transformers
+, monoid-subclasses, optparse-applicative, QuickCheck, stdenv
+, tasty, tasty-hedgehog, tasty-hunit, tasty-quickcheck
+, transformers
 }:
 mkDerivation {
   pname = "vfr-waypoints";
@@ -8,8 +9,12 @@ mkDerivation {
   src = ./.;
   isLibrary = true;
   isExecutable = true;
-  libraryHaskellDepends = [ base containers fuzzy lens ];
-  executableHaskellDepends = [ base lens ];
+  libraryHaskellDepends = [
+    base containers fuzzy lens monoid-subclasses
+  ];
+  executableHaskellDepends = [
+    base fuzzy lens optparse-applicative
+  ];
   testHaskellDepends = [
     base checkers hedgehog lens QuickCheck tasty tasty-hedgehog
     tasty-hunit tasty-quickcheck transformers

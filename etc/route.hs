@@ -8,6 +8,8 @@ import Data.Char
 import Data.List
 import Data.List.NonEmpty(NonEmpty)
 import Data.Maybe
+import System.Environment
+import Text.Printf
 
 data Coordinate =
   Coordinate
@@ -132,8 +134,8 @@ data WaypointEncoded =
     String -- WAYPOINT
     (Maybe String) -- STATE
     String -- CODE
-    Double -- LAT
-    Double -- LON
+    (Int, Int, Double) -- LAT
+    (Int, Int, Double) -- LON
   deriving (Eq, Ord, Show)
 
 waypointCode (WaypointEncoded _ _ c _ _) =
@@ -141,7 +143,7 @@ waypointCode (WaypointEncoded _ _ c _ _) =
 
 parselatlon ::
   String
-  -> Maybe Double
+  -> Maybe (Int, Int, Double)
 parselatlon (c:' ':r) =
   let w = if c `elem` "SW"
             then Just (-1)
@@ -150,10 +152,11 @@ parselatlon (c:' ':r) =
               else Nothing
       j =
         reads r >>= \(i', s) -> 
-        (\x -> (i',x)) <$> reads s        
-  in  do  w'            <- w
-          (n,  (d, _))  <- listToMaybe j
-          pure (w' * (fromIntegral n + d / 60))
+        let (v, w) = break (== '.') s
+        in pure (i', read v, read ('0':w))
+  in  do  w'           <- w
+          (i', j', k') <- listToMaybe j
+          pure (w' * i', j', k')
 parselatlon _ =
   Nothing
 
@@ -187,7 +190,7 @@ render ws =
         concat ["_", w, "_"]
       paren p s =
         if p then concat ["(", s, ")"] else s
-      render1 (WaypointEncoded wpt x1 x2 x3 x4) =
+      render1 (WaypointEncoded wpt x1 x2 (x3, x3', x3'') (x4, x4', x4'')) =
         concat
           [
 
@@ -204,10 +207,21 @@ render ws =
           , "\n    "
           , show x2
           , "\n    "
+          , "(Lat "
           , paren (x3<0) (show x3)
+          , " "
+          , show x3'
+          , " "
+          , printf "%.1f" x3''
+          , ")"
           , "\n    "
+          , "(Lon "
           , paren (x4<0) (show x4)
-          , "\n"
+          , " "
+          , show x4'
+          , " "
+          , printf "%.1f" x4''
+          , ")\n"
           ]
       all_wpts w =
         let str s =
@@ -251,9 +265,13 @@ main ::
   IO ()
 main =
   do
-      f <- readFile "/home/tmorris/Documents/VFR__24MAY2018.html"
-      let i :: [String]; i = parse' f
-      let g = fmap (\w -> w >>= \w' -> show w' ++ "\n") (encode i)
-      let h = render <$> encode i
-      writeFile "/tmp/xyz" (fromMaybe "" h)
+      a <- getArgs
+      case a of
+        [] ->
+          putStrLn "arguments: <VFR waypoints.html> <output-file>"
+        inp:out:_ ->
+          do
+              f <- readFile inp
+              let h = render <$> encode (parse' f)
+              writeFile out (fromMaybe "" h)
       
