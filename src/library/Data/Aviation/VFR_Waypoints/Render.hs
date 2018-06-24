@@ -9,29 +9,24 @@ import Data.Aviation.VFR_Waypoints
 import Prelude
 import Text.Printf
 
+toDecimal ::
+  (Integral a, Integral b, Ord c, Fractional c) =>
+  (a, b, c) ->
+  c
+toDecimal (x, y, z) =
+  let x' = fromIntegral x
+      (.?.) = if x' < 0 then (-) else (+)
+  in  x' .?. (fromIntegral y/60 + z/60)
+
 renderVFR_Waypoint ::
   HasVFR_Waypoint w =>
   w
   -> String
 renderVFR_Waypoint w =
-  let yellow_green x =
+  let red_white x =
         concat
           [
-            "\ESC[92m\ESC[42m"
-          , x
-          , "\ESC[m"
-          ]
-      white_red x =
-        concat
-          [
-            "\ESC[38m\ESC[41m"
-          , x
-          , "\ESC[m"
-          ]
-      light_pink x =
-        concat
-          [
-            "\ESC[95m\ESC[45m"
+            "\ESC[31m\ESC[47m"
           , x
           , "\ESC[m"
           ]
@@ -57,29 +52,31 @@ renderVFR_Waypoint w =
         in  x ++ replicate n' ' '
   in  concat
         [
-          white_red "WAYPOINT"
+          red_white "WAYPOINT"
         , white_black (mkN 32 name')
-        , yellow_green " "
         , case state' of
             Nothing ->
               ""
             Just s ->
               concat
                 [
-                  white_red "STATE"
+                  red_white "STATE"
                 , white_black (mkN 3 s)
-                , yellow_green " "
                 ]
-        , white_red "CODE"
+        , red_white "CODE"
         , white_black (mkN 5 code')
-        , yellow_green " "
-        , white_red "LAT"
-        , white_black (show (lat' ^. latitudeExponent))
+        , red_white "LAT"
+        , white_black (printf "%03d" (lat' ^. latitudeDegrees))
         , white_black " "
-        , white_black (printf "%04.1f" (lat' ^. latitudeMantissa))
-        , yellow_green " "
-        , white_red "LON"
-        , white_black (show (lon' ^. longitudeExponent))
+        , white_black (printf "%02d" (lat' ^. latitudeMinutes))
+        , white_black (drop 1 . printf "%.1f" $ (lat' ^. latitudeMantissa))
+        , white_black "    "
+        , white_black (printf "%.6f" (toDecimal (lat' ^. latitudeDegrees, lat' ^. latitudeMinutes, lat' ^. latitudeMantissa)))
+        , red_white "LON"
+        , white_black (show (lon' ^. longitudeDegrees))
         , white_black " "
-        , white_black (printf "%04.1f" (lon' ^. longitudeMantissa))
+        , white_black (printf "%02d" (lon' ^. longitudeMinutes))
+        , white_black (drop 1 . printf "%.1f" $ (lon' ^. longitudeMantissa))
+        , white_black "    "
+        , white_black (printf "%.6f" (toDecimal (lon' ^. longitudeDegrees, lon' ^. longitudeMinutes, lon' ^. longitudeMantissa)))
         ]
