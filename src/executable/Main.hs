@@ -3,9 +3,20 @@ module Main(
 ) where
 
 import Data.Aviation.VFR_Waypoints
+import Data.Aviation.VFR_Waypoints.Render
 import Data.Aviation.VFR_Waypoints.Search
+
+import System.Environment
+import qualified Text.Fuzzy as Fuzzy
 
 main ::
   IO ()
 main =
-  print "hi"
+  do  a <- getArgs
+      case a of
+        [] ->
+          putStrLn "args"
+        h:_ ->
+          let rs :: [VFR_Waypoint]; rs = Fuzzy.original <$> searchFuzzyCodeName h "" "" False
+              s = rs >>= \r -> renderVFR_Waypoint r ++ "\n"
+          in  putStrLn s

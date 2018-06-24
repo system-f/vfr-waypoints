@@ -26,6 +26,7 @@ source-repository   head
 
 library
   exposed-modules:     Data.Aviation.VFR_Waypoints
+                     , Data.Aviation.VFR_Waypoints.Render
                      , Data.Aviation.VFR_Waypoints.Search
   build-depends:       base >=4.8 && <4.11
                      , lens >=4.15 && < 4.17

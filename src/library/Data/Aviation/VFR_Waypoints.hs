@@ -18,14 +18,68 @@ import Data.String(String)
 import Data.Traversable
 import Prelude(Double, Show)
 
+data Lat =
+  Lat
+    Int
+    Double
+  deriving (Eq, Ord, Show)
+
+class HasLat c_aC1P where
+  latitude :: Lens' c_aC1P Lat
+  latitudeExponent :: Lens' c_aC1P Int
+  {-# INLINE latitudeExponent #-}
+  latitudeMantissa :: Lens' c_aC1P Double
+  {-# INLINE latitudeMantissa #-}
+  latitudeExponent = latitude . latitudeExponent
+  latitudeMantissa = latitude . latitudeMantissa
+instance HasLat Lat where
+  {-# INLINE latitudeExponent #-}
+  {-# INLINE latitudeMantissa #-}
+  latitude = id
+  latitudeExponent f_aC1Q (Lat x1_aC1R x2_aC1S)
+    = (fmap (\ y1_aC1T -> (Lat y1_aC1T) x2_aC1S)) (f_aC1Q x1_aC1R)
+  latitudeMantissa f_aC1U (Lat x1_aC1V x2_aC1W)
+    = (fmap (\ y1_aC1X -> (Lat x1_aC1V) y1_aC1X)) (f_aC1U x2_aC1W)
+
+data Lon =
+  Lon
+    Int
+    Double
+  deriving (Eq, Ord, Show)
+
+class HasLon c_aC1P where
+  longitude :: Lens' c_aC1P Lon
+  longitudeExponent :: Lens' c_aC1P Int
+  {-# INLINE longitudeExponent #-}
+  longitudeMantissa :: Lens' c_aC1P Double
+  {-# INLINE longitudeMantissa #-}
+  longitudeExponent = longitude . longitudeExponent
+  longitudeMantissa = longitude . longitudeMantissa
+instance HasLon Lon where
+  {-# INLINE longitudeExponent #-}
+  {-# INLINE longitudeMantissa #-}
+  longitude = id
+  longitudeExponent f_aC1Q (Lon x1_aC1R x2_aC1S)
+    = (fmap (\ y1_aC1T -> (Lon y1_aC1T) x2_aC1S)) (f_aC1Q x1_aC1R)
+  longitudeMantissa f_aC1U (Lon x1_aC1V x2_aC1W)
+    = (fmap (\ y1_aC1X -> (Lon x1_aC1V) y1_aC1X)) (f_aC1U x2_aC1W)
+
 data VFR_Waypoint =
   VFR_Waypoint
     String
     (Maybe String)
     String
-    Double
-    Double
+    Lat
+    Lon
   deriving (Eq, Ord, Show)
+
+instance HasLat VFR_Waypoint where
+  latitude =
+    lat . latitude
+
+instance HasLon VFR_Waypoint where
+  longitude =
+    lon . longitude
 
 class HasVFR_Waypoint a where
   vfr_waypoint ::
@@ -50,13 +104,13 @@ class HasVFR_Waypoint a where
   {-# INLINE code #-}
 
   lat ::
-    Lens' a Double
+    Lens' a Lat
   lat =
     vfr_waypoint . lat
   {-# INLINE lat #-}
 
   lon ::
-    Lens' a Double
+    Lens' a Lon
   lon =
     vfr_waypoint . lon
   {-# INLINE lon #-}
@@ -165,8 +219,8 @@ _KNO_ =
     "ABEAM KUNOTH"
     (Just "NT")
     "KNO"
-    (-23.541666666666668)
-    133.55
+    (Lat (-23) 32.5)
+    (Lon 133 33.0)
 
 _ABKL_ ::
   VFR_Waypoint
@@ -175,8 +229,8 @@ _ABKL_ =
     "ABM KILTO"
     (Just "WA")
     "ABKL"
-    (-17.738333333333333)
-    122.735
+    (Lat (-17) 44.3)
+    (Lon 122 44.1)
 
 _TVT_ ::
   VFR_Waypoint
@@ -185,8 +239,8 @@ _TVT_ =
     "ABM TV TOWERS"
     (Just "QLD")
     "TVT"
-    (-27.475)
-    152.91666666666666
+    (Lat (-27) 28.5)
+    (Lon 152 55.0)
 
 _ACE_ ::
   VFR_Waypoint
@@ -195,8 +249,8 @@ _ACE_ =
     "ACADEMY"
     (Just "VIC")
     "ACE"
-    (-37.89666666666667)
-    145.18
+    (Lat (-37) 53.8)
+    (Lon 145 10.8)
 
 _ANI_ ::
   VFR_Waypoint
@@ -205,8 +259,8 @@ _ANI_ =
     "ACHERON ISLAND"
     (Just "QLD")
     "ANI"
-    (-18.961666666666666)
-    146.63666666666666
+    (Lat (-18) 57.7)
+    (Lon 146 38.2)
 
 _ACLD_ ::
   VFR_Waypoint
@@ -215,8 +269,8 @@ _ACLD_ =
     "ACLAND"
     (Just "QLD")
     "ACLD"
-    (-27.305)
-    151.68833333333333
+    (Lat (-27) 18.3)
+    (Lon 151 41.3)
 
 _ACTY_ ::
   VFR_Waypoint
@@ -225,8 +279,8 @@ _ACTY_ =
     "ADELAIDE CBD"
     (Just "SA")
     "ACTY"
-    (-34.93333333333333)
-    138.6
+    (Lat (-34) 56.0)
+    (Lon 138 36.0)
 
 _ADB_ ::
   VFR_Waypoint
@@ -235,8 +289,8 @@ _ADB_ =
     "ADELAIDE RIVER BRIDGE"
     (Just "NT")
     "ADB"
-    (-12.658333333333333)
-    131.33333333333334
+    (Lat (-12) 39.5)
+    (Lon 131 20.0)
 
 _AOG_ ::
   VFR_Waypoint
@@ -245,8 +299,8 @@ _AOG_ =
     "ADELONG"
     (Just "NSW")
     "AOG"
-    (-35.30833333333333)
-    148.06666666666666
+    (Lat (-35) 18.5)
+    (Lon 148 4.0)
 
 _ADI_ ::
   VFR_Waypoint
@@ -255,8 +309,8 @@ _ADI_ =
     "ADMIRALTY ISLAND"
     (Just "QLD")
     "ADI"
-    (-16.983333333333334)
-    145.775
+    (Lat (-16) 59.0)
+    (Lon 145 46.5)
 
 _ADWD_ ::
   VFR_Waypoint
@@ -265,8 +319,8 @@ _ADWD_ =
     "ADVENTURE WORLD"
     (Just "WA")
     "ADWD"
-    (-32.095)
-    115.81833333333333
+    (Lat (-32) 5.7)
+    (Lon 115 49.1)
 
 _ALON_ ::
   VFR_Waypoint
@@ -275,8 +329,8 @@ _ALON_ =
     "ALAWOONA"
     (Just "SA")
     "ALON"
-    (-34.75)
-    140.5
+    (Lat (-34) 45.0)
+    (Lon 140 30.0)
 
 _APL_ ::
   VFR_Waypoint
@@ -285,8 +339,8 @@ _APL_ =
     "ALBERT PARK LAKE"
     (Just "VIC")
     "APL"
-    (-37.855)
-    144.975
+    (Lat (-37) 51.3)
+    (Lon 144 58.5)
 
 _AKW_ ::
   VFR_Waypoint
@@ -295,8 +349,8 @@ _AKW_ =
     "ALKIMOS WRECK"
     (Just "WA")
     "AKW"
-    (-31.608333333333334)
-    115.65
+    (Lat (-31) 36.5)
+    (Lon 115 39.0)
 
 _ALBA_ ::
   VFR_Waypoint
@@ -305,8 +359,8 @@ _ALBA_ =
     "ALOOMBA"
     (Just "QLD")
     "ALBA"
-    (-17.105)
-    145.83333333333334
+    (Lat (-17) 6.3)
+    (Lon 145 50.0)
 
 _ALOA_ ::
   VFR_Waypoint
@@ -315,8 +369,8 @@ _ALOA_ =
     "ALTONA"
     (Just "VIC")
     "ALOA"
-    (-37.86666666666667)
-    144.85
+    (Lat (-37) 52.0)
+    (Lon 144 51.0)
 
 _ALTS_ ::
   VFR_Waypoint
@@ -325,8 +379,8 @@ _ALTS_ =
     "ALTONA SOUTH"
     (Just "VIC")
     "ALTS"
-    (-37.87833333333333)
-    144.81
+    (Lat (-37) 52.7)
+    (Lon 144 48.6)
 
 _ANG_ ::
   VFR_Waypoint
@@ -335,8 +389,8 @@ _ANG_ =
     "ANGLESEA"
     (Just "VIC")
     "ANG"
-    (-38.416666666666664)
-    144.18333333333334
+    (Lat (-38) 25.0)
+    (Lon 144 11.0)
 
 _APM_ ::
   VFR_Waypoint
@@ -345,8 +399,8 @@ _APM_ =
     "ANM PAPER MILL"
     (Just "NSW")
     "APM"
-    (-36.0)
-    146.98333333333332
+    (Lat (-36) 0.0)
+    (Lon 146 59.0)
 
 _ANA_ ::
   VFR_Waypoint
@@ -355,8 +409,8 @@ _ANA_ =
     "ANNA BAY"
     (Just "NSW")
     "ANA"
-    (-32.78333333333333)
-    152.08333333333334
+    (Lat (-32) 47.0)
+    (Lon 152 5.0)
 
 _ANP_ ::
   VFR_Waypoint
@@ -365,8 +419,8 @@ _ANP_ =
     "ANTILL PLAINS"
     (Just "QLD")
     "ANP"
-    (-19.433333333333334)
-    146.83333333333334
+    (Lat (-19) 26.0)
+    (Lon 146 50.0)
 
 _APPN_ ::
   VFR_Waypoint
@@ -375,8 +429,8 @@ _APPN_ =
     "APPIN"
     (Just "NSW")
     "APPN"
-    (-34.2)
-    150.78833333333333
+    (Lat (-34) 12.0)
+    (Lon 150 47.3)
 
 _ARCD_ ::
   VFR_Waypoint
@@ -385,8 +439,8 @@ _ARCD_ =
     "ARCADIA HS"
     (Just "QLD")
     "ARCD"
-    (-20.866666666666667)
-    138.06666666666666
+    (Lat (-20) 52.0)
+    (Lon 138 4.0)
 
 _AEN_ ::
   VFR_Waypoint
@@ -395,8 +449,8 @@ _AEN_ =
     "ARDENT"
     (Just "QLD")
     "AEN"
-    (-26.778333333333332)
-    152.57833333333335
+    (Lat (-26) 46.7)
+    (Lon 152 34.7)
 
 _ARE_ ::
   VFR_Waypoint
@@ -405,8 +459,8 @@ _ARE_ =
     "ARMADALE"
     (Just "WA")
     "ARE"
-    (-32.14333333333333)
-    116.01333333333334
+    (Lat (-32) 8.6)
+    (Lon 116 0.8)
 
 _AWP_ ::
   VFR_Waypoint
@@ -415,8 +469,8 @@ _AWP_ =
     "ARROWSMITH PT"
     (Just "NT")
     "AWP"
-    (-13.25)
-    136.45
+    (Lat (-13) 15.0)
+    (Lon 136 27.0)
 
 _ASU_ ::
   VFR_Waypoint
@@ -425,8 +479,8 @@ _ASU_ =
     "ARUNDEL SUBSTATION"
     (Just "NSW")
     "ASU"
-    (-35.208333333333336)
-    147.4
+    (Lat (-35) 12.5)
+    (Lon 147 24.0)
 
 _ATN_ ::
   VFR_Waypoint
@@ -435,8 +489,8 @@ _ATN_ =
     "ATHERTON"
     (Just "QLD")
     "ATN"
-    (-17.258333333333333)
-    145.50833333333333
+    (Lat (-17) 15.5)
+    (Lon 145 30.5)
 
 _ATG_ ::
   VFR_Waypoint
@@ -445,8 +499,8 @@ _ATG_ =
     "ATTUNGA"
     (Just "NSW")
     "ATG"
-    (-30.933333333333334)
-    150.83833333333334
+    (Lat (-30) 56.0)
+    (Lon 150 50.3)
 
 _ATV_ ::
   VFR_Waypoint
@@ -455,8 +509,8 @@ _ATV_ =
     "ATV10"
     (Just "VIC")
     "ATV"
-    (-37.85333333333333)
-    145.16833333333332
+    (Lat (-37) 51.2)
+    (Lon 145 10.1)
 
 _ALEC_ ::
   VFR_Waypoint
@@ -465,8 +519,8 @@ _ALEC_ =
     "AUSTRALIAN LIVESTOCK EQUINE CENT"
     (Just "NSW")
     "ALEC"
-    (-31.135)
-    150.92166666666665
+    (Lat (-31) 8.1)
+    (Lon 150 55.3)
 
 _AVCA_ ::
   VFR_Waypoint
@@ -475,8 +529,8 @@ _AVCA_ =
     "AVOCA"
     (Just "TAS")
     "AVCA"
-    (-41.781666666666666)
-    147.72
+    (Lat (-41) 46.9)
+    (Lon 147 43.2)
 
 _BADA_ ::
   VFR_Waypoint
@@ -485,8 +539,8 @@ _BADA_ =
     "BABINDA"
     (Just "QLD")
     "BADA"
-    (-17.341666666666665)
-    145.925
+    (Lat (-17) 20.5)
+    (Lon 145 55.5)
 
 _BMP_ ::
   VFR_Waypoint
@@ -495,8 +549,8 @@ _BMP_ =
     "BACCHUS MARSH TOWNSHIP"
     (Just "VIC")
     "BMP"
-    (-37.675)
-    144.43833333333333
+    (Lat (-37) 40.5)
+    (Lon 144 26.3)
 
 _BKRL_ ::
   VFR_Waypoint
@@ -505,8 +559,8 @@ _BKRL_ =
     "BAKER LAKE"
     (Just "WA")
     "BKRL"
-    (-26.711666666666666)
-    125.98
+    (Lat (-26) 42.7)
+    (Lon 125 58.8)
 
 _BLHS_ ::
   VFR_Waypoint
@@ -515,8 +569,8 @@ _BLHS_ =
     "BALD HILLS MAST"
     (Just "QLD")
     "BLHS"
-    (-27.313333333333333)
-    153.01666666666668
+    (Lat (-27) 18.8)
+    (Lon 153 1.0)
 
 _BOA_ ::
   VFR_Waypoint
@@ -525,8 +579,8 @@ _BOA_ =
     "BALMORAL"
     (Just "VIC")
     "BOA"
-    (-37.25)
-    141.83333333333334
+    (Lat (-37) 15.0)
+    (Lon 141 50.0)
 
 _BANG_ ::
   VFR_Waypoint
@@ -535,8 +589,8 @@ _BANG_ =
     "BANGALOW"
     (Just "NSW")
     "BANG"
-    (-28.686666666666667)
-    153.51666666666668
+    (Lat (-28) 41.2)
+    (Lon 153 31.0)
 
 _BDT_ ::
   VFR_Waypoint
@@ -545,8 +599,8 @@ _BDT_ =
     "BARANDUDA TOWERS"
     (Just "VIC")
     "BDT"
-    (-36.25)
-    146.85
+    (Lat (-36) 15.0)
+    (Lon 146 51.0)
 
 _BARB_ ::
   VFR_Waypoint
@@ -555,8 +609,8 @@ _BARB_ =
     "BARBAGALLO RACEWAY"
     (Just "WA")
     "BARB"
-    (-31.666666666666668)
-    115.78333333333333
+    (Lat (-31) 40.0)
+    (Lon 115 47.0)
 
 _BHCP_ ::
   VFR_Waypoint
@@ -565,8 +619,8 @@ _BHCP_ =
     "BARN HILL CARAVAN PARK"
     (Just "WA")
     "BHCP"
-    (-18.368333333333332)
-    122.04
+    (Lat (-18) 22.1)
+    (Lon 122 2.4)
 
 _BSL_ ::
   VFR_Waypoint
@@ -575,8 +629,8 @@ _BSL_ =
     "BARNES HILL"
     (Just "QLD")
     "BSL"
-    (-27.2)
-    152.1
+    (Lat (-27) 12.0)
+    (Lon 152 6.0)
 
 _BRNJ_ ::
   VFR_Waypoint
@@ -585,8 +639,8 @@ _BRNJ_ =
     "BARRENJOEY HEAD"
     (Just "NSW")
     "BRNJ"
-    (-33.58)
-    151.32666666666665
+    (Lat (-33) 34.8)
+    (Lon 151 19.6)
 
 _BRR_ ::
   VFR_Waypoint
@@ -595,8 +649,8 @@ _BRR_ =
     "BARRINGUN"
     (Just "NSW")
     "BRR"
-    (-29.016666666666666)
-    145.7
+    (Lat (-29) 1.0)
+    (Lon 145 42.0)
 
 _BRGE_ ::
   VFR_Waypoint
@@ -605,8 +659,8 @@ _BRGE_ =
     "BARRON GORGE"
     (Just "QLD")
     "BRGE"
-    (-16.85)
-    145.65
+    (Lat (-16) 51.0)
+    (Lon 145 39.0)
 
 _BPN_ ::
   VFR_Waypoint
@@ -615,8 +669,8 @@ _BPN_ =
     "BARWON PRISON"
     (Just "VIC")
     "BPN"
-    (-37.983333333333334)
-    144.35
+    (Lat (-37) 59.0)
+    (Lon 144 21.0)
 
 _KALK_ ::
   VFR_Waypoint
@@ -625,8 +679,8 @@ _KALK_ =
     "BASS STRAIT"
     (Just "TAS")
     "KALK"
-    (-39.5)
-    142.5
+    (Lat (-39) 30.0)
+    (Lon 142 30.0)
 
 _BATB_ ::
   VFR_Waypoint
@@ -635,8 +689,8 @@ _BATB_ =
     "BATEMANS BAY"
     (Just "NSW")
     "BATB"
-    (-35.71666666666667)
-    150.18333333333334
+    (Lat (-35) 43.0)
+    (Lon 150 11.0)
 
 _BTI_ ::
   VFR_Waypoint
@@ -645,8 +699,8 @@ _BTI_ =
     "BATHURST ISLAND"
     (Just "NT")
     "BTI"
-    (-11.766666666666667)
-    130.61666666666667
+    (Lat (-11) 46.0)
+    (Lon 130 37.0)
 
 _BNE_ ::
   VFR_Waypoint
@@ -655,8 +709,8 @@ _BNE_ =
     "BATMAN BRIDGE"
     (Just "TAS")
     "BNE"
-    (-41.218333333333334)
-    146.915
+    (Lat (-41) 13.1)
+    (Lon 146 54.9)
 
 _BAW_ ::
   VFR_Waypoint
@@ -665,8 +719,8 @@ _BAW_ =
     "BAYWEST"
     (Just "VIC")
     "BAW"
-    (-38.0)
-    144.92666666666668
+    (Lat (-38) 0.0)
+    (Lon 144 55.6)
 
 _BCM_ ::
   VFR_Waypoint
@@ -675,8 +729,8 @@ _BCM_ =
     "BEACHMERE"
     (Just "QLD")
     "BCM"
-    (-27.116666666666667)
-    153.05
+    (Lat (-27) 7.0)
+    (Lon 153 3.0)
 
 _BIV_ ::
   VFR_Waypoint
@@ -685,8 +739,8 @@ _BIV_ =
     "BECTIVE HS"
     (Just "NSW")
     "BIV"
-    (-30.971666666666668)
-    150.73833333333334
+    (Lat (-30) 58.3)
+    (Lon 150 44.3)
 
 _BENT_ ::
   VFR_Waypoint
@@ -695,8 +749,8 @@ _BENT_ =
     "BEECHMONT"
     (Just "QLD")
     "BENT"
-    (-28.133333333333333)
-    153.2
+    (Lat (-28) 8.0)
+    (Lon 153 12.0)
 
 _BCH_ ::
   VFR_Waypoint
@@ -705,8 +759,8 @@ _BCH_ =
     "BEECHWORTH"
     (Just "VIC")
     "BCH"
-    (-36.358333333333334)
-    146.68833333333333
+    (Lat (-36) 21.5)
+    (Lon 146 41.3)
 
 _BLR_ ::
   VFR_Waypoint
@@ -715,8 +769,8 @@ _BLR_ =
     "BELLBROOK"
     (Just "NSW")
     "BLR"
-    (-30.821666666666665)
-    152.51166666666666
+    (Lat (-30) 49.3)
+    (Lon 152 30.7)
 
 _BLIG_ ::
   VFR_Waypoint
@@ -725,8 +779,8 @@ _BLIG_ =
     "BELLINGEN"
     (Just "NSW")
     "BLIG"
-    (-30.455)
-    152.89666666666668
+    (Lat (-30) 27.3)
+    (Lon 152 53.8)
 
 _BENV_ ::
   VFR_Waypoint
@@ -735,8 +789,8 @@ _BENV_ =
     "BEN NEVIS"
     (Just "TAS")
     "BENV"
-    (-41.41166666666667)
-    147.64166666666668
+    (Lat (-41) 24.7)
+    (Lon 147 38.5)
 
 _BND_ ::
   VFR_Waypoint
@@ -745,8 +799,8 @@ _BND_ =
     "BENDEMEER"
     (Just "NSW")
     "BND"
-    (-30.883333333333333)
-    151.15
+    (Lat (-30) 53.0)
+    (Lon 151 9.0)
 
 _BEE_ ::
   VFR_Waypoint
@@ -755,8 +809,8 @@ _BEE_ =
     "BERILEE"
     (Just "NSW")
     "BEE"
-    (-33.62)
-    151.105
+    (Lat (-33) 37.2)
+    (Lon 151 6.3)
 
 _BESI_ ::
   VFR_Waypoint
@@ -765,8 +819,8 @@ _BESI_ =
     "BESSIE POINT"
     (Just "QLD")
     "BESI"
-    (-16.903333333333332)
-    145.81333333333333
+    (Lat (-16) 54.2)
+    (Lon 145 48.8)
 
 _BVG_ ::
   VFR_Waypoint
@@ -775,8 +829,8 @@ _BVG_ =
     "BEVERIDGE"
     (Just "VIC")
     "BVG"
-    (-37.471666666666664)
-    144.97166666666666
+    (Lat (-37) 28.3)
+    (Lon 144 58.3)
 
 _BDTN_ ::
   VFR_Waypoint
@@ -785,8 +839,8 @@ _BDTN_ =
     "BIDDESTON"
     (Just "QLD")
     "BDTN"
-    (-27.558333333333334)
-    151.71666666666667
+    (Lat (-27) 33.5)
+    (Lon 151 43.0)
 
 _BIBA_ ::
   VFR_Waypoint
@@ -795,8 +849,8 @@ _BIBA_ =
     "BINGIL BAY"
     (Just "QLD")
     "BIBA"
-    (-17.828333333333333)
-    146.10166666666666
+    (Lat (-17) 49.7)
+    (Lon 146 6.1)
 
 _BDWD_ ::
   VFR_Waypoint
@@ -805,8 +859,8 @@ _BDWD_ =
     "BIRDWOOD"
     (Just "SA")
     "BDWD"
-    (-34.82333333333333)
-    138.96
+    (Lat (-34) 49.4)
+    (Lon 138 57.6)
 
 _BCT_ ::
   VFR_Waypoint
@@ -815,8 +869,8 @@ _BCT_ =
     "BLACK MT"
     (Just "QLD")
     "BCT"
-    (-21.07)
-    149.09666666666666
+    (Lat (-21) 4.2)
+    (Lon 149 5.8)
 
 _BKM_ ::
   VFR_Waypoint
@@ -825,8 +879,8 @@ _BKM_ =
     "BLACK MT"
     (Just "ACT")
     "BKM"
-    (-35.275)
-    149.1
+    (Lat (-35) 16.5)
+    (Lon 149 6.0)
 
 _BKIS_ ::
   VFR_Waypoint
@@ -835,8 +889,8 @@ _BKIS_ =
     "BLACKSMITH ISLAND"
     (Just "QLD")
     "BKIS"
-    (-20.633333333333333)
-    149.06666666666666
+    (Lat (-20) 38.0)
+    (Lon 149 4.0)
 
 _BLIC_ ::
   VFR_Waypoint
@@ -845,8 +899,8 @@ _BLIC_ =
     "BLI BLI CASTLE"
     (Just "QLD")
     "BLIC"
-    (-26.625)
-    153.03333333333333
+    (Lat (-26) 37.5)
+    (Lon 153 2.0)
 
 _BTM_ ::
   VFR_Waypoint
@@ -855,8 +909,8 @@ _BTM_ =
     "BOAT HARBOUR"
     (Just "TAS")
     "BTM"
-    (-40.95)
-    145.63333333333333
+    (Lat (-40) 57.0)
+    (Lon 145 38.0)
 
 _BOAT_ ::
   VFR_Waypoint
@@ -865,8 +919,8 @@ _BOAT_ =
     "BOATYARD"
     (Just "WA")
     "BOAT"
-    (-32.15)
-    115.76666666666667
+    (Lat (-32) 9.0)
+    (Lon 115 46.0)
 
 _BODD_ ::
   VFR_Waypoint
@@ -875,8 +929,8 @@ _BODD_ =
     "BODDINGTON"
     (Just "WA")
     "BODD"
-    (-32.8)
-    116.46666666666667
+    (Lat (-32) 48.0)
+    (Lon 116 28.0)
 
 _BGN_ ::
   VFR_Waypoint
@@ -885,8 +939,8 @@ _BGN_ =
     "BOGANTUNGAN"
     (Just "QLD")
     "BGN"
-    (-23.65)
-    147.3
+    (Lat (-23) 39.0)
+    (Lon 147 18.0)
 
 _BLTB_ ::
   VFR_Waypoint
@@ -895,8 +949,8 @@ _BLTB_ =
     "BOLTE BRIDGE"
     (Just "VIC")
     "BLTB"
-    (-37.82)
-    144.93166666666667
+    (Lat (-37) 49.2)
+    (Lon 144 55.9)
 
 _BSP_ ::
   VFR_Waypoint
@@ -905,8 +959,8 @@ _BSP_ =
     "BOND SPRINGS"
     (Just "NT")
     "BSP"
-    (-23.516666666666666)
-    133.85
+    (Lat (-23) 31.0)
+    (Lon 133 51.0)
 
 _BUVY_ ::
   VFR_Waypoint
@@ -915,8 +969,8 @@ _BUVY_ =
     "BOND UNIVERSITY"
     (Just "QLD")
     "BUVY"
-    (-28.076666666666668)
-    153.41
+    (Lat (-28) 4.6)
+    (Lon 153 24.6)
 
 _BNG_ ::
   VFR_Waypoint
@@ -925,8 +979,8 @@ _BNG_ =
     "BONEGILLA"
     (Just "VIC")
     "BNG"
-    (-36.145)
-    147.01333333333332
+    (Lat (-36) 8.7)
+    (Lon 147 0.8)
 
 _BONG_ ::
   VFR_Waypoint
@@ -935,8 +989,8 @@ _BONG_ =
     "BONGAREE"
     (Just "QLD")
     "BONG"
-    (-27.083333333333332)
-    153.18333333333334
+    (Lat (-27) 5.0)
+    (Lon 153 11.0)
 
 _BOON_ ::
   VFR_Waypoint
@@ -945,8 +999,8 @@ _BOON_ =
     "BOONDALL ENTERTAINMENT CENTRE"
     (Just "QLD")
     "BOON"
-    (-27.341666666666665)
-    153.085
+    (Lat (-27) 20.5)
+    (Lon 153 5.1)
 
 _BOAR_ ::
   VFR_Waypoint
@@ -955,8 +1009,8 @@ _BOAR_ =
     "BORUMBA RESV"
     (Just "QLD")
     "BOAR"
-    (-26.508333333333333)
-    152.58333333333334
+    (Lat (-26) 30.5)
+    (Lon 152 35.0)
 
 _BBH_ ::
   VFR_Waypoint
@@ -965,8 +1019,8 @@ _BBH_ =
     "BOTANY BAY HEADS"
     (Just "NSW")
     "BBH"
-    (-34.00833333333333)
-    151.24166666666667
+    (Lat (-34) 0.5)
+    (Lon 151 14.5)
 
 _BOWEN_ ::
   VFR_Waypoint
@@ -975,8 +1029,8 @@ _BOWEN_ =
     "BOWEN"
     (Just "QLD")
     "BOWEN"
-    (-20.016666666666666)
-    148.24166666666667
+    (Lat (-20) 1.0)
+    (Lon 148 14.5)
 
 _BOWB_ ::
   VFR_Waypoint
@@ -985,8 +1039,8 @@ _BOWB_ =
     "BOWEN BRIDGE"
     (Just "TAS")
     "BOWB"
-    (-42.81666666666667)
-    147.3
+    (Lat (-42) 49.0)
+    (Lon 147 18.0)
 
 _BWV_ ::
   VFR_Waypoint
@@ -995,8 +1049,8 @@ _BWV_ =
     "BOWENVILLE"
     (Just "QLD")
     "BWV"
-    (-27.305)
-    151.48833333333334
+    (Lat (-27) 18.3)
+    (Lon 151 29.3)
 
 _BWMS_ ::
   VFR_Waypoint
@@ -1005,8 +1059,8 @@ _BWMS_ =
     "BOWMANS"
     (Just "SA")
     "BWMS"
-    (-34.15)
-    138.26666666666668
+    (Lat (-34) 9.0)
+    (Lon 138 16.0)
 
 _BOW_ ::
   VFR_Waypoint
@@ -1015,8 +1069,8 @@ _BOW_ =
     "BOWNA"
     (Just "NSW")
     "BOW"
-    (-35.95)
-    147.11666666666667
+    (Lat (-35) 57.0)
+    (Lon 147 7.0)
 
 _BWL_ ::
   VFR_Waypoint
@@ -1025,8 +1079,8 @@ _BWL_ =
     "BOWRAL"
     (Just "NSW")
     "BWL"
-    (-34.48)
-    150.41833333333332
+    (Lat (-34) 28.8)
+    (Lon 150 25.1)
 
 _BOV_ ::
   VFR_Waypoint
@@ -1035,8 +1089,8 @@ _BOV_ =
     "BOWRAVILLE"
     (Just "NSW")
     "BOV"
-    (-30.65)
-    152.85
+    (Lat (-30) 39.0)
+    (Lon 152 51.0)
 
 _BPI_ ::
   VFR_Waypoint
@@ -1045,8 +1099,8 @@ _BPI_ =
     "BRAMPTON ISLAND"
     (Just "QLD")
     "BPI"
-    (-20.805)
-    149.26666666666668
+    (Lat (-20) 48.3)
+    (Lon 149 16.0)
 
 _BAXT_ ::
   VFR_Waypoint
@@ -1055,8 +1109,8 @@ _BAXT_ =
     "BRANXTON"
     (Just "NSW")
     "BAXT"
-    (-32.666666666666664)
-    151.35
+    (Lat (-32) 40.0)
+    (Lon 151 21.0)
 
 _BZA_ ::
   VFR_Waypoint
@@ -1065,8 +1119,8 @@ _BZA_ =
     "BREEZA"
     (Just "NSW")
     "BZA"
-    (-31.25)
-    150.46666666666667
+    (Lat (-31) 15.0)
+    (Lon 150 28.0)
 
 _BBBG_ ::
   VFR_Waypoint
@@ -1075,8 +1129,8 @@ _BBBG_ =
     "BRIBIE BRIDGE"
     (Just "QLD")
     "BBBG"
-    (-27.073333333333334)
-    153.14666666666668
+    (Lat (-27) 4.4)
+    (Lon 153 8.8)
 
 _BBI_ ::
   VFR_Waypoint
@@ -1085,8 +1139,8 @@ _BBI_ =
     "BRIBIE ISLAND"
     (Just "QLD")
     "BBI"
-    (-27.0)
-    153.14333333333335
+    (Lat (-27) 0.0)
+    (Lon 153 8.6)
 
 _BTO_ ::
   VFR_Waypoint
@@ -1095,8 +1149,8 @@ _BTO_ =
     "BRIGHTON"
     (Just "VIC")
     "BTO"
-    (-37.91166666666667)
-    144.98666666666668
+    (Lat (-37) 54.7)
+    (Lon 144 59.2)
 
 _BTJ_ ::
   VFR_Waypoint
@@ -1105,8 +1159,8 @@ _BTJ_ =
     "BRIGHTON JETTY"
     (Just "SA")
     "BTJ"
-    (-35.016666666666666)
-    138.51666666666668
+    (Lat (-35) 1.0)
+    (Lon 138 31.0)
 
 _BRY_ ::
   VFR_Waypoint
@@ -1115,8 +1169,8 @@ _BRY_ =
     "BRINGELLY"
     (Just "NSW")
     "BRY"
-    (-33.94166666666667)
-    150.72833333333332
+    (Lat (-33) 56.5)
+    (Lon 150 43.7)
 
 _BRIN_ ::
   VFR_Waypoint
@@ -1125,8 +1179,8 @@ _BRIN_ =
     "BRINSMEAD"
     (Just "QLD")
     "BRIN"
-    (-16.908333333333335)
-    145.70833333333334
+    (Lat (-16) 54.5)
+    (Lon 145 42.5)
 
 _BCTY_ ::
   VFR_Waypoint
@@ -1135,8 +1189,8 @@ _BCTY_ =
     "BRISBANE CBD"
     (Just "QLD")
     "BCTY"
-    (-27.466666666666665)
-    153.03333333333333
+    (Lat (-27) 28.0)
+    (Lon 153 2.0)
 
 _OGABA_ ::
   VFR_Waypoint
@@ -1145,8 +1199,8 @@ _OGABA_ =
     "BRISBANE CRICKET GROUND"
     (Just "QLD")
     "OGABA"
-    (-27.48)
-    153.06666666666666
+    (Lat (-27) 28.8)
+    (Lon 153 4.0)
 
 _BDF_ ::
   VFR_Waypoint
@@ -1155,8 +1209,8 @@ _BDF_ =
     "BROADFORD"
     (Just "VIC")
     "BDF"
-    (-37.208333333333336)
-    145.04166666666666
+    (Lat (-37) 12.5)
+    (Lon 145 2.5)
 
 _BYN_ ::
   VFR_Waypoint
@@ -1165,8 +1219,8 @@ _BYN_ =
     "BROOKLYN"
     (Just "VIC")
     "BYN"
-    (-37.82833333333333)
-    144.85833333333332
+    (Lat (-37) 49.7)
+    (Lon 144 51.5)
 
 _BBG_ ::
   VFR_Waypoint
@@ -1175,8 +1229,8 @@ _BBG_ =
     "BROOKLYN BRIDGE"
     (Just "NSW")
     "BBG"
-    (-33.541666666666664)
-    151.19666666666666
+    (Lat (-33) 32.5)
+    (Lon 151 11.8)
 
 _BTON_ ::
   VFR_Waypoint
@@ -1185,8 +1239,8 @@ _BTON_ =
     "BROOKTON"
     (Just "WA")
     "BTON"
-    (-32.36666666666667)
-    117.01666666666667
+    (Lat (-32) 22.0)
+    (Lon 117 1.0)
 
 _BRI_ ::
   VFR_Waypoint
@@ -1195,8 +1249,8 @@ _BRI_ =
     "BROUGHTON ISLAND"
     (Just "NSW")
     "BRI"
-    (-32.608333333333334)
-    152.30833333333334
+    (Lat (-32) 36.5)
+    (Lon 152 18.5)
 
 _OBSTM_ ::
   VFR_Waypoint
@@ -1205,8 +1259,8 @@ _OBSTM_ =
     "BRUCE STADIUM"
     (Just "ACT")
     "OBSTM"
-    (-35.25)
-    149.1
+    (Lat (-35) 15.0)
+    (Lon 149 6.0)
 
 _BRH_ ::
   VFR_Waypoint
@@ -1215,8 +1269,8 @@ _BRH_ =
     "BRUNSWICK HEADS"
     (Just "NSW")
     "BRH"
-    (-28.541666666666668)
-    153.55
+    (Lat (-28) 32.5)
+    (Lon 153 33.0)
 
 _BUCP_ ::
   VFR_Waypoint
@@ -1225,8 +1279,8 @@ _BUCP_ =
     "BUCHAN PT"
     (Just "QLD")
     "BUCP"
-    (-16.736666666666668)
-    145.66833333333332
+    (Lat (-16) 44.2)
+    (Lon 145 40.1)
 
 _BUCN_ ::
   VFR_Waypoint
@@ -1235,8 +1289,8 @@ _BUCN_ =
     "BUCHANAN HILLS"
     (Just "NT")
     "BUCN"
-    (-18.9)
-    131.08333333333334
+    (Lat (-18) 54.0)
+    (Lon 131 5.0)
 
 _BKD_ ::
   VFR_Waypoint
@@ -1245,8 +1299,8 @@ _BKD_ =
     "BUCKLAND"
     (Just "TAS")
     "BKD"
-    (-42.611666666666665)
-    147.71666666666667
+    (Lat (-42) 36.7)
+    (Lon 147 43.0)
 
 _BPK_ ::
   VFR_Waypoint
@@ -1255,8 +1309,8 @@ _BPK_ =
     "BUCKLAND PARK WEATHER RADAR"
     (Just "SA")
     "BPK"
-    (-34.61666666666667)
-    138.46833333333333
+    (Lat (-34) 37.0)
+    (Lon 138 28.1)
 
 _BDH_ ::
   VFR_Waypoint
@@ -1265,8 +1319,8 @@ _BDH_ =
     "BUNDAGEN HEAD"
     (Just "NSW")
     "BDH"
-    (-30.433333333333334)
-    153.075
+    (Lat (-30) 26.0)
+    (Lon 153 4.5)
 
 _BEN_ ::
   VFR_Waypoint
@@ -1275,8 +1329,8 @@ _BEN_ =
     "BUNGENDORE"
     (Just "NSW")
     "BEN"
-    (-35.25833333333333)
-    149.44666666666666
+    (Lat (-35) 15.5)
+    (Lon 149 26.8)
 
 _BUG_ ::
   VFR_Waypoint
@@ -1285,8 +1339,8 @@ _BUG_ =
     "BUNGIL BRIDGE"
     (Just "VIC")
     "BUG"
-    (-36.05)
-    147.35
+    (Lat (-36) 3.0)
+    (Lon 147 21.0)
 
 _URG_ ::
   VFR_Waypoint
@@ -1295,8 +1349,8 @@ _URG_ =
     "BURBONG"
     (Just "NSW")
     "URG"
-    (-35.34)
-    149.31
+    (Lat (-35) 20.4)
+    (Lon 149 18.6)
 
 _BLGH_ ::
   VFR_Waypoint
@@ -1305,8 +1359,8 @@ _BLGH_ =
     "BURLEIGH HEADS"
     (Just "QLD")
     "BLGH"
-    (-28.091666666666665)
-    153.45833333333334
+    (Lat (-28) 5.5)
+    (Lon 153 27.5)
 
 _BUB_ ::
   VFR_Waypoint
@@ -1315,8 +1369,8 @@ _BUB_ =
     "BURNS BEACH"
     (Just "WA")
     "BUB"
-    (-31.72833333333333)
-    115.71666666666667
+    (Lat (-31) 43.7)
+    (Lon 115 43.0)
 
 _BURR_ ::
   VFR_Waypoint
@@ -1325,8 +1379,8 @@ _BURR_ =
     "BURRA"
     (Just "SA")
     "BURR"
-    (-33.68333333333333)
-    138.93333333333334
+    (Lat (-33) 41.0)
+    (Lon 138 56.0)
 
 _BUGA_ ::
   VFR_Waypoint
@@ -1335,8 +1389,8 @@ _BUGA_ =
     "BURRAGA"
     (Just "NSW")
     "BUGA"
-    (-33.88333333333333)
-    149.56666666666666
+    (Lat (-33) 53.0)
+    (Lon 149 34.0)
 
 _BJK_ ::
   VFR_Waypoint
@@ -1345,8 +1399,8 @@ _BJK_ =
     "BURRINJUCK"
     (Just "NSW")
     "BJK"
-    (-35.005)
-    148.58333333333334
+    (Lat (-35) 0.3)
+    (Lon 148 35.0)
 
 _BMK_ ::
   VFR_Waypoint
@@ -1355,8 +1409,8 @@ _BMK_ =
     "BURRUMBUTTOCK"
     (Just "NSW")
     "BMK"
-    (-35.833333333333336)
-    146.8
+    (Lat (-35) 50.0)
+    (Lon 146 48.0)
 
 _BYFD_ ::
   VFR_Waypoint
@@ -1365,8 +1419,8 @@ _BYFD_ =
     "BYFORD"
     (Just "WA")
     "BYFD"
-    (-32.21666666666667)
-    116.03333333333333
+    (Lat (-32) 13.0)
+    (Lon 116 2.0)
 
 _BYNO_ ::
   VFR_Waypoint
@@ -1375,8 +1429,8 @@ _BYNO_ =
     "BYNOE HARBOUR"
     (Just "NT")
     "BYNO"
-    (-12.75)
-    130.68333333333334
+    (Lat (-12) 45.0)
+    (Lon 130 41.0)
 
 _BYRK_ ::
   VFR_Waypoint
@@ -1385,8 +1439,8 @@ _BYRK_ =
     "BYROCK"
     (Just "NSW")
     "BYRK"
-    (-30.65)
-    146.4
+    (Lat (-30) 39.0)
+    (Lon 146 24.0)
 
 _BBAY_ ::
   VFR_Waypoint
@@ -1395,8 +1449,8 @@ _BBAY_ =
     "BYRON BAY"
     (Just "NSW")
     "BBAY"
-    (-28.65)
-    153.61666666666667
+    (Lat (-28) 39.0)
+    (Lon 153 37.0)
 
 _CBLT_ ::
   VFR_Waypoint
@@ -1405,8 +1459,8 @@ _CBLT_ =
     "CABLEWAY TERMINAL"
     (Just "QLD")
     "CBLT"
-    (-16.848333333333333)
-    145.69166666666666
+    (Lat (-16) 50.9)
+    (Lon 145 41.5)
 
 _CABO_ ::
   VFR_Waypoint
@@ -1415,8 +1469,8 @@ _CABO_ =
     "CABOOLTURE"
     (Just "QLD")
     "CABO"
-    (-27.088333333333335)
-    152.95
+    (Lat (-27) 5.3)
+    (Lon 152 57.0)
 
 _CALEN_ ::
   VFR_Waypoint
@@ -1425,8 +1479,8 @@ _CALEN_ =
     "CALEN"
     (Just "QLD")
     "CALEN"
-    (-20.9)
-    148.77
+    (Lat (-20) 54.0)
+    (Lon 148 46.2)
 
 _CRDZ_ ::
   VFR_Waypoint
@@ -1435,8 +1489,8 @@ _CRDZ_ =
     "CALOUNDRA DROPZONE"
     (Just "QLD")
     "CRDZ"
-    (-26.8)
-    153.11
+    (Lat (-26) 48.0)
+    (Lon 153 6.6)
 
 _CALT_ ::
   VFR_Waypoint
@@ -1445,8 +1499,8 @@ _CALT_ =
     "CALTEX REFINERY"
     (Just "QLD")
     "CALT"
-    (-27.415)
-    153.15833333333333
+    (Lat (-27) 24.9)
+    (Lon 153 9.5)
 
 _CBRA_ ::
   VFR_Waypoint
@@ -1455,8 +1509,8 @@ _CBRA_ =
     "CAMBRAI"
     (Just "SA")
     "CBRA"
-    (-34.65833333333333)
-    139.28
+    (Lat (-34) 39.5)
+    (Lon 139 16.8)
 
 _CPA_ ::
   VFR_Waypoint
@@ -1465,8 +1519,8 @@ _CPA_ =
     "CAMPANIA"
     (Just "TAS")
     "CPA"
-    (-42.666666666666664)
-    147.42166666666665
+    (Lat (-42) 40.0)
+    (Lon 147 25.3)
 
 _CLLN_ ::
   VFR_Waypoint
@@ -1475,8 +1529,8 @@ _CLLN_ =
     "CAMPBELLTOWN"
     (Just "TAS")
     "CLLN"
-    (-41.93333333333333)
-    147.49166666666667
+    (Lat (-41) 56.0)
+    (Lon 147 29.5)
 
 _CAMB_ ::
   VFR_Waypoint
@@ -1485,8 +1539,8 @@ _CAMB_ =
     "CAMPBELLTOWN UNIVERSITY"
     (Just "NSW")
     "CAMB"
-    (-34.071666666666665)
-    150.78333333333333
+    (Lat (-34) 4.3)
+    (Lon 150 47.0)
 
 _RCSE_ ::
   VFR_Waypoint
@@ -1495,8 +1549,8 @@ _RCSE_ =
     "CANBERRA RACECOURSE"
     (Just "ACT")
     "RCSE"
-    (-35.23833333333334)
-    149.13666666666666
+    (Lat (-35) 14.3)
+    (Lon 149 8.2)
 
 _CNB_ ::
   VFR_Waypoint
@@ -1505,8 +1559,8 @@ _CNB_ =
     "CANNING BRIDGE"
     (Just "WA")
     "CNB"
-    (-32.01)
-    115.85
+    (Lat (-32) 0.6)
+    (Lon 115 51.0)
 
 _CDM_ ::
   VFR_Waypoint
@@ -1515,8 +1569,8 @@ _CDM_ =
     "CANNING DAM"
     (Just "WA")
     "CDM"
-    (-32.155)
-    116.125
+    (Lat (-32) 9.3)
+    (Lon 116 7.5)
 
 _CAV_ ::
   VFR_Waypoint
@@ -1525,8 +1579,8 @@ _CAV_ =
     "CANNONVALE"
     (Just "QLD")
     "CAV"
-    (-20.278333333333332)
-    148.69166666666666
+    (Lat (-20) 16.7)
+    (Lon 148 41.5)
 
 _CBY_ ::
   VFR_Waypoint
@@ -1535,8 +1589,8 @@ _CBY_ =
     "CANTERBURY RACECOURSE"
     (Just "NSW")
     "CBY"
-    (-33.90833333333333)
-    151.11166666666668
+    (Lat (-33) 54.5)
+    (Lon 151 6.7)
 
 _CAPS_ ::
   VFR_Waypoint
@@ -1545,8 +1599,8 @@ _CAPS_ =
     "CAPE BANKS"
     (Just "NSW")
     "CAPS"
-    (-33.998333333333335)
-    151.245
+    (Lat (-33) 59.9)
+    (Lon 151 14.7)
 
 _CCL_ ::
   VFR_Waypoint
@@ -1555,8 +1609,8 @@ _CCL_ =
     "CAPE CLEVELAND"
     (Just "QLD")
     "CCL"
-    (-19.183333333333334)
-    147.01333333333332
+    (Lat (-19) 11.0)
+    (Lon 147 0.8)
 
 _CPY_ ::
   VFR_Waypoint
@@ -1565,8 +1619,8 @@ _CPY_ =
     "CAPE CONWAY"
     (Just "QLD")
     "CPY"
-    (-20.536666666666665)
-    148.92833333333334
+    (Lat (-20) 32.2)
+    (Lon 148 55.7)
 
 _CGR_ ::
   VFR_Waypoint
@@ -1575,8 +1629,8 @@ _CGR_ =
     "CAPE GAMBIER"
     (Just "NT")
     "CGR"
-    (-11.938333333333333)
-    130.96666666666667
+    (Lat (-11) 56.3)
+    (Lon 130 58.0)
 
 _CGF_ ::
   VFR_Waypoint
@@ -1585,8 +1639,8 @@ _CGF_ =
     "CAPE GRAFTON"
     (Just "QLD")
     "CGF"
-    (-16.863333333333333)
-    145.91666666666666
+    (Lat (-16) 51.8)
+    (Lon 145 55.0)
 
 _CPH_ ::
   VFR_Waypoint
@@ -1595,8 +1649,8 @@ _CPH_ =
     "CAPE HILLSBOROUGH"
     (Just "QLD")
     "CPH"
-    (-20.905)
-    149.045
+    (Lat (-20) 54.3)
+    (Lon 149 2.7)
 
 _CAJE_ ::
   VFR_Waypoint
@@ -1605,8 +1659,8 @@ _CAJE_ =
     "CAPE JERVIS"
     (Just "SA")
     "CAJE"
-    (-35.60666666666667)
-    138.09166666666667
+    (Lat (-35) 36.4)
+    (Lon 138 5.5)
 
 _CAKE_ ::
   VFR_Waypoint
@@ -1615,8 +1669,8 @@ _CAKE_ =
     "CAPE KEITH"
     (Just "NT")
     "CAKE"
-    (-11.616666666666667)
-    131.46666666666667
+    (Lat (-11) 37.0)
+    (Lon 131 28.0)
 
 _CMB_ ::
   VFR_Waypoint
@@ -1625,8 +1679,8 @@ _CMB_ =
     "CAPE LAMBERT"
     (Just "WA")
     "CMB"
-    (-20.593333333333334)
-    117.18333333333334
+    (Lat (-20) 35.6)
+    (Lon 117 11.0)
 
 _CPMN_ ::
   VFR_Waypoint
@@ -1635,8 +1689,8 @@ _CPMN_ =
     "CAPE MORETON"
     (Just "QLD")
     "CPMN"
-    (-27.033333333333335)
-    153.46666666666667
+    (Lat (-27) 2.0)
+    (Lon 153 28.0)
 
 _CPLD_ ::
   VFR_Waypoint
@@ -1645,8 +1699,8 @@ _CPLD_ =
     "CAPE PORTLAND"
     (Just "TAS")
     "CPLD"
-    (-40.75)
-    147.95
+    (Lat (-40) 45.0)
+    (Lon 147 57.0)
 
 _CPHE_ ::
   VFR_Waypoint
@@ -1655,8 +1709,8 @@ _CPHE_ =
     "CAPE RICHE"
     (Just "WA")
     "CPHE"
-    (-34.6)
-    118.76666666666667
+    (Lat (-34) 36.0)
+    (Lon 118 46.0)
 
 _CAPT_ ::
   VFR_Waypoint
@@ -1665,8 +1719,8 @@ _CAPT_ =
     "CAPTAINS FLAT"
     (Just "NSW")
     "CAPT"
-    (-35.59166666666667)
-    149.445
+    (Lat (-35) 35.5)
+    (Lon 149 26.7)
 
 _CAU_ ::
   VFR_Waypoint
@@ -1675,8 +1729,8 @@ _CAU_ =
     "CARAMUT"
     (Just "VIC")
     "CAU"
-    (-37.96666666666667)
-    142.51666666666668
+    (Lat (-37) 58.0)
+    (Lon 142 31.0)
 
 _CARE_ ::
   VFR_Waypoint
@@ -1685,8 +1739,8 @@ _CARE_ =
     "CARDINIA RESV"
     (Just "VIC")
     "CARE"
-    (-37.958333333333336)
-    145.41666666666666
+    (Lat (-37) 57.5)
+    (Lon 145 25.0)
 
 _CDNA_ ::
   VFR_Waypoint
@@ -1695,8 +1749,8 @@ _CDNA_ =
     "CARDONA"
     (Just "QLD")
     "CDNA"
-    (-23.333333333333332)
-    149.0
+    (Lat (-23) 20.0)
+    (Lon 149 0.0)
 
 _CARIN_ ::
   VFR_Waypoint
@@ -1705,8 +1759,8 @@ _CARIN_ =
     "CARINDALE SHOPPING CENTRE"
     (Just "QLD")
     "CARIN"
-    (-27.5)
-    153.10166666666666
+    (Lat (-27) 30.0)
+    (Lon 153 6.1)
 
 _CIK_ ::
   VFR_Waypoint
@@ -1715,8 +1769,8 @@ _CIK_ =
     "CARRICK"
     (Just "TAS")
     "CIK"
-    (-41.53333333333333)
-    147.0
+    (Lat (-41) 32.0)
+    (Lon 147 0.0)
 
 _CARR_ ::
   VFR_Waypoint
@@ -1725,8 +1779,8 @@ _CARR_ =
     "CARRUM"
     (Just "VIC")
     "CARR"
-    (-38.075)
-    145.12
+    (Lat (-38) 4.5)
+    (Lon 145 7.2)
 
 _CLJ_ ::
   VFR_Waypoint
@@ -1735,8 +1789,8 @@ _CLJ_ =
     "CASTLE JUNCTION"
     (Just "TAS")
     "CLJ"
-    (-41.505)
-    147.48333333333332
+    (Lat (-41) 30.3)
+    (Lon 147 29.0)
 
 _CTT_ ::
   VFR_Waypoint
@@ -1745,8 +1799,8 @@ _CTT_ =
     "CASTLE PT"
     (Just "NT")
     "CTT"
-    (-12.35)
-    131.275
+    (Lat (-12) 21.0)
+    (Lon 131 16.5)
 
 _CRPT_ ::
   VFR_Waypoint
@@ -1755,8 +1809,8 @@ _CRPT_ =
     "CASTLEREAGH POINT"
     (Just "QLD")
     "CRPT"
-    (-27.191666666666666)
-    153.11166666666668
+    (Lat (-27) 11.5)
+    (Lon 153 6.7)
 
 _CCP_ ::
   VFR_Waypoint
@@ -1765,8 +1819,8 @@ _CCP_ =
     "CECIL PLAINS"
     (Just "QLD")
     "CCP"
-    (-27.533333333333335)
-    151.18333333333334
+    (Lat (-27) 32.0)
+    (Lon 151 11.0)
 
 _CAO_ ::
   VFR_Waypoint
@@ -1775,8 +1829,8 @@ _CAO_ =
     "CEDUNA OBSERVATORY"
     (Just "SA")
     "CAO"
-    (-31.866666666666667)
-    133.8
+    (Lat (-31) 52.0)
+    (Lon 133 48.0)
 
 _CBRG_ ::
   VFR_Waypoint
@@ -1785,8 +1839,8 @@ _CBRG_ =
     "CENTENARY BRIDGE"
     (Just "QLD")
     "CBRG"
-    (-27.528333333333332)
-    152.94666666666666
+    (Lat (-27) 31.7)
+    (Lon 152 56.8)
 
 _CERB_ ::
   VFR_Waypoint
@@ -1795,8 +1849,8 @@ _CERB_ =
     "CERBERUS"
     (Just "VIC")
     "CERB"
-    (-37.96666666666667)
-    145.0
+    (Lat (-37) 58.0)
+    (Lon 145 0.0)
 
 _CYM_ ::
   VFR_Waypoint
@@ -1805,8 +1859,8 @@ _CYM_ =
     "CHAFFEY DAM"
     (Just "NSW")
     "CYM"
-    (-31.341666666666665)
-    151.13333333333333
+    (Lat (-31) 20.5)
+    (Lon 151 8.0)
 
 _CHI_ ::
   VFR_Waypoint
@@ -1815,8 +1869,8 @@ _CHI_ =
     "CHANNEL ISLAND"
     (Just "NT")
     "CHI"
-    (-12.55)
-    130.86666666666667
+    (Lat (-12) 33.0)
+    (Lon 130 52.0)
 
 _CHAP_ ::
   VFR_Waypoint
@@ -1825,8 +1879,8 @@ _CHAP_ =
     "CHARLES PT"
     (Just "NT")
     "CHAP"
-    (-12.383333333333333)
-    130.61833333333334
+    (Lat (-12) 23.0)
+    (Lon 130 37.1)
 
 _CHAT_ ::
   VFR_Waypoint
@@ -1835,8 +1889,8 @@ _CHAT_ =
     "CHATSWOOD CBD"
     (Just "NSW")
     "CHAT"
-    (-33.79666666666667)
-    151.185
+    (Lat (-33) 47.8)
+    (Lon 151 11.1)
 
 _CHN_ ::
   VFR_Waypoint
@@ -1845,8 +1899,8 @@ _CHN_ =
     "CHILTERN"
     (Just "VIC")
     "CHN"
-    (-36.14666666666667)
-    146.60666666666665
+    (Lat (-36) 8.8)
+    (Lon 146 36.4)
 
 _CIB_ ::
   VFR_Waypoint
@@ -1855,8 +1909,8 @@ _CIB_ =
     "CHIPBOARD FACTORY"
     (Just "NSW")
     "CIB"
-    (-35.071666666666665)
-    147.405
+    (Lat (-35) 4.3)
+    (Lon 147 24.3)
 
 _COY_ ::
   VFR_Waypoint
@@ -1865,8 +1919,8 @@ _COY_ =
     "CHOCOLATE FACTORY"
     (Just "TAS")
     "COY"
-    (-42.8)
-    147.26666666666668
+    (Lat (-42) 48.0)
+    (Lon 147 16.0)
 
 _CNTH_ ::
   VFR_Waypoint
@@ -1875,8 +1929,8 @@ _CNTH_ =
     "CHOPPERS NORTH"
     (Just "NSW")
     "CNTH"
-    (-33.88166666666667)
-    151.025
+    (Lat (-33) 52.9)
+    (Lon 151 1.5)
 
 _CSTH_ ::
   VFR_Waypoint
@@ -1885,8 +1939,8 @@ _CSTH_ =
     "CHOPPERS SOUTH"
     (Just "NSW")
     "CSTH"
-    (-33.955)
-    150.965
+    (Lat (-33) 57.3)
+    (Lon 150 57.9)
 
 _CWST_ ::
   VFR_Waypoint
@@ -1895,8 +1949,8 @@ _CWST_ =
     "CHOPPERS WEST"
     (Just "NSW")
     "CWST"
-    (-33.873333333333335)
-    151.00333333333333
+    (Lat (-33) 52.4)
+    (Lon 151 0.2)
 
 _CIH_ ::
   VFR_Waypoint
@@ -1905,8 +1959,8 @@ _CIH_ =
     "CID HARBOUR"
     (Just "QLD")
     "CIH"
-    (-20.25)
-    148.93333333333334
+    (Lat (-20) 15.0)
+    (Lon 148 56.0)
 
 _CYB_ ::
   VFR_Waypoint
@@ -1915,8 +1969,8 @@ _CYB_ =
     "CITY BEACH"
     (Just "WA")
     "CYB"
-    (-31.941666666666666)
-    115.75
+    (Lat (-31) 56.5)
+    (Lon 115 45.0)
 
 _CEN_ ::
   VFR_Waypoint
@@ -1925,8 +1979,8 @@ _CEN_ =
     "CLEVEDON"
     (Just "QLD")
     "CEN"
-    (-19.39666666666667)
-    147.02166666666668
+    (Lat (-19) 23.8)
+    (Lon 147 1.3)
 
 _CVD_ ::
   VFR_Waypoint
@@ -1935,8 +1989,8 @@ _CVD_ =
     "CLEVELAND"
     (Just "QLD")
     "CVD"
-    (-27.52)
-    153.28333333333333
+    (Lat (-27) 31.2)
+    (Lon 153 17.0)
 
 _CFI_ ::
   VFR_Waypoint
@@ -1945,8 +1999,8 @@ _CFI_ =
     "CLIFFY ISLAND"
     (Just "VIC")
     "CFI"
-    (-38.95166666666667)
-    146.70166666666665
+    (Lat (-38) 57.1)
+    (Lon 146 42.1)
 
 _CLS_ ::
   VFR_Waypoint
@@ -1955,8 +2009,8 @@ _CLS_ =
     "CLIFTON SPRINGS"
     (Just "VIC")
     "CLS"
-    (-38.15)
-    144.56666666666666
+    (Lat (-38) 9.0)
+    (Lon 144 34.0)
 
 _CGH_ ::
   VFR_Waypoint
@@ -1965,8 +2019,8 @@ _CGH_ =
     "CLONAGH STN"
     (Just "QLD")
     "CGH"
-    (-20.133333333333333)
-    140.68333333333334
+    (Lat (-20) 8.0)
+    (Lon 140 41.0)
 
 _CLOY_ ::
   VFR_Waypoint
@@ -1975,8 +2029,8 @@ _CLOY_ =
     "CLONEYS CREEK"
     (Just "QLD")
     "CLOY"
-    (-20.216666666666665)
-    142.6
+    (Lat (-20) 13.0)
+    (Lon 142 36.0)
 
 _COBA_ ::
   VFR_Waypoint
@@ -1985,8 +2039,8 @@ _COBA_ =
     "COBAKI"
     (Just "NSW")
     "COBA"
-    (-28.183333333333334)
-    153.48833333333334
+    (Lat (-28) 11.0)
+    (Lon 153 29.3)
 
 _CKT_ ::
   VFR_Waypoint
@@ -1995,8 +2049,8 @@ _CKT_ =
     "COCKATOO"
     (Just "VIC")
     "CKT"
-    (-37.93833333333333)
-    145.495
+    (Lat (-37) 56.3)
+    (Lon 145 29.7)
 
 _CBI_ ::
   VFR_Waypoint
@@ -2005,8 +2059,8 @@ _CBI_ =
     "COLBINABBIN"
     (Just "VIC")
     "CBI"
-    (-36.583333333333336)
-    144.8
+    (Lat (-36) 35.0)
+    (Lon 144 48.0)
 
 _CGE_ ::
   VFR_Waypoint
@@ -2015,8 +2069,8 @@ _CGE_ =
     "COLLINGULLIE"
     (Just "NSW")
     "CGE"
-    (-35.08833333333333)
-    147.12166666666667
+    (Lat (-35) 5.3)
+    (Lon 147 7.3)
 
 _CONG_ ::
   VFR_Waypoint
@@ -2025,8 +2079,8 @@ _CONG_ =
     "COMERONG ISLAND"
     (Just "NSW")
     "CONG"
-    (-34.88333333333333)
-    150.73333333333332
+    (Lat (-34) 53.0)
+    (Lon 150 44.0)
 
 _CJN_ ::
   VFR_Waypoint
@@ -2035,8 +2089,8 @@ _CJN_ =
     "CONARA JUNCTION"
     (Just "TAS")
     "CJN"
-    (-41.833333333333336)
-    147.43333333333334
+    (Lat (-41) 50.0)
+    (Lon 147 26.0)
 
 _CGM_ ::
   VFR_Waypoint
@@ -2045,8 +2099,8 @@ _CGM_ =
     "CONDONG MILL"
     (Just "NSW")
     "CGM"
-    (-28.316666666666666)
-    153.43333333333334
+    (Lat (-28) 19.0)
+    (Lon 153 26.0)
 
 _CBYC_ ::
   VFR_Waypoint
@@ -2055,8 +2109,8 @@ _CBYC_ =
     "COOBY CREEK RESV"
     (Just "QLD")
     "CBYC"
-    (-27.386666666666667)
-    151.93833333333333
+    (Lat (-27) 23.2)
+    (Lon 151 56.3)
 
 _CIS_ ::
   VFR_Waypoint
@@ -2065,8 +2119,8 @@ _CIS_ =
     "COOK ISLAND"
     (Just "NSW")
     "CIS"
-    (-28.196666666666665)
-    153.57833333333335
+    (Lat (-28) 11.8)
+    (Lon 153 34.7)
 
 _CLMN_ ::
   VFR_Waypoint
@@ -2075,8 +2129,8 @@ _CLMN_ =
     "COOLAMON"
     (Just "NSW")
     "CLMN"
-    (-34.81666666666667)
-    147.2
+    (Lat (-34) 49.0)
+    (Lon 147 12.0)
 
 _CMDR_ ::
   VFR_Waypoint
@@ -2085,8 +2139,8 @@ _CMDR_ =
     "COOLMUNDA RESV"
     (Just "QLD")
     "CMDR"
-    (-28.45)
-    151.23333333333332
+    (Lat (-28) 27.0)
+    (Lon 151 14.0)
 
 _COOL_ ::
   VFR_Waypoint
@@ -2095,8 +2149,8 @@ _COOL_ =
     "COOLUM HI-RISE"
     (Just "QLD")
     "COOL"
-    (-26.528333333333332)
-    153.08666666666667
+    (Lat (-26) 31.7)
+    (Lon 153 5.2)
 
 _CORO_ ::
   VFR_Waypoint
@@ -2105,8 +2159,8 @@ _CORO_ =
     "COOROY"
     (Just "QLD")
     "CORO"
-    (-26.416666666666668)
-    152.90833333333333
+    (Lat (-26) 25.0)
+    (Lon 152 54.5)
 
 _CPL_ ::
   VFR_Waypoint
@@ -2115,8 +2169,8 @@ _CPL_ =
     "COPPERLODE DAM"
     (Just "QLD")
     "CPL"
-    (-16.986666666666668)
-    145.67166666666665
+    (Lat (-16) 59.2)
+    (Lon 145 40.3)
 
 _CPNG_ ::
   VFR_Waypoint
@@ -2125,8 +2179,8 @@ _CPNG_ =
     "COPPINS CROSSING"
     (Just "ACT")
     "CPNG"
-    (-35.288333333333334)
-    149.04333333333332
+    (Lat (-35) 17.3)
+    (Lon 149 2.6)
 
 _CVR_ ::
   VFR_Waypoint
@@ -2135,8 +2189,8 @@ _CVR_ =
     "CORIN RESV"
     (Just "ACT")
     "CVR"
-    (-35.541666666666664)
-    148.83333333333334
+    (Lat (-35) 32.5)
+    (Lon 148 50.0)
 
 _COSS_ ::
   VFR_Waypoint
@@ -2145,8 +2199,8 @@ _COSS_ =
     "COSSACK"
     (Just "WA")
     "COSS"
-    (-20.676666666666666)
-    117.19
+    (Lat (-20) 40.6)
+    (Lon 117 11.4)
 
 _CTE_ ::
   VFR_Waypoint
@@ -2155,8 +2209,8 @@ _CTE_ =
     "COTTESLOE"
     (Just "WA")
     "CTE"
-    (-31.991666666666667)
-    115.75
+    (Lat (-31) 59.5)
+    (Lon 115 45.0)
 
 _COWI_ ::
   VFR_Waypoint
@@ -2165,8 +2219,8 @@ _COWI_ =
     "COW ISLAND"
     (Just "QLD")
     "COWI"
-    (-20.423333333333332)
-    148.845
+    (Lat (-20) 25.4)
+    (Lon 148 50.7)
 
 _COWR_ ::
   VFR_Waypoint
@@ -2175,8 +2229,8 @@ _COWR_ =
     "COWWARR"
     (Just "VIC")
     "COWR"
-    (-38.015)
-    146.69333333333333
+    (Lat (-38) 0.9)
+    (Lon 146 41.6)
 
 _CML_ ::
   VFR_Waypoint
@@ -2185,8 +2239,8 @@ _CML_ =
     "CRADLE MOUNTAIN LODGE"
     (Just "TAS")
     "CML"
-    (-41.595)
-    145.92833333333334
+    (Lat (-41) 35.7)
+    (Lon 145 55.7)
 
 _CBV_ ::
   VFR_Waypoint
@@ -2195,8 +2249,8 @@ _CBV_ =
     "CRAIGBOURNE RESV"
     (Just "TAS")
     "CBV"
-    (-42.55)
-    147.41666666666666
+    (Lat (-42) 33.0)
+    (Lon 147 25.0)
 
 _CGB_ ::
   VFR_Waypoint
@@ -2205,8 +2259,8 @@ _CGB_ =
     "CRAIGIEBURN OVERPASS"
     (Just "VIC")
     "CGB"
-    (-37.60333333333333)
-    144.93833333333333
+    (Lat (-37) 36.2)
+    (Lon 144 56.3)
 
 _CRAY_ ::
   VFR_Waypoint
@@ -2215,8 +2269,8 @@ _CRAY_ =
     "CRAYFISH"
     (Just "SA")
     "CRAY"
-    (-38.583333333333336)
-    139.75
+    (Lat (-38) 35.0)
+    (Lon 139 45.0)
 
 _CREM_ ::
   VFR_Waypoint
@@ -2225,8 +2279,8 @@ _CREM_ =
     "CREMORNE"
     (Just "TAS")
     "CREM"
-    (-42.958333333333336)
-    147.53333333333333
+    (Lat (-42) 57.5)
+    (Lon 147 32.0)
 
 _CES_ ::
   VFR_Waypoint
@@ -2235,8 +2289,8 @@ _CES_ =
     "CRESSY"
     (Just "TAS")
     "CES"
-    (-41.69166666666667)
-    147.08333333333334
+    (Lat (-41) 41.5)
+    (Lon 147 5.0)
 
 _CWK_ ::
   VFR_Waypoint
@@ -2245,8 +2299,8 @@ _CWK_ =
     "CRESWICK"
     (Just "VIC")
     "CWK"
-    (-37.43333333333333)
-    143.9
+    (Lat (-37) 26.0)
+    (Lon 143 54.0)
 
 _CUL_ ::
   VFR_Waypoint
@@ -2255,8 +2309,8 @@ _CUL_ =
     "CRONULLA"
     (Just "NSW")
     "CUL"
-    (-34.06166666666667)
-    151.15333333333334
+    (Lat (-34) 3.7)
+    (Lon 151 9.2)
 
 _CRPC_ ::
   VFR_Waypoint
@@ -2265,8 +2319,8 @@ _CRPC_ =
     "CROPPA CREEK"
     (Just "NSW")
     "CRPC"
-    (-29.133333333333333)
-    150.3
+    (Lat (-29) 8.0)
+    (Lon 150 18.0)
 
 _CNT_ ::
   VFR_Waypoint
@@ -2275,8 +2329,8 @@ _CNT_ =
     "CROWS NEST"
     (Just "QLD")
     "CNT"
-    (-27.27)
-    152.055
+    (Lat (-27) 16.2)
+    (Lon 152 3.3)
 
 _CGD_ ::
   VFR_Waypoint
@@ -2285,8 +2339,8 @@ _CGD_ =
     "CUDGEN HEADLAND"
     (Just "NSW")
     "CGD"
-    (-28.265)
-    153.585
+    (Lat (-28) 15.9)
+    (Lon 153 35.1)
 
 _CCN_ ::
   VFR_Waypoint
@@ -2295,8 +2349,8 @@ _CCN_ =
     "CULCAIRN"
     (Just "NSW")
     "CCN"
-    (-35.666666666666664)
-    147.03833333333333
+    (Lat (-35) 40.0)
+    (Lon 147 2.3)
 
 _DAIN_ ::
   VFR_Waypoint
@@ -2305,8 +2359,8 @@ _DAIN_ =
     "DAINTREE"
     (Just "QLD")
     "DAIN"
-    (-16.25)
-    145.31666666666666
+    (Lat (-16) 15.0)
+    (Lon 145 19.0)
 
 _DLMO_ ::
   VFR_Waypoint
@@ -2315,8 +2369,8 @@ _DLMO_ =
     "DALMORE DOWNS"
     (Just "NT")
     "DLMO"
-    (-19.775)
-    136.00166666666667
+    (Lat (-19) 46.5)
+    (Lon 136 0.1)
 
 _DRY_ ::
   VFR_Waypoint
@@ -2325,8 +2379,8 @@ _DRY_ =
     "DALRYE"
     (Just "QLD")
     "DRY"
-    (-20.166666666666668)
-    149.06666666666666
+    (Lat (-20) 10.0)
+    (Lon 149 4.0)
 
 _DMW_ ::
   VFR_Waypoint
@@ -2335,8 +2389,8 @@ _DMW_ =
     "DAM WALL"
     (Just "SA")
     "DMW"
-    (-34.75833333333333)
-    138.72166666666666
+    (Lat (-34) 45.5)
+    (Lon 138 43.3)
 
 _DARL_ ::
   VFR_Waypoint
@@ -2345,8 +2399,8 @@ _DARL_ =
     "DARLIMURA"
     (Just "VIC")
     "DARL"
-    (-38.35333333333333)
-    146.215
+    (Lat (-38) 21.2)
+    (Lon 146 12.9)
 
 _DHH_ ::
   VFR_Waypoint
@@ -2355,8 +2409,8 @@ _DHH_ =
     "DARLING HARBOUR"
     (Just "NSW")
     "DHH"
-    (-33.858333333333334)
-    151.2
+    (Lat (-33) 51.5)
+    (Lon 151 12.0)
 
 _DND_ ::
   VFR_Waypoint
@@ -2365,8 +2419,8 @@ _DND_ =
     "DARWIN RIVER DAM"
     (Just "NT")
     "DND"
-    (-12.825)
-    130.96666666666667
+    (Lat (-12) 49.5)
+    (Lon 130 58.0)
 
 _DBO_ ::
   VFR_Waypoint
@@ -2375,8 +2429,8 @@ _DBO_ =
     "DAYBORO"
     (Just "QLD")
     "DBO"
-    (-27.2)
-    152.82166666666666
+    (Lat (-27) 12.0)
+    (Lon 152 49.3)
 
 _DFD_ ::
   VFR_Waypoint
@@ -2385,8 +2439,8 @@ _DFD_ =
     "DAYLESFORD"
     (Just "VIC")
     "DFD"
-    (-37.35)
-    144.15
+    (Lat (-37) 21.0)
+    (Lon 144 9.0)
 
 _DGY_ ::
   VFR_Waypoint
@@ -2395,8 +2449,8 @@ _DGY_ =
     "DE GREY HS"
     (Just "WA")
     "DGY"
-    (-20.175)
-    119.17
+    (Lat (-20) 10.5)
+    (Lon 119 10.2)
 
 _DSS_ ::
   VFR_Waypoint
@@ -2405,8 +2459,8 @@ _DSS_ =
     "DEDERANG SUBSTATION"
     (Just "VIC")
     "DSS"
-    (-36.45333333333333)
-    146.99
+    (Lat (-36) 27.2)
+    (Lon 146 59.4)
 
 _DPW_ ::
   VFR_Waypoint
@@ -2415,8 +2469,8 @@ _DPW_ =
     "DEEP WELL"
     (Just "NT")
     "DPW"
-    (-24.358333333333334)
-    134.05
+    (Lat (-24) 21.5)
+    (Lon 134 3.0)
 
 _DEL_ ::
   VFR_Waypoint
@@ -2425,8 +2479,8 @@ _DEL_ =
     "DELORAINE"
     (Just "TAS")
     "DEL"
-    (-41.53333333333333)
-    146.66666666666666
+    (Lat (-41) 32.0)
+    (Lon 146 40.0)
 
 _DNP_ ::
   VFR_Waypoint
@@ -2435,8 +2489,8 @@ _DNP_ =
     "DENHAM PASSAGE"
     (Just "QLD")
     "DNP"
-    (-11.333333333333334)
-    143.33333333333334
+    (Lat (-11) 20.0)
+    (Lon 143 20.0)
 
 _DWB_ ::
   VFR_Waypoint
@@ -2445,8 +2499,8 @@ _DWB_ =
     "DERWENT BRIDGE"
     (Just "TAS")
     "DWB"
-    (-42.13333333333333)
-    146.23333333333332
+    (Lat (-42) 8.0)
+    (Lon 146 14.0)
 
 _DVM_ ::
   VFR_Waypoint
@@ -2455,8 +2509,8 @@ _DVM_ =
     "DEVILS MARBLES"
     (Just "NT")
     "DVM"
-    (-20.533333333333335)
-    134.25
+    (Lat (-20) 32.0)
+    (Lon 134 15.0)
 
 _DIBE_ ::
   VFR_Waypoint
@@ -2465,8 +2519,8 @@ _DIBE_ =
     "DICKY BEACH"
     (Just "QLD")
     "DIBE"
-    (-26.781666666666666)
-    153.13833333333332
+    (Lat (-26) 46.9)
+    (Lon 153 8.3)
 
 _DODI_ ::
   VFR_Waypoint
@@ -2475,8 +2529,8 @@ _DODI_ =
     "DODDS ISLAND"
     (Just "NSW")
     "DODI"
-    (-28.248333333333335)
-    153.53333333333333
+    (Lat (-28) 14.9)
+    (Lon 153 32.0)
 
 _DLPT_ ::
   VFR_Waypoint
@@ -2485,8 +2539,8 @@ _DLPT_ =
     "DOLLS POINT"
     (Just "NSW")
     "DLPT"
-    (-33.995)
-    151.14833333333334
+    (Lat (-33) 59.7)
+    (Lon 151 8.9)
 
 _DSN_ ::
   VFR_Waypoint
@@ -2495,8 +2549,8 @@ _DSN_ =
     "DONCASTER SHOPPINGTOWN"
     (Just "VIC")
     "DSN"
-    (-37.78333333333333)
-    145.125
+    (Lat (-37) 47.0)
+    (Lon 145 7.5)
 
 _DOP_ ::
   VFR_Waypoint
@@ -2505,8 +2559,8 @@ _DOP_ =
     "DONNINGTON AIRPARK"
     (Just "QLD")
     "DOP"
-    (-19.601666666666667)
-    146.84166666666667
+    (Lat (-19) 36.1)
+    (Lon 146 50.5)
 
 _DOOM_ ::
   VFR_Waypoint
@@ -2515,8 +2569,8 @@ _DOOM_ =
     "DOOMBEN RACECOURSE"
     (Just "QLD")
     "DOOM"
-    (-27.426666666666666)
-    153.07
+    (Lat (-27) 25.6)
+    (Lon 153 4.2)
 
 _DRO_ ::
   VFR_Waypoint
@@ -2525,8 +2579,8 @@ _DRO_ =
     "DORRIGO"
     (Just "NSW")
     "DRO"
-    (-30.341666666666665)
-    152.71333333333334
+    (Lat (-30) 20.5)
+    (Lon 152 42.8)
 
 _DCIS_ ::
   VFR_Waypoint
@@ -2535,8 +2589,8 @@ _DCIS_ =
     "DOUBLE CONE ISLAND"
     (Just "QLD")
     "DCIS"
-    (-20.1)
-    148.71666666666667
+    (Lat (-20) 6.0)
+    (Lon 148 43.0)
 
 _DOU_ ::
   VFR_Waypoint
@@ -2545,8 +2599,8 @@ _DOU_ =
     "DOUBLE ISLAND"
     (Just "QLD")
     "DOU"
-    (-16.725)
-    145.68333333333334
+    (Lat (-16) 43.5)
+    (Lon 145 41.0)
 
 _DLP_ ::
   VFR_Waypoint
@@ -2555,8 +2609,8 @@ _DLP_ =
     "DOUBLE ISLAND PT"
     (Just "QLD")
     "DLP"
-    (-25.916666666666668)
-    153.18333333333334
+    (Lat (-25) 55.0)
+    (Lon 153 11.0)
 
 _DBPT_ ::
   VFR_Waypoint
@@ -2565,8 +2619,8 @@ _DBPT_ =
     "DOUBLE PT"
     (Just "QLD")
     "DBPT"
-    (-11.866666666666667)
-    142.9
+    (Lat (-11) 52.0)
+    (Lon 142 54.0)
 
 _DRLD_ ::
   VFR_Waypoint
@@ -2575,8 +2629,8 @@ _DRLD_ =
     "DREAMWORLD"
     (Just "QLD")
     "DRLD"
-    (-27.865)
-    153.31666666666666
+    (Lat (-27) 51.9)
+    (Lon 153 19.0)
 
 _DRM_ ::
   VFR_Waypoint
@@ -2585,8 +2639,8 @@ _DRM_ =
     "DROMANA"
     (Just "VIC")
     "DRM"
-    (-38.333333333333336)
-    144.96666666666667
+    (Lat (-38) 20.0)
+    (Lon 144 58.0)
 
 _DRP_ ::
   VFR_Waypoint
@@ -2595,8 +2649,8 @@ _DRP_ =
     "DROUGHTY PT"
     (Just "TAS")
     "DRP"
-    (-42.93333333333333)
-    147.41666666666666
+    (Lat (-42) 56.0)
+    (Lon 147 25.0)
 
 _DRN_ ::
   VFR_Waypoint
@@ -2605,8 +2659,8 @@ _DRN_ =
     "DROUIN"
     (Just "VIC")
     "DRN"
-    (-38.13333333333333)
-    145.85
+    (Lat (-38) 8.0)
+    (Lon 145 51.0)
 
 _DCRK_ ::
   VFR_Waypoint
@@ -2615,8 +2669,8 @@ _DCRK_ =
     "DRY CREEK"
     (Just "SA")
     "DCRK"
-    (-34.833333333333336)
-    138.58333333333334
+    (Lat (-34) 50.0)
+    (Lon 138 35.0)
 
 _DAG_ ::
   VFR_Waypoint
@@ -2625,8 +2679,8 @@ _DAG_ =
     "DUARINGA"
     (Just "QLD")
     "DAG"
-    (-23.72)
-    149.66833333333332
+    (Lat (-23) 43.2)
+    (Lon 149 40.1)
 
 _DUB_ ::
   VFR_Waypoint
@@ -2635,8 +2689,8 @@ _DUB_ =
     "DUBLIN"
     (Just "SA")
     "DUB"
-    (-34.455)
-    138.35
+    (Lat (-34) 27.3)
+    (Lon 138 21.0)
 
 _DLY_ ::
   VFR_Waypoint
@@ -2645,8 +2699,8 @@ _DLY_ =
     "DUNALLEY"
     (Just "TAS")
     "DLY"
-    (-42.891666666666666)
-    147.805
+    (Lat (-42) 53.5)
+    (Lon 147 48.3)
 
 _DGN_ ::
   VFR_Waypoint
@@ -2655,8 +2709,8 @@ _DGN_ =
     "DUNGOWAN"
     (Just "NSW")
     "DGN"
-    (-31.216666666666665)
-    151.11666666666667
+    (Lat (-31) 13.0)
+    (Lon 151 7.0)
 
 _DUWN_ ::
   VFR_Waypoint
@@ -2665,8 +2719,8 @@ _DUWN_ =
     "DUNGOWAN DAM"
     (Just "NSW")
     "DUWN"
-    (-31.4)
-    151.35
+    (Lat (-31) 24.0)
+    (Lon 151 21.0)
 
 _DUA_ ::
   VFR_Waypoint
@@ -2675,8 +2729,8 @@ _DUA_ =
     "DURI GAP"
     (Just "NSW")
     "DUA"
-    (-31.2)
-    150.7
+    (Lat (-31) 12.0)
+    (Lon 150 42.0)
 
 _DMT_ ::
   VFR_Waypoint
@@ -2685,8 +2739,8 @@ _DMT_ =
     "DURI MT"
     (Just "NSW")
     "DMT"
-    (-31.205)
-    150.73
+    (Lat (-31) 12.3)
+    (Lon 150 43.8)
 
 _DONG_ ::
   VFR_Waypoint
@@ -2695,8 +2749,8 @@ _DONG_ =
     "DURONG"
     (Just "QLD")
     "DONG"
-    (-26.4)
-    151.25
+    (Lat (-26) 24.0)
+    (Lon 151 15.0)
 
 _DTON_ ::
   VFR_Waypoint
@@ -2705,8 +2759,8 @@ _DTON_ =
     "DUTTON"
     (Just "SA")
     "DTON"
-    (-34.36666666666667)
-    139.13333333333333
+    (Lat (-34) 22.0)
+    (Lon 139 8.0)
 
 _EAN_ ::
   VFR_Waypoint
@@ -2715,8 +2769,8 @@ _EAN_ =
     "EAGLE HAWK NECK"
     (Just "TAS")
     "EAN"
-    (-43.016666666666666)
-    147.9
+    (Lat (-43) 1.0)
+    (Lon 147 54.0)
 
 _EARH_ ::
   VFR_Waypoint
@@ -2725,8 +2779,8 @@ _EARH_ =
     "EARL HILL"
     (Just "QLD")
     "EARH"
-    (-16.8)
-    145.7
+    (Lat (-16) 48.0)
+    (Lon 145 42.0)
 
 _EARV_ ::
   VFR_Waypoint
@@ -2735,8 +2789,8 @@ _EARV_ =
     "EARLVILLE"
     (Just "QLD")
     "EARV"
-    (-16.955)
-    145.73833333333334
+    (Lat (-16) 57.3)
+    (Lon 145 44.3)
 
 _EAM_ ::
   VFR_Waypoint
@@ -2745,8 +2799,8 @@ _EAM_ =
     "EAST ARM"
     (Just "NT")
     "EAM"
-    (-12.516666666666667)
-    130.93333333333334
+    (Lat (-12) 31.0)
+    (Lon 130 56.0)
 
 _EGT_ ::
   VFR_Waypoint
@@ -2755,8 +2809,8 @@ _EGT_ =
     "EAST GRETA"
     (Just "NSW")
     "EGT"
-    (-32.73833333333333)
-    151.53833333333333
+    (Lat (-32) 44.3)
+    (Lon 151 32.3)
 
 _ETP_ ::
   VFR_Waypoint
@@ -2765,8 +2819,8 @@ _ETP_ =
     "EAST PT"
     (Just "NT")
     "ETP"
-    (-12.408333333333333)
-    130.81666666666666
+    (Lat (-12) 24.5)
+    (Lon 130 49.0)
 
 _EDP_ ::
   VFR_Waypoint
@@ -2775,8 +2829,8 @@ _EDP_ =
     "EDDYSTONE PT"
     (Just "TAS")
     "EDP"
-    (-40.998333333333335)
-    148.34833333333333
+    (Lat (-40) 59.9)
+    (Lon 148 20.9)
 
 _EDT_ ::
   VFR_Waypoint
@@ -2785,8 +2839,8 @@ _EDT_ =
     "EDMONTON"
     (Just "QLD")
     "EDT"
-    (-17.025)
-    145.73
+    (Lat (-17) 1.5)
+    (Lon 145 43.8)
 
 _ELDO_ ::
   VFR_Waypoint
@@ -2795,8 +2849,8 @@ _ELDO_ =
     "ELDORADO"
     (Just "VIC")
     "ELDO"
-    (-36.31166666666667)
-    146.52166666666668
+    (Lat (-36) 18.7)
+    (Lon 146 31.3)
 
 _ERB_ ::
   VFR_Waypoint
@@ -2805,8 +2859,8 @@ _ERB_ =
     "ELIZABETH RIVER BRIDGE"
     (Just "NT")
     "ERB"
-    (-12.543333333333333)
-    130.975
+    (Lat (-12) 32.6)
+    (Lon 130 58.5)
 
 _EMY_ ::
   VFR_Waypoint
@@ -2815,8 +2869,8 @@ _EMY_ =
     "EMILY GAP"
     (Just "NT")
     "EMY"
-    (-23.74)
-    133.94166666666666
+    (Lat (-23) 44.4)
+    (Lon 133 56.5)
 
 _EDOR_ ::
   VFR_Waypoint
@@ -2825,8 +2879,8 @@ _EDOR_ =
     "ENDEAVOUR REEF"
     (Just "QLD")
     "EDOR"
-    (-15.783333333333333)
-    145.56666666666666
+    (Lat (-15) 47.0)
+    (Lon 145 34.0)
 
 _EPPG_ ::
   VFR_Waypoint
@@ -2835,8 +2889,8 @@ _EPPG_ =
     "EPPING"
     (Just "VIC")
     "EPPG"
-    (-37.64333333333333)
-    145.025
+    (Lat (-37) 38.6)
+    (Lon 145 1.5)
 
 _ERSK_ ::
   VFR_Waypoint
@@ -2845,8 +2899,8 @@ _ERSK_ =
     "ERSKINEVILLE OVAL"
     (Just "NSW")
     "ERSK"
-    (-33.901666666666664)
-    151.19
+    (Lat (-33) 54.1)
+    (Lon 151 11.4)
 
 _ETON_ ::
   VFR_Waypoint
@@ -2855,8 +2909,8 @@ _ETON_ =
     "ETON"
     (Just "QLD")
     "ETON"
-    (-21.266666666666666)
-    148.97166666666666
+    (Lat (-21) 16.0)
+    (Lon 148 58.3)
 
 _EMI_ ::
   VFR_Waypoint
@@ -2865,8 +2919,8 @@ _EMI_ =
     "EUMUNDI"
     (Just "QLD")
     "EMI"
-    (-26.48)
-    152.95333333333335
+    (Lat (-26) 28.8)
+    (Lon 152 57.2)
 
 _EWI_ ::
   VFR_Waypoint
@@ -2875,8 +2929,8 @@ _EWI_ =
     "EWANINGA"
     (Just "NT")
     "EWI"
-    (-23.983333333333334)
-    133.93333333333334
+    (Lat (-23) 59.0)
+    (Lon 133 56.0)
 
 _EMD_ ::
   VFR_Waypoint
@@ -2885,8 +2939,8 @@ _EMD_ =
     "EWEN MADDOCK DAM"
     (Just "QLD")
     "EMD"
-    (-26.778333333333332)
-    153.00833333333333
+    (Lat (-26) 46.7)
+    (Lon 153 0.5)
 
 _FCP_ ::
   VFR_Waypoint
@@ -2895,8 +2949,8 @@ _FCP_ =
     "FALSE CAPE"
     (Just "QLD")
     "FCP"
-    (-16.875)
-    145.85
+    (Lat (-16) 52.5)
+    (Lon 145 51.0)
 
 _FHS_ ::
   VFR_Waypoint
@@ -2905,8 +2959,8 @@ _FHS_ =
     "FARRER HIGH SCHOOL"
     (Just "NSW")
     "FHS"
-    (-31.141666666666666)
-    150.98333333333332
+    (Lat (-31) 8.5)
+    (Lon 150 59.0)
 
 _FDP_ ::
   VFR_Waypoint
@@ -2915,8 +2969,8 @@ _FDP_ =
     "FEDERATION PEAK"
     (Just "TAS")
     "FDP"
-    (-43.266666666666666)
-    146.45
+    (Lat (-43) 16.0)
+    (Lon 146 27.0)
 
 _FNVL_ ::
   VFR_Waypoint
@@ -2925,8 +2979,8 @@ _FNVL_ =
     "FERNVALE"
     (Just "QLD")
     "FNVL"
-    (-27.455)
-    152.65333333333334
+    (Lat (-27) 27.3)
+    (Lon 152 39.2)
 
 _FLDI_ ::
   VFR_Waypoint
@@ -2935,8 +2989,8 @@ _FLDI_ =
     "FIELD ISLAND"
     (Just "NT")
     "FLDI"
-    (-12.1)
-    132.38333333333333
+    (Lat (-12) 6.0)
+    (Lon 132 23.0)
 
 _FISH_ ::
   VFR_Waypoint
@@ -2945,8 +2999,8 @@ _FISH_ =
     "FISHERMANS ISLAND"
     (Just "QLD")
     "FISH"
-    (-27.386666666666667)
-    153.17666666666668
+    (Lat (-27) 23.2)
+    (Lon 153 10.6)
 
 _FIT_ ::
   VFR_Waypoint
@@ -2955,8 +3009,8 @@ _FIT_ =
     "FITNESS CAMP"
     (Just "NSW")
     "FIT"
-    (-35.166666666666664)
-    147.62166666666667
+    (Lat (-35) 10.0)
+    (Lon 147 37.3)
 
 _FID_ ::
   VFR_Waypoint
@@ -2965,8 +3019,8 @@ _FID_ =
     "FITZROY ISLAND"
     (Just "QLD")
     "FID"
-    (-16.933333333333334)
-    145.99166666666667
+    (Lat (-16) 56.0)
+    (Lon 145 59.5)
 
 _FGN_ ::
   VFR_Waypoint
@@ -2975,8 +3029,8 @@ _FGN_ =
     "FLEMINGTON"
     (Just "VIC")
     "FGN"
-    (-37.79333333333334)
-    144.91166666666666
+    (Lat (-37) 47.6)
+    (Lon 144 54.7)
 
 _FPK_ ::
   VFR_Waypoint
@@ -2985,8 +3039,8 @@ _FPK_ =
     "FLINDERS PEAK"
     (Just "QLD")
     "FPK"
-    (-27.816666666666666)
-    152.80833333333334
+    (Lat (-27) 49.0)
+    (Lon 152 48.5)
 
 _FYN_ ::
   VFR_Waypoint
@@ -2995,8 +3049,8 @@ _FYN_ =
     "FLYNN"
     (Just "VIC")
     "FYN"
-    (-38.193333333333335)
-    146.67333333333335
+    (Lat (-38) 11.6)
+    (Lon 146 40.4)
 
 _FOOT_ ::
   VFR_Waypoint
@@ -3005,8 +3059,8 @@ _FOOT_ =
     "FOOTBALL PARK"
     (Just "SA")
     "FOOT"
-    (-34.88166666666667)
-    138.495
+    (Lat (-34) 52.9)
+    (Lon 138 29.7)
 
 _FMN_ ::
   VFR_Waypoint
@@ -3015,8 +3069,8 @@ _FMN_ =
     "FORMARTIN"
     (Just "QLD")
     "FMN"
-    (-27.39666666666667)
-    151.40833333333333
+    (Lat (-27) 23.8)
+    (Lon 151 24.5)
 
 _FDL_ ::
   VFR_Waypoint
@@ -3025,8 +3079,8 @@ _FDL_ =
     "FORRESTDALE LAKE"
     (Just "WA")
     "FDL"
-    (-32.16)
-    115.93
+    (Lat (-32) 9.6)
+    (Lon 115 55.8)
 
 _FFLD_ ::
   VFR_Waypoint
@@ -3035,8 +3089,8 @@ _FFLD_ =
     "FORRESTFIELD"
     (Just "WA")
     "FFLD"
-    (-31.988333333333333)
-    116.01833333333333
+    (Lat (-31) 59.3)
+    (Lon 116 1.1)
 
 _FOWB_ ::
   VFR_Waypoint
@@ -3045,8 +3099,8 @@ _FOWB_ =
     "FOWLERS BAY"
     (Just "SA")
     "FOWB"
-    (-31.983333333333334)
-    132.43333333333334
+    (Lat (-31) 59.0)
+    (Lon 132 26.0)
 
 _FRLG_ ::
   VFR_Waypoint
@@ -3055,8 +3109,8 @@ _FRLG_ =
     "FREELING"
     (Just "SA")
     "FRLG"
-    (-34.45666666666666)
-    138.80833333333334
+    (Lat (-34) 27.4)
+    (Lon 138 48.5)
 
 _FWO_ ::
   VFR_Waypoint
@@ -3065,8 +3119,8 @@ _FWO_ =
     "FREEWAY OVERPASS"
     (Just "VIC")
     "FWO"
-    (-37.795)
-    144.99333333333334
+    (Lat (-37) 47.7)
+    (Lon 144 59.6)
 
 _FRE_ ::
   VFR_Waypoint
@@ -3075,8 +3129,8 @@ _FRE_ =
     "FREMANTLE"
     (Just "WA")
     "FRE"
-    (-32.05833333333333)
-    115.74166666666666
+    (Lat (-32) 3.5)
+    (Lon 115 44.5)
 
 _FREM_ ::
   VFR_Waypoint
@@ -3085,8 +3139,8 @@ _FREM_ =
     "FREMANTLE GOLF COURSE"
     (Just "WA")
     "FREM"
-    (-32.055)
-    115.77333333333333
+    (Lat (-32) 3.3)
+    (Lon 115 46.4)
 
 _FRWV_ ::
   VFR_Waypoint
@@ -3095,8 +3149,8 @@ _FRWV_ =
     "FRESHWATER VALLEY"
     (Just "QLD")
     "FRWV"
-    (-16.95)
-    145.68833333333333
+    (Lat (-16) 57.0)
+    (Lon 145 41.3)
 
 _GALGA_ ::
   VFR_Waypoint
@@ -3105,8 +3159,8 @@ _GALGA_ =
     "GALGA"
     (Just "SA")
     "GALGA"
-    (-34.71666666666667)
-    139.96666666666667
+    (Lat (-34) 43.0)
+    (Lon 139 58.0)
 
 _GGN_ ::
   VFR_Waypoint
@@ -3115,8 +3169,8 @@ _GGN_ =
     "GALLANGOWAN"
     (Just "QLD")
     "GGN"
-    (-26.433333333333334)
-    152.32833333333335
+    (Lat (-26) 26.0)
+    (Lon 152 19.7)
 
 _GAE_ ::
   VFR_Waypoint
@@ -3125,8 +3179,8 @@ _GAE_ =
     "GALLILEE"
     (Just "QLD")
     "GAE"
-    (-22.383333333333333)
-    145.98333333333332
+    (Lat (-22) 23.0)
+    (Lon 145 59.0)
 
 _GWTR_ ::
   VFR_Waypoint
@@ -3135,8 +3189,8 @@ _GWTR_ =
     "GAOL WATER TOWER"
     (Just "NT")
     "GWTR"
-    (-23.858333333333334)
-    133.8
+    (Lat (-23) 51.5)
+    (Lon 133 48.0)
 
 _GST_ ::
   VFR_Waypoint
@@ -3145,8 +3199,8 @@ _GST_ =
     "GATE SOUTH"
     (Just "NSW")
     "GST"
-    (-31.29)
-    150.685
+    (Lat (-31) 17.4)
+    (Lon 150 41.1)
 
 _GWT_ ::
   VFR_Waypoint
@@ -3155,8 +3209,8 @@ _GWT_ =
     "GATE WEST"
     (Just "NSW")
     "GWT"
-    (-31.02166666666667)
-    150.57166666666666
+    (Lat (-31) 1.3)
+    (Lon 150 34.3)
 
 _GWB_ ::
   VFR_Waypoint
@@ -3165,8 +3219,8 @@ _GWB_ =
     "GATEWAY BRIDGE"
     (Just "QLD")
     "GWB"
-    (-27.446666666666665)
-    153.1
+    (Lat (-27) 26.8)
+    (Lon 153 6.0)
 
 _GEK_ ::
   VFR_Waypoint
@@ -3175,8 +3229,8 @@ _GEK_ =
     "GEMBROOK"
     (Just "VIC")
     "GEK"
-    (-37.95)
-    145.55
+    (Lat (-37) 57.0)
+    (Lon 145 33.0)
 
 _GRB_ ::
   VFR_Waypoint
@@ -3185,8 +3239,8 @@ _GRB_ =
     "GEORGES RIVER BRIDGE"
     (Just "NSW")
     "GRB"
-    (-34.00333333333333)
-    151.11
+    (Lat (-34) 0.2)
+    (Lon 151 6.6)
 
 _GEP_ ::
   VFR_Waypoint
@@ -3195,8 +3249,8 @@ _GEP_ =
     "GEPPS CROSS"
     (Just "SA")
     "GEP"
-    (-34.85)
-    138.6
+    (Lat (-34) 51.0)
+    (Lon 138 36.0)
 
 _GOY_ ::
   VFR_Waypoint
@@ -3205,8 +3259,8 @@ _GOY_ =
     "GEROGERY"
     (Just "NSW")
     "GOY"
-    (-35.83833333333333)
-    146.99166666666667
+    (Lat (-35) 50.3)
+    (Lon 146 59.5)
 
 _GNR_ ::
   VFR_Waypoint
@@ -3215,8 +3269,8 @@ _GNR_ =
     "GIBSON REEF"
     (Just "QLD")
     "GNR"
-    (-17.316666666666666)
-    146.35
+    (Lat (-17) 19.0)
+    (Lon 146 21.0)
 
 _GIM_ ::
   VFR_Waypoint
@@ -3225,8 +3279,8 @@ _GIM_ =
     "GILBERLAND MINE"
     (Just "QLD")
     "GIM"
-    (-19.3)
-    143.6
+    (Lat (-19) 18.0)
+    (Lon 143 36.0)
 
 _GIRU_ ::
   VFR_Waypoint
@@ -3235,8 +3289,8 @@ _GIRU_ =
     "GIRU"
     (Just "QLD")
     "GIRU"
-    (-19.513333333333332)
-    147.105
+    (Lat (-19) 30.8)
+    (Lon 147 6.3)
 
 _GVB_ ::
   VFR_Waypoint
@@ -3245,8 +3299,8 @@ _GVB_ =
     "GLADESVILLE BRIDGE"
     (Just "NSW")
     "GVB"
-    (-33.84166666666667)
-    151.14666666666668
+    (Lat (-33) 50.5)
+    (Lon 151 8.8)
 
 _GBRY_ ::
   VFR_Waypoint
@@ -3255,8 +3309,8 @@ _GBRY_ =
     "GLEN BRAY"
     (Just "NSW")
     "GBRY"
-    (-35.925)
-    147.00833333333333
+    (Lat (-35) 55.5)
+    (Lon 147 0.5)
 
 _GBR_ ::
   VFR_Waypoint
@@ -3265,8 +3319,8 @@ _GBR_ =
     "GLENBURN"
     (Just "VIC")
     "GBR"
-    (-37.425)
-    145.42166666666665
+    (Lat (-37) 25.5)
+    (Lon 145 25.3)
 
 _GLEN_ ::
   VFR_Waypoint
@@ -3275,8 +3329,8 @@ _GLEN_ =
     "GLENLOCH INTERCHANGE"
     (Just "NSW")
     "GLEN"
-    (-35.285)
-    149.085
+    (Lat (-35) 17.1)
+    (Lon 149 5.1)
 
 _GMN_ ::
   VFR_Waypoint
@@ -3285,8 +3339,8 @@ _GMN_ =
     "GLENMORGAN"
     (Just "QLD")
     "GMN"
-    (-27.25)
-    149.68333333333334
+    (Lat (-27) 15.0)
+    (Lon 149 41.0)
 
 _GLC_ ::
   VFR_Waypoint
@@ -3295,8 +3349,8 @@ _GLC_ =
     "GLENORCHY"
     (Just "SA")
     "GLC"
-    (-31.916666666666668)
-    139.78333333333333
+    (Lat (-31) 55.0)
+    (Lon 139 47.0)
 
 _GRE_ ::
   VFR_Waypoint
@@ -3305,8 +3359,8 @@ _GRE_ =
     "GLENREAGH"
     (Just "NSW")
     "GRE"
-    (-30.055)
-    152.97833333333332
+    (Lat (-30) 3.3)
+    (Lon 152 58.7)
 
 _GRK_ ::
   VFR_Waypoint
@@ -3315,8 +3369,8 @@ _GRK_ =
     "GLENROCK HS"
     (Just "QLD")
     "GRK"
-    (-15.116666666666667)
-    145.08333333333334
+    (Lat (-15) 7.0)
+    (Lon 145 5.0)
 
 _GCR_ ::
   VFR_Waypoint
@@ -3325,8 +3379,8 @@ _GCR_ =
     "GLOUCESTER"
     (Just "NSW")
     "GCR"
-    (-32.005)
-    151.96666666666667
+    (Lat (-32) 0.3)
+    (Lon 151 58.0)
 
 _GMH_ ::
   VFR_Waypoint
@@ -3335,8 +3389,8 @@ _GMH_ =
     "GMH"
     (Just "VIC")
     "GMH"
-    (-38.00833333333333)
-    145.23833333333334
+    (Lat (-38) 0.5)
+    (Lon 145 14.3)
 
 _GOI_ ::
   VFR_Waypoint
@@ -3345,8 +3399,8 @@ _GOI_ =
     "GOLDSMITH ISLAND"
     (Just "QLD")
     "GOI"
-    (-20.683333333333334)
-    149.15
+    (Lat (-20) 41.0)
+    (Lon 149 9.0)
 
 _GON_ ::
   VFR_Waypoint
@@ -3355,8 +3409,8 @@ _GON_ =
     "GOODNA"
     (Just "QLD")
     "GON"
-    (-27.616666666666667)
-    152.88833333333332
+    (Lat (-27) 37.0)
+    (Lon 152 53.3)
 
 _GGV_ ::
   VFR_Waypoint
@@ -3365,8 +3419,8 @@ _GGV_ =
     "GOOGONG RESV"
     (Just "NSW")
     "GGV"
-    (-35.42166666666667)
-    149.26166666666666
+    (Lat (-35) 25.3)
+    (Lon 149 15.7)
 
 _GMBG_ ::
   VFR_Waypoint
@@ -3375,8 +3429,8 @@ _GMBG_ =
     "GOOMBUNGEE"
     (Just "QLD")
     "GMBG"
-    (-27.308333333333334)
-    151.85
+    (Lat (-27) 18.5)
+    (Lon 151 51.0)
 
 _GNN_ ::
   VFR_Waypoint
@@ -3385,8 +3439,8 @@ _GNN_ =
     "GOONANEMAN"
     (Just "QLD")
     "GNN"
-    (-25.433333333333334)
-    152.13333333333333
+    (Lat (-25) 26.0)
+    (Lon 152 8.0)
 
 _GGO_ ::
   VFR_Waypoint
@@ -3395,8 +3449,8 @@ _GGO_ =
     "GOONOO GOONOO HS"
     (Just "NSW")
     "GGO"
-    (-31.31)
-    150.905
+    (Lat (-31) 18.6)
+    (Lon 150 54.3)
 
 _GOV_ ::
   VFR_Waypoint
@@ -3405,8 +3459,8 @@ _GOV_ =
     "GORDONVALE"
     (Just "QLD")
     "GOV"
-    (-17.088333333333335)
-    145.78333333333333
+    (Lat (-17) 5.3)
+    (Lon 145 47.0)
 
 _GOW_ ::
   VFR_Waypoint
@@ -3415,8 +3469,8 @@ _GOW_ =
     "GOWRIE JUNCTION"
     (Just "QLD")
     "GOW"
-    (-27.5)
-    151.88666666666666
+    (Lat (-27) 30.0)
+    (Lon 151 53.2)
 
 _GRAA_ ::
   VFR_Waypoint
@@ -3425,8 +3479,8 @@ _GRAA_ =
     "GRANYA"
     (Just "VIC")
     "GRAA"
-    (-36.111666666666665)
-    147.31666666666666
+    (Lat (-36) 6.7)
+    (Lon 147 19.0)
 
 _GVH_ ::
   VFR_Waypoint
@@ -3435,8 +3489,8 @@ _GVH_ =
     "GRAVELLY BEACH"
     (Just "TAS")
     "GVH"
-    (-41.288333333333334)
-    146.97166666666666
+    (Lat (-41) 17.3)
+    (Lon 146 58.3)
 
 _GRHL_ ::
   VFR_Waypoint
@@ -3445,8 +3499,8 @@ _GRHL_ =
     "GREEN HILLS"
     (Just "WA")
     "GRHL"
-    (-31.925)
-    116.95833333333333
+    (Lat (-31) 55.5)
+    (Lon 116 57.5)
 
 _GNIS_ ::
   VFR_Waypoint
@@ -3455,8 +3509,8 @@ _GNIS_ =
     "GREEN ISLAND (CAIRNS)"
     (Just "QLD")
     "GNIS"
-    (-16.758333333333333)
-    145.975
+    (Lat (-16) 45.5)
+    (Lon 145 58.5)
 
 _GRL_ ::
   VFR_Waypoint
@@ -3465,8 +3519,8 @@ _GRL_ =
     "GREEN ISLAND (MACKAY)"
     (Just "QLD")
     "GRL"
-    (-20.983333333333334)
-    149.15
+    (Lat (-20) 59.0)
+    (Lon 149 9.0)
 
 _GRNH_ ::
   VFR_Waypoint
@@ -3475,8 +3529,8 @@ _GRNH_ =
     "GREENHILL"
     (Just "QLD")
     "GRNH"
-    (-17.04)
-    145.805
+    (Lat (-17) 2.4)
+    (Lon 145 48.3)
 
 _GNM_ ::
   VFR_Waypoint
@@ -3485,8 +3539,8 @@ _GNM_ =
     "GREENMOUNT"
     (Just "QLD")
     "GNM"
-    (-27.783333333333335)
-    151.95
+    (Lat (-27) 47.0)
+    (Lon 151 57.0)
 
 _GRRV_ ::
   VFR_Waypoint
@@ -3495,8 +3549,8 @@ _GRRV_ =
     "GROSE RIVER"
     (Just "NSW")
     "GRRV"
-    (-33.615)
-    150.67
+    (Lat (-33) 36.9)
+    (Lon 150 40.2)
 
 _GDG_ ::
   VFR_Waypoint
@@ -3505,8 +3559,8 @@ _GDG_ =
     "GUNDAGAI"
     (Just "NSW")
     "GDG"
-    (-35.06166666666667)
-    148.10333333333332
+    (Lat (-35) 3.7)
+    (Lon 148 6.2)
 
 _GUP_ ::
   VFR_Waypoint
@@ -3515,8 +3569,8 @@ _GUP_ =
     "GUNN PT"
     (Just "NT")
     "GUP"
-    (-12.183333333333334)
-    130.99166666666667
+    (Lat (-12) 11.0)
+    (Lon 130 59.5)
 
 _GUNN_ ::
   VFR_Waypoint
@@ -3525,8 +3579,8 @@ _GUNN_ =
     "GUNNING"
     (Just "NSW")
     "GUNN"
-    (-34.781666666666666)
-    149.26666666666668
+    (Lat (-34) 46.9)
+    (Lon 149 16.0)
 
 _GUNG_ ::
   VFR_Waypoint
@@ -3535,8 +3589,8 @@ _GUNG_ =
     "GUTHALUNGRA"
     (Just "QLD")
     "GUNG"
-    (-19.933333333333334)
-    147.83333333333334
+    (Lat (-19) 56.0)
+    (Lon 147 50.0)
 
 _HADEN_ ::
   VFR_Waypoint
@@ -3545,8 +3599,8 @@ _HADEN_ =
     "HADEN"
     (Just "QLD")
     "HADEN"
-    (-27.22)
-    151.88833333333332
+    (Lat (-27) 13.2)
+    (Lon 151 53.3)
 
 _HSP_ ::
   VFR_Waypoint
@@ -3555,8 +3609,8 @@ _HSP_ =
     "HADSPEN"
     (Just "TAS")
     "HSP"
-    (-41.50833333333333)
-    147.05833333333334
+    (Lat (-41) 30.5)
+    (Lon 147 3.5)
 
 _HALL_ ::
   VFR_Waypoint
@@ -3565,8 +3619,8 @@ _HALL_ =
     "HALL"
     (Just "ACT")
     "HALL"
-    (-35.16833333333334)
-    149.06833333333333
+    (Lat (-35) 10.1)
+    (Lon 149 4.1)
 
 _HMM_ ::
   VFR_Waypoint
@@ -3575,8 +3629,8 @@ _HMM_ =
     "HAMMOND ISLAND"
     (Just "QLD")
     "HMM"
-    (-10.533333333333333)
-    142.21666666666667
+    (Lat (-10) 32.0)
+    (Lon 142 13.0)
 
 _HMN_ ::
   VFR_Waypoint
@@ -3585,8 +3639,8 @@ _HMN_ =
     "HAMPTON"
     (Just "QLD")
     "HMN"
-    (-27.358333333333334)
-    152.06666666666666
+    (Lat (-27) 21.5)
+    (Lon 152 4.0)
 
 _HAVY_ ::
   VFR_Waypoint
@@ -3595,8 +3649,8 @@ _HAVY_ =
     "HAPPY VALLEY"
     (Just "QLD")
     "HAVY"
-    (-26.808333333333334)
-    153.13333333333333
+    (Lat (-26) 48.5)
+    (Lon 153 8.0)
 
 _HBB_ ::
   VFR_Waypoint
@@ -3605,8 +3659,8 @@ _HBB_ =
     "HARBOUR BRIDGE"
     (Just "NSW")
     "HBB"
-    (-33.85333333333333)
-    151.20833333333334
+    (Lat (-33) 51.2)
+    (Lon 151 12.5)
 
 _HAF_ ::
   VFR_Waypoint
@@ -3615,8 +3669,8 @@ _HAF_ =
     "HAREFIELD"
     (Just "NSW")
     "HAF"
-    (-34.96333333333333)
-    147.51666666666668
+    (Lat (-34) 57.8)
+    (Lon 147 31.0)
 
 _HGTE_ ::
   VFR_Waypoint
@@ -3625,8 +3679,8 @@ _HGTE_ =
     "HARROGATE"
     (Just "SA")
     "HGTE"
-    (-34.95333333333333)
-    139.01833333333335
+    (Lat (-34) 57.2)
+    (Lon 139 1.1)
 
 _HARV_ ::
   VFR_Waypoint
@@ -3635,8 +3689,8 @@ _HARV_ =
     "HARVEY"
     (Just "WA")
     "HARV"
-    (-33.083333333333336)
-    115.9
+    (Lat (-33) 5.0)
+    (Lon 115 54.0)
 
 _HSTI_ ::
   VFR_Waypoint
@@ -3645,8 +3699,8 @@ _HSTI_ =
     "HASTINGS"
     (Just "QLD")
     "HSTI"
-    (-28.3)
-    145.18333333333334
+    (Lat (-28) 18.0)
+    (Lon 145 11.0)
 
 _HASS_ ::
   VFR_Waypoint
@@ -3655,8 +3709,8 @@ _HASS_ =
     "HASTINGS PT"
     (Just "NSW")
     "HASS"
-    (-28.358333333333334)
-    153.58
+    (Lat (-28) 21.5)
+    (Lon 153 34.8)
 
 _HATF_ ::
   VFR_Waypoint
@@ -3665,8 +3719,8 @@ _HATF_ =
     "HATFIELD"
     (Just "NSW")
     "HATF"
-    (-33.7)
-    143.65
+    (Lat (-33) 42.0)
+    (Lon 143 39.0)
 
 _HVI_ ::
   VFR_Waypoint
@@ -3675,8 +3729,8 @@ _HVI_ =
     "HAVANNAH ISLAND"
     (Just "QLD")
     "HVI"
-    (-18.845)
-    146.53833333333333
+    (Lat (-18) 50.7)
+    (Lon 146 32.3)
 
 _HPT_ ::
   VFR_Waypoint
@@ -3685,8 +3739,8 @@ _HPT_ =
     "HAY PT"
     (Just "QLD")
     "HPT"
-    (-21.278333333333332)
-    149.29166666666666
+    (Lat (-21) 16.7)
+    (Lon 149 17.5)
 
 _HAZ_ ::
   VFR_Waypoint
@@ -3695,8 +3749,8 @@ _HAZ_ =
     "HAZELWOOD ISLAND"
     (Just "QLD")
     "HAZ"
-    (-20.283333333333335)
-    149.08333333333334
+    (Lat (-20) 17.0)
+    (Lon 149 5.0)
 
 _HEAT_ ::
   VFR_Waypoint
@@ -3705,8 +3759,8 @@ _HEAT_ =
     "HEATHCOTE TOWNSHIP"
     (Just "VIC")
     "HEAT"
-    (-36.916666666666664)
-    144.7
+    (Lat (-36) 55.0)
+    (Lon 144 42.0)
 
 _HRR_ ::
   VFR_Waypoint
@@ -3715,8 +3769,8 @@ _HRR_ =
     "HELENA RIVER RESV"
     (Just "WA")
     "HRR"
-    (-32.001666666666665)
-    116.22666666666667
+    (Lat (-32) 0.1)
+    (Lon 116 13.6)
 
 _HNB_ ::
   VFR_Waypoint
@@ -3725,8 +3779,8 @@ _HNB_ =
     "HELENSBURGH"
     (Just "NSW")
     "HNB"
-    (-34.19166666666667)
-    150.975
+    (Lat (-34) 11.5)
+    (Lon 150 58.5)
 
 _HED_ ::
   VFR_Waypoint
@@ -3735,8 +3789,8 @@ _HED_ =
     "HELIDON"
     (Just "QLD")
     "HED"
-    (-27.55)
-    152.13333333333333
+    (Lat (-27) 33.0)
+    (Lon 152 8.0)
 
 _HENTY_ ::
   VFR_Waypoint
@@ -3745,8 +3799,8 @@ _HENTY_ =
     "HENTY"
     (Just "NSW")
     "HENTY"
-    (-35.525)
-    147.03333333333333
+    (Lat (-35) 31.5)
+    (Lon 147 2.0)
 
 _HKE_ ::
   VFR_Waypoint
@@ -3755,8 +3809,8 @@ _HKE_ =
     "HERDSMAN LAKE"
     (Just "WA")
     "HKE"
-    (-31.92)
-    115.81333333333333
+    (Lat (-31) 55.2)
+    (Lon 115 48.8)
 
 _HXB_ ::
   VFR_Waypoint
@@ -3765,8 +3819,8 @@ _HXB_ =
     "HEXHAM BRIDGE"
     (Just "NSW")
     "HXB"
-    (-32.83)
-    151.69
+    (Lat (-32) 49.8)
+    (Lon 151 41.4)
 
 _HIPA_ ::
   VFR_Waypoint
@@ -3775,8 +3829,8 @@ _HIPA_ =
     "HIGH PERFORMANCE AREA 3"
     (Just "QLD")
     "HIPA"
-    (-27.15)
-    153.84666666666666
+    (Lat (-27) 9.0)
+    (Lon 153 50.8)
 
 _HVTG_ ::
   VFR_Waypoint
@@ -3785,8 +3839,8 @@ _HVTG_ =
     "HIGH VOLTAGE"
     (Just "QLD")
     "HVTG"
-    (-17.015)
-    145.76333333333332
+    (Lat (-17) 0.9)
+    (Lon 145 45.8)
 
 _HIM_ ::
   VFR_Waypoint
@@ -3795,8 +3849,8 @@ _HIM_ =
     "HILTON MINE"
     (Just "QLD")
     "HIM"
-    (-20.566666666666666)
-    139.48333333333332
+    (Lat (-20) 34.0)
+    (Lon 139 29.0)
 
 _HNCH_ ::
   VFR_Waypoint
@@ -3805,8 +3859,8 @@ _HNCH_ =
     "HINCHINBROOK ISLAND"
     (Just "QLD")
     "HNCH"
-    (-18.366666666666667)
-    146.25
+    (Lat (-18) 22.0)
+    (Lon 146 15.0)
 
 _HDWL_ ::
   VFR_Waypoint
@@ -3815,8 +3869,8 @@ _HDWL_ =
     "HINZE DAM WALL"
     (Just "QLD")
     "HDWL"
-    (-28.05)
-    153.28666666666666
+    (Lat (-28) 3.0)
+    (Lon 153 17.2)
 
 _HCTY_ ::
   VFR_Waypoint
@@ -3825,8 +3879,8 @@ _HCTY_ =
     "HOBART CBD"
     (Just "TAS")
     "HCTY"
-    (-42.88333333333333)
-    147.33333333333334
+    (Lat (-42) 53.0)
+    (Lon 147 20.0)
 
 _HBKT_ ::
   VFR_Waypoint
@@ -3835,8 +3889,8 @@ _HBKT_ =
     "HOLBROOK TOWNSHIP"
     (Just "NSW")
     "HBKT"
-    (-35.73)
-    147.325
+    (Lat (-35) 43.8)
+    (Lon 147 19.5)
 
 _HOLM_ ::
   VFR_Waypoint
@@ -3845,8 +3899,8 @@ _HOLM_ =
     "HOLMES REEF"
     (Just "QLD")
     "HOLM"
-    (-16.5)
-    148.0
+    (Lat (-16) 30.0)
+    (Lon 148 0.0)
 
 _HBU_ ::
   VFR_Waypoint
@@ -3855,8 +3909,8 @@ _HBU_ =
     "HOMEBUSH"
     (Just "QLD")
     "HBU"
-    (-21.28)
-    149.05
+    (Lat (-21) 16.8)
+    (Lon 149 3.0)
 
 _HDP_ ::
   VFR_Waypoint
@@ -3865,8 +3919,8 @@ _HDP_ =
     "HOOD PT"
     (Just "WA")
     "HDP"
-    (-34.38333333333333)
-    119.56666666666666
+    (Lat (-34) 23.0)
+    (Lon 119 34.0)
 
 _HPI_ ::
   VFR_Waypoint
@@ -3875,8 +3929,8 @@ _HPI_ =
     "HOPE INLET"
     (Just "NT")
     "HPI"
-    (-12.328333333333333)
-    131.01666666666668
+    (Lat (-12) 19.7)
+    (Lon 131 1.0)
 
 _HVR_ ::
   VFR_Waypoint
@@ -3885,8 +3939,8 @@ _HVR_ =
     "HOPE VALLEY RESV"
     (Just "SA")
     "HVR"
-    (-34.85)
-    138.68333333333334
+    (Lat (-34) 51.0)
+    (Lon 138 41.0)
 
 _HORD_ ::
   VFR_Waypoint
@@ -3895,8 +3949,8 @@ _HORD_ =
     "HORDERN HILLS"
     (Just "NT")
     "HORD"
-    (-20.65)
-    130.31666666666666
+    (Lat (-20) 39.0)
+    (Lon 130 19.0)
 
 _HZWF_ ::
   VFR_Waypoint
@@ -3905,8 +3959,8 @@ _HZWF_ =
     "HORIZONTAL WATERFALLS"
     (Just "WA")
     "HZWF"
-    (-16.383333333333333)
-    123.96666666666667
+    (Lat (-16) 23.0)
+    (Lon 123 58.0)
 
 _HBVT_ ::
   VFR_Waypoint
@@ -3915,8 +3969,8 @@ _HBVT_ =
     "HORNIBROOK VIADUCT"
     (Just "QLD")
     "HBVT"
-    (-27.273333333333333)
-    153.07166666666666
+    (Lat (-27) 16.4)
+    (Lon 153 4.3)
 
 _HSY_ ::
   VFR_Waypoint
@@ -3925,8 +3979,8 @@ _HSY_ =
     "HORNSBY"
     (Just "NSW")
     "HSY"
-    (-33.69166666666667)
-    151.10666666666665
+    (Lat (-33) 41.5)
+    (Lon 151 6.4)
 
 _HST_ ::
   VFR_Waypoint
@@ -3935,8 +3989,8 @@ _HST_ =
     "HOSKINSTOWN"
     (Just "NSW")
     "HST"
-    (-35.42166666666667)
-    149.45
+    (Lat (-35) 25.3)
+    (Lon 149 27.0)
 
 _HWG_ ::
   VFR_Waypoint
@@ -3945,8 +3999,8 @@ _HWG_ =
     "HOWLONG"
     (Just "NSW")
     "HWG"
-    (-35.97666666666667)
-    146.625
+    (Lat (-35) 58.6)
+    (Lon 146 37.5)
 
 _HGR_ ::
   VFR_Waypoint
@@ -3955,8 +4009,8 @@ _HGR_ =
     "HUGH RIVER"
     (Just "NT")
     "HGR"
-    (-24.35)
-    133.43333333333334
+    (Lat (-24) 21.0)
+    (Lon 133 26.0)
 
 _HWW_ ::
   VFR_Waypoint
@@ -3965,8 +4019,8 @@ _HWW_ =
     "HUME WEIR WALL"
     (Just "VIC")
     "HWW"
-    (-36.111666666666665)
-    147.025
+    (Lat (-36) 6.7)
+    (Lon 147 1.5)
 
 _HYH_ ::
   VFR_Waypoint
@@ -3975,8 +4029,8 @@ _HYH_ =
     "HUMMOCKY HILLS"
     (Just "TAS")
     "HYH"
-    (-41.733333333333334)
-    147.25
+    (Lat (-41) 44.0)
+    (Lon 147 15.0)
 
 _HRD_ ::
   VFR_Waypoint
@@ -3985,8 +4039,8 @@ _HRD_ =
     "HUNGERFORD"
     (Just "NSW")
     "HRD"
-    (-29.0)
-    144.4
+    (Lat (-29) 0.0)
+    (Lon 144 24.0)
 
 _HYDEN_ ::
   VFR_Waypoint
@@ -3995,8 +4049,8 @@ _HYDEN_ =
     "HYDEN"
     (Just "WA")
     "HYDEN"
-    (-32.45)
-    118.86666666666666
+    (Lat (-32) 27.0)
+    (Lon 118 52.0)
 
 _IND_ ::
   VFR_Waypoint
@@ -4005,8 +4059,8 @@ _IND_ =
     "INDEE HS"
     (Just "WA")
     "IND"
-    (-20.786666666666665)
-    118.59166666666667
+    (Lat (-20) 47.2)
+    (Lon 118 35.5)
 
 _IDNA_ ::
   VFR_Waypoint
@@ -4015,8 +4069,8 @@ _IDNA_ =
     "INDIANA"
     (Just "NT")
     "IDNA"
-    (-23.333333333333332)
-    135.43333333333334
+    (Lat (-23) 20.0)
+    (Lon 135 26.0)
 
 _IDK_ ::
   VFR_Waypoint
@@ -4025,8 +4079,8 @@ _IDK_ =
     "INDULKANA TOWNSHIP"
     (Just "SA")
     "IDK"
-    (-26.966666666666665)
-    133.325
+    (Lat (-26) 58.0)
+    (Lon 133 19.5)
 
 _INGL_ ::
   VFR_Waypoint
@@ -4035,8 +4089,8 @@ _INGL_ =
     "INGLEBURN"
     (Just "NSW")
     "INGL"
-    (-33.971666666666664)
-    150.85833333333332
+    (Lat (-33) 58.3)
+    (Lon 150 51.5)
 
 _IPHL_ ::
   VFR_Waypoint
@@ -4045,8 +4099,8 @@ _IPHL_ =
     "IPPIA HILL"
     (Just "NT")
     "IPHL"
-    (-25.116666666666667)
-    133.05
+    (Lat (-25) 7.0)
+    (Lon 133 3.0)
 
 _ISB_ ::
   VFR_Waypoint
@@ -4055,8 +4109,8 @@ _ISB_ =
     "ISRAELITE BAY"
     (Just "WA")
     "ISB"
-    (-33.61666666666667)
-    123.88333333333334
+    (Lat (-33) 37.0)
+    (Lon 123 53.0)
 
 _JSK_ ::
   VFR_Waypoint
@@ -4065,8 +4119,8 @@ _JSK_ =
     "JACK SMITH LAKE"
     (Just "VIC")
     "JSK"
-    (-38.5)
-    147.0
+    (Lat (-38) 30.0)
+    (Lon 147 0.0)
 
 _JAC_ ::
   VFR_Waypoint
@@ -4075,8 +4129,8 @@ _JAC_ =
     "JACKO'S JUNCTION"
     (Just "NT")
     "JAC"
-    (-12.263333333333334)
-    131.03666666666666
+    (Lat (-12) 15.8)
+    (Lon 131 2.2)
 
 _JNR_ ::
   VFR_Waypoint
@@ -4085,8 +4139,8 @@ _JNR_ =
     "JACKSON RIVER"
     (Just "QLD")
     "JNR"
-    (-11.583333333333334)
-    142.0
+    (Lat (-11) 35.0)
+    (Lon 142 0.0)
 
 _JSL_ ::
   VFR_Waypoint
@@ -4095,8 +4149,8 @@ _JSL_ =
     "JACOB'S SUGARLOAF"
     (Just "TAS")
     "JSL"
-    (-41.94166666666667)
-    147.3
+    (Lat (-41) 56.5)
+    (Lon 147 18.0)
 
 _JACW_ ::
   VFR_Waypoint
@@ -4105,8 +4159,8 @@ _JACW_ =
     "JACOB'S WELL"
     (Just "WA")
     "JACW"
-    (-32.03333333333333)
-    117.2
+    (Lat (-32) 2.0)
+    (Lon 117 12.0)
 
 _JMPP_ ::
   VFR_Waypoint
@@ -4115,8 +4169,8 @@ _JMPP_ =
     "JAMES PRICE POINT"
     (Just "WA")
     "JMPP"
-    (-17.485)
-    122.14333333333333
+    (Lat (-17) 29.1)
+    (Lon 122 8.6)
 
 _JADL_ ::
   VFR_Waypoint
@@ -4125,8 +4179,8 @@ _JADL_ =
     "JARRAHDALE"
     (Just "WA")
     "JADL"
-    (-32.34)
-    116.075
+    (Lat (-32) 20.4)
+    (Lon 116 4.5)
 
 _JCK_ ::
   VFR_Waypoint
@@ -4135,8 +4189,8 @@ _JCK_ =
     "JAY CREEK"
     (Just "NT")
     "JCK"
-    (-23.786666666666665)
-    133.5
+    (Lat (-23) 47.2)
+    (Lon 133 30.0)
 
 _JEA_ ::
   VFR_Waypoint
@@ -4145,8 +4199,8 @@ _JEA_ =
     "JEANNIE RIVER"
     (Just "QLD")
     "JEA"
-    (-14.733333333333333)
-    144.86666666666667
+    (Lat (-14) 44.0)
+    (Lon 144 52.0)
 
 _JES_ ::
   VFR_Waypoint
@@ -4155,8 +4209,8 @@ _JES_ =
     "JESSIE GAP"
     (Just "NT")
     "JES"
-    (-23.748333333333335)
-    134.01833333333335
+    (Lat (-23) 44.9)
+    (Lon 134 1.1)
 
 _JIBN_ ::
   VFR_Waypoint
@@ -4165,8 +4219,8 @@ _JIBN_ =
     "JIBBON PT"
     (Just "NSW")
     "JIBN"
-    (-34.085)
-    151.17
+    (Lat (-34) 5.1)
+    (Lon 151 10.2)
 
 _JIA_ ::
   VFR_Waypoint
@@ -4175,8 +4229,8 @@ _JIA_ =
     "JINDERA"
     (Just "NSW")
     "JIA"
-    (-35.958333333333336)
-    146.88833333333332
+    (Lat (-35) 57.5)
+    (Lon 146 53.3)
 
 _JDN_ ::
   VFR_Waypoint
@@ -4185,8 +4239,8 @@ _JDN_ =
     "JONDARYAN"
     (Just "QLD")
     "JDN"
-    (-27.366666666666667)
-    151.58833333333334
+    (Lat (-27) 22.0)
+    (Lon 151 35.3)
 
 _JGK_ ::
   VFR_Waypoint
@@ -4195,8 +4249,8 @@ _JGK_ =
     "JUG CREEK"
     (Just "QLD")
     "JGK"
-    (-22.0)
-    144.7
+    (Lat (-22) 0.0)
+    (Lon 144 42.0)
 
 _JPP_ ::
   VFR_Waypoint
@@ -4205,8 +4259,8 @@ _JPP_ =
     "JUMPINPIN"
     (Just "QLD")
     "JPP"
-    (-27.733333333333334)
-    153.45
+    (Lat (-27) 44.0)
+    (Lon 153 27.0)
 
 _JUNEE_ ::
   VFR_Waypoint
@@ -4215,8 +4269,8 @@ _JUNEE_ =
     "JUNEE"
     (Just "NSW")
     "JUNEE"
-    (-34.86666666666667)
-    147.58333333333334
+    (Lat (-34) 52.0)
+    (Lon 147 35.0)
 
 _JUP_ ::
   VFR_Waypoint
@@ -4225,8 +4279,8 @@ _JUP_ =
     "JUPITERS CASINO"
     (Just "QLD")
     "JUP"
-    (-28.031666666666666)
-    153.43
+    (Lat (-28) 1.9)
+    (Lon 153 25.8)
 
 _KKN_ ::
   VFR_Waypoint
@@ -4235,8 +4289,8 @@ _KKN_ =
     "KAIMKILLENBUN"
     (Just "QLD")
     "KKN"
-    (-27.066666666666666)
-    151.43333333333334
+    (Lat (-27) 4.0)
+    (Lon 151 26.0)
 
 _KAO_ ::
   VFR_Waypoint
@@ -4245,8 +4299,8 @@ _KAO_ =
     "KALKALLO"
     (Just "VIC")
     "KAO"
-    (-37.53666666666667)
-    144.945
+    (Lat (-37) 32.2)
+    (Lon 144 56.7)
 
 _KTS_ ::
   VFR_Waypoint
@@ -4255,8 +4309,8 @@ _KTS_ =
     "KEATS ISLAND"
     (Just "QLD")
     "KTS"
-    (-9.683333333333334)
-    143.45
+    (Lat (-9) 41.0)
+    (Lon 143 27.0)
 
 _KEP_ ::
   VFR_Waypoint
@@ -4265,8 +4319,8 @@ _KEP_ =
     "KEEPIT DAM"
     (Just "NSW")
     "KEP"
-    (-30.88)
-    150.49833333333333
+    (Lat (-30) 52.8)
+    (Lon 150 29.9)
 
 _KERW_ ::
   VFR_Waypoint
@@ -4275,8 +4329,8 @@ _KERW_ =
     "KEERWEE"
     (Just "QLD")
     "KERW"
-    (-25.216666666666665)
-    151.35
+    (Lat (-25) 13.0)
+    (Lon 151 21.0)
 
 _KALL_ ::
   VFR_Waypoint
@@ -4285,8 +4339,8 @@ _KALL_ =
     "KENDALL"
     (Just "QLD")
     "KALL"
-    (-14.2)
-    141.6
+    (Lat (-14) 12.0)
+    (Lon 141 36.0)
 
 _KSI_ ::
   VFR_Waypoint
@@ -4295,8 +4349,8 @@ _KSI_ =
     "KESWICK ISLAND"
     (Just "QLD")
     "KSI"
-    (-20.916666666666668)
-    149.41666666666666
+    (Lat (-20) 55.0)
+    (Lon 149 25.0)
 
 _KMA_ ::
   VFR_Waypoint
@@ -4305,8 +4359,8 @@ _KMA_ =
     "KIAMA"
     (Just "NSW")
     "KMA"
-    (-34.666666666666664)
-    150.85
+    (Lat (-34) 40.0)
+    (Lon 150 51.0)
 
 _KIAN_ ::
   VFR_Waypoint
@@ -4315,8 +4369,8 @@ _KIAN_ =
     "KIANDRA"
     (Just "NSW")
     "KIAN"
-    (-35.86666666666667)
-    148.5
+    (Lat (-35) 52.0)
+    (Lon 148 30.0)
 
 _KDBF_ ::
   VFR_Waypoint
@@ -4325,8 +4379,8 @@ _KDBF_ =
     "KIDSON BLUFF"
     (Just "WA")
     "KDBF"
-    (-22.25)
-    125.03333333333333
+    (Lat (-22) 15.0)
+    (Lon 125 2.0)
 
 _KIEWA_ ::
   VFR_Waypoint
@@ -4335,8 +4389,8 @@ _KIEWA_ =
     "KIEWA"
     (Just "VIC")
     "KIEWA"
-    (-36.25833333333333)
-    147.00833333333333
+    (Lat (-36) 15.5)
+    (Lon 147 0.5)
 
 _KLCY_ ::
   VFR_Waypoint
@@ -4345,8 +4399,8 @@ _KLCY_ =
     "KILCOY TOWNSHIP"
     (Just "QLD")
     "KLCY"
-    (-26.941666666666666)
-    152.56333333333333
+    (Lat (-26) 56.5)
+    (Lon 152 33.8)
 
 _KKV_ ::
   VFR_Waypoint
@@ -4355,8 +4409,8 @@ _KKV_ =
     "KILKIVAN"
     (Just "QLD")
     "KKV"
-    (-26.083333333333332)
-    152.24666666666667
+    (Lat (-26) 5.0)
+    (Lon 152 14.8)
 
 _KIM_ ::
   VFR_Waypoint
@@ -4365,8 +4419,8 @@ _KIM_ =
     "KILMORE"
     (Just "VIC")
     "KIM"
-    (-37.3)
-    144.955
+    (Lat (-37) 18.0)
+    (Lon 144 57.3)
 
 _KMG_ ::
   VFR_Waypoint
@@ -4375,8 +4429,8 @@ _KMG_ =
     "KILMORE GAP"
     (Just "VIC")
     "KMG"
-    (-37.3)
-    144.98333333333332
+    (Lat (-37) 18.0)
+    (Lon 144 59.0)
 
 _KLTO_ ::
   VFR_Waypoint
@@ -4385,8 +4439,8 @@ _KLTO_ =
     "KILTO"
     (Just "WA")
     "KLTO"
-    (-17.691666666666666)
-    122.71333333333334
+    (Lat (-17) 41.5)
+    (Lon 122 42.8)
 
 _KCAS_ ::
   VFR_Waypoint
@@ -4395,8 +4449,8 @@ _KCAS_ =
     "KING CASCADES"
     (Just "WA")
     "KCAS"
-    (-15.625)
-    125.3
+    (Lat (-15) 37.5)
+    (Lon 125 18.0)
 
 _KRT_ ::
   VFR_Waypoint
@@ -4405,8 +4459,8 @@ _KRT_ =
     "KING RANCH TULLY"
     (Just "QLD")
     "KRT"
-    (-18.083333333333332)
-    145.83333333333334
+    (Lat (-18) 5.0)
+    (Lon 145 50.0)
 
 _KGLE_ ::
   VFR_Waypoint
@@ -4415,8 +4469,8 @@ _KGLE_ =
     "KINGLAKE"
     (Just "VIC")
     "KGLE"
-    (-37.52166666666667)
-    145.35
+    (Lat (-37) 31.3)
+    (Lon 145 21.0)
 
 _KBCH_ ::
   VFR_Waypoint
@@ -4425,8 +4479,8 @@ _KBCH_ =
     "KINGS BEACH"
     (Just "QLD")
     "KBCH"
-    (-26.805)
-    153.14
+    (Lat (-26) 48.3)
+    (Lon 153 8.4)
 
 _KCFF_ ::
   VFR_Waypoint
@@ -4435,8 +4489,8 @@ _KCFF_ =
     "KINGSCLIFF"
     (Just "NSW")
     "KCFF"
-    (-28.25)
-    153.57166666666666
+    (Lat (-28) 15.0)
+    (Lon 153 34.3)
 
 _KGT_ ::
   VFR_Waypoint
@@ -4445,8 +4499,8 @@ _KGT_ =
     "KINGSTHORPE"
     (Just "QLD")
     "KGT"
-    (-27.47833333333333)
-    151.81333333333333
+    (Lat (-27) 28.7)
+    (Lon 151 48.8)
 
 _KINN_ ::
   VFR_Waypoint
@@ -4455,8 +4509,8 @@ _KINN_ =
     "KINGSTON CENTRE"
     (Just "VIC")
     "KINN"
-    (-37.95666666666666)
-    145.07666666666665
+    (Lat (-37) 57.4)
+    (Lon 145 4.6)
 
 _KIRA_ ::
   VFR_Waypoint
@@ -4465,8 +4519,8 @@ _KIRA_ =
     "KIRRA"
     (Just "NSW")
     "KIRA"
-    (-28.166666666666668)
-    153.52333333333334
+    (Lat (-28) 10.0)
+    (Lon 153 31.4)
 
 _KSPT_ ::
   VFR_Waypoint
@@ -4475,8 +4529,8 @@ _KSPT_ =
     "KISSING POINT"
     (Just "QLD")
     "KSPT"
-    (-19.241666666666667)
-    146.805
+    (Lat (-19) 14.5)
+    (Lon 146 48.3)
 
 _KNW_ ::
   VFR_Waypoint
@@ -4485,8 +4539,8 @@ _KNW_ =
     "KONGWAK"
     (Just "VIC")
     "KNW"
-    (-38.516666666666666)
-    145.71666666666667
+    (Lat (-38) 31.0)
+    (Lon 145 43.0)
 
 _KTG_ ::
   VFR_Waypoint
@@ -4495,8 +4549,8 @@ _KTG_ =
     "KOOLATONG RIVER"
     (Just "NT")
     "KTG"
-    (-13.083333333333334)
-    135.65
+    (Lat (-13) 5.0)
+    (Lon 135 39.0)
 
 _KBD_ ::
   VFR_Waypoint
@@ -4505,8 +4559,8 @@ _KBD_ =
     "KOOMBOOLOOMBA DAM"
     (Just "QLD")
     "KBD"
-    (-17.833333333333332)
-    145.6
+    (Lat (-17) 50.0)
+    (Lon 145 36.0)
 
 _KOOM_ ::
   VFR_Waypoint
@@ -4515,8 +4569,8 @@ _KOOM_ =
     "KOOMOOLOOBOOKA CAVE"
     (Just "SA")
     "KOOM"
-    (-31.483333333333334)
-    129.58333333333334
+    (Lat (-31) 29.0)
+    (Lon 129 35.0)
 
 _KANC_ ::
   VFR_Waypoint
@@ -4525,8 +4579,8 @@ _KANC_ =
     "KOORAN CROCODILE FARM"
     (Just "QLD")
     "KANC"
-    (-23.3)
-    150.73333333333332
+    (Lat (-23) 18.0)
+    (Lon 150 44.0)
 
 _KOT_ ::
   VFR_Waypoint
@@ -4535,8 +4589,8 @@ _KOT_ =
     "KOOTINGAL"
     (Just "NSW")
     "KOT"
-    (-31.05)
-    151.05
+    (Lat (-31) 3.0)
+    (Lon 151 3.0)
 
 _KOPP_ ::
   VFR_Waypoint
@@ -4545,8 +4599,8 @@ _KOPP_ =
     "KOPPEN PARK"
     (Just "QLD")
     "KOPP"
-    (-16.931666666666665)
-    145.73333333333332
+    (Lat (-16) 55.9)
+    (Lon 145 44.0)
 
 _KREE_ ::
   VFR_Waypoint
@@ -4555,8 +4609,8 @@ _KREE_ =
     "KOREELAH"
     (Just "SA")
     "KREE"
-    (-35.916666666666664)
-    136.91666666666666
+    (Lat (-35) 55.0)
+    (Lon 136 55.0)
 
 _KUN_ ::
   VFR_Waypoint
@@ -4565,8 +4619,8 @@ _KUN_ =
     "KUNWARARA"
     (Just "QLD")
     "KUN"
-    (-22.916666666666668)
-    150.13333333333333
+    (Lat (-22) 55.0)
+    (Lon 150 8.0)
 
 _KRN_ ::
   VFR_Waypoint
@@ -4575,8 +4629,8 @@ _KRN_ =
     "KURANDA"
     (Just "QLD")
     "KRN"
-    (-16.816666666666666)
-    145.63833333333332
+    (Lat (-16) 49.0)
+    (Lon 145 38.3)
 
 _KRMD_ ::
   VFR_Waypoint
@@ -4585,8 +4639,8 @@ _KRMD_ =
     "KURMOND"
     (Just "NSW")
     "KRMD"
-    (-33.55)
-    150.68666666666667
+    (Lat (-33) 33.0)
+    (Lon 150 41.2)
 
 _KYP_ ::
   VFR_Waypoint
@@ -4595,8 +4649,8 @@ _KYP_ =
     "KYEAMBA PARK"
     (Just "NSW")
     "KYP"
-    (-35.446666666666665)
-    147.61666666666667
+    (Lat (-35) 26.8)
+    (Lon 147 37.0)
 
 _KYE_ ::
   VFR_Waypoint
@@ -4605,8 +4659,8 @@ _KYE_ =
     "KYEAMBA TOWER"
     (Just "NSW")
     "KYE"
-    (-35.525)
-    147.59166666666667
+    (Lat (-35) 31.5)
+    (Lon 147 35.5)
 
 _KTN_ ::
   VFR_Waypoint
@@ -4615,8 +4669,8 @@ _KTN_ =
     "KYNETON"
     (Just "VIC")
     "KTN"
-    (-37.24666666666667)
-    144.45833333333334
+    (Lat (-37) 14.8)
+    (Lon 144 27.5)
 
 _LDH_ ::
   VFR_Waypoint
@@ -4625,8 +4679,8 @@ _LDH_ =
     "LADYSMITH"
     (Just "NSW")
     "LDH"
-    (-35.211666666666666)
-    147.51666666666668
+    (Lat (-35) 12.7)
+    (Lon 147 31.0)
 
 _LDLY_ ::
   VFR_Waypoint
@@ -4635,8 +4689,8 @@ _LDLY_ =
     "LAIDLEY"
     (Just "QLD")
     "LDLY"
-    (-27.633333333333333)
-    152.38333333333333
+    (Lat (-27) 38.0)
+    (Lon 152 23.0)
 
 _LKT_ ::
   VFR_Waypoint
@@ -4645,8 +4699,8 @@ _LKT_ =
     "LAKE ALBERT"
     (Just "NSW")
     "LKT"
-    (-35.178333333333335)
-    147.36333333333334
+    (Lat (-35) 10.7)
+    (Lon 147 21.8)
 
 _LKAD_ ::
   VFR_Waypoint
@@ -4655,8 +4709,8 @@ _LKAD_ =
     "LAKE AMADEUS"
     (Just "NT")
     "LKAD"
-    (-24.58)
-    130.46166666666667
+    (Lat (-24) 34.8)
+    (Lon 130 27.7)
 
 _LBT_ ::
   VFR_Waypoint
@@ -4665,8 +4719,8 @@ _LBT_ =
     "LAKE BATHURST"
     (Just "NSW")
     "LBT"
-    (-35.05)
-    149.68333333333334
+    (Lat (-35) 3.0)
+    (Lon 149 41.0)
 
 _LKON_ ::
   VFR_Waypoint
@@ -4675,8 +4729,8 @@ _LKON_ =
     "LAKE CLARENDON"
     (Just "QLD")
     "LKON"
-    (-27.491666666666667)
-    152.35
+    (Lat (-27) 29.5)
+    (Lon 152 21.0)
 
 _LCR_ ::
   VFR_Waypoint
@@ -4685,8 +4739,8 @@ _LCR_ =
     "LAKE CORANGAMITE"
     (Just "VIC")
     "LCR"
-    (-38.1)
-    143.51666666666668
+    (Lat (-38) 6.0)
+    (Lon 143 31.0)
 
 _LCDI_ ::
   VFR_Waypoint
@@ -4695,8 +4749,8 @@ _LCDI_ =
     "LAKE CURRIMUNDI"
     (Just "QLD")
     "LCDI"
-    (-26.765)
-    153.13666666666666
+    (Lat (-26) 45.9)
+    (Lon 153 8.2)
 
 _LAD_ ::
   VFR_Waypoint
@@ -4705,8 +4759,8 @@ _LAD_ =
     "LAKE DEAN"
     (Just "NT")
     "LAD"
-    (-12.733333333333333)
-    131.01666666666668
+    (Lat (-12) 44.0)
+    (Lon 131 1.0)
 
 _LDAP_ ::
   VFR_Waypoint
@@ -4715,8 +4769,8 @@ _LDAP_ =
     "LAKE DISAPPOINTMENT"
     (Just "WA")
     "LDAP"
-    (-23.5)
-    122.66666666666667
+    (Lat (-23) 30.0)
+    (Lon 122 40.0)
 
 _LKEC_ ::
   VFR_Waypoint
@@ -4725,8 +4779,8 @@ _LKEC_ =
     "LAKE ECHO"
     (Just "TAS")
     "LKEC"
-    (-42.166666666666664)
-    146.63333333333333
+    (Lat (-42) 10.0)
+    (Lon 146 38.0)
 
 _LEM_ ::
   VFR_Waypoint
@@ -4735,8 +4789,8 @@ _LEM_ =
     "LAKE EPSOM"
     (Just "QLD")
     "LEM"
-    (-21.488333333333333)
-    148.83333333333334
+    (Lat (-21) 29.3)
+    (Lon 148 50.0)
 
 _LEYN_ ::
   VFR_Waypoint
@@ -4745,8 +4799,8 @@ _LEYN_ =
     "LAKE EYRE NORTH"
     (Just "SA")
     "LEYN"
-    (-28.416666666666668)
-    137.3
+    (Lat (-28) 25.0)
+    (Lon 137 18.0)
 
 _LFS_ ::
   VFR_Waypoint
@@ -4755,8 +4809,8 @@ _LFS_ =
     "LAKE FINNISS"
     (Just "NT")
     "LFS"
-    (-12.38)
-    131.475
+    (Lat (-12) 22.8)
+    (Lon 131 28.5)
 
 _LFRO_ ::
   VFR_Waypoint
@@ -4765,8 +4819,8 @@ _LFRO_ =
     "LAKE FROME"
     (Just "SA")
     "LFRO"
-    (-30.633333333333333)
-    139.86666666666667
+    (Lat (-30) 38.0)
+    (Lon 139 52.0)
 
 _LGGN_ ::
   VFR_Waypoint
@@ -4775,8 +4829,8 @@ _LGGN_ =
     "LAKE GEORGE NORTH"
     (Just "NSW")
     "LGGN"
-    (-34.98833333333333)
-    149.39166666666668
+    (Lat (-34) 59.3)
+    (Lon 149 23.5)
 
 _LGGS_ ::
   VFR_Waypoint
@@ -4785,8 +4839,8 @@ _LGGS_ =
     "LAKE GEORGE SOUTH"
     (Just "NSW")
     "LGGS"
-    (-35.20333333333333)
-    149.40833333333333
+    (Lat (-35) 12.2)
+    (Lon 149 24.5)
 
 _LGEN_ ::
   VFR_Waypoint
@@ -4795,8 +4849,8 @@ _LGEN_ =
     "LAKE GILLEN"
     (Just "WA")
     "LGEN"
-    (-26.216666666666665)
-    124.6
+    (Lat (-26) 13.0)
+    (Lon 124 36.0)
 
 _LGDA_ ::
   VFR_Waypoint
@@ -4805,8 +4859,8 @@ _LGDA_ =
     "LAKE GININDERRA"
     (Just "ACT")
     "LGDA"
-    (-35.233333333333334)
-    149.06833333333333
+    (Lat (-35) 14.0)
+    (Lon 149 4.1)
 
 _LKH_ ::
   VFR_Waypoint
@@ -4815,8 +4869,8 @@ _LKH_ =
     "LAKE HINDMARSH"
     (Just "VIC")
     "LKH"
-    (-36.11666666666667)
-    141.86666666666667
+    (Lat (-36) 7.0)
+    (Lon 141 52.0)
 
 _LKIM_ ::
   VFR_Waypoint
@@ -4825,8 +4879,8 @@ _LKIM_ =
     "LAKE ILMA"
     (Just "WA")
     "LKIM"
-    (-29.25)
-    127.76666666666667
+    (Lat (-29) 15.0)
+    (Lon 127 46.0)
 
 _LKG_ ::
   VFR_Waypoint
@@ -4835,8 +4889,8 @@ _LKG_ =
     "LAKE KING"
     (Just "WA")
     "LKG"
-    (-33.083333333333336)
-    119.66666666666667
+    (Lat (-33) 5.0)
+    (Lon 119 40.0)
 
 _LMC_ ::
   VFR_Waypoint
@@ -4845,8 +4899,8 @@ _LMC_ =
     "LAKE MANCHESTER"
     (Just "QLD")
     "LMC"
-    (-27.483333333333334)
-    152.76666666666668
+    (Lat (-27) 29.0)
+    (Lon 152 46.0)
 
 _LME_ ::
   VFR_Waypoint
@@ -4855,8 +4909,8 @@ _LME_ =
     "LAKE MAURICE"
     (Just "SA")
     "LME"
-    (-29.4)
-    130.95
+    (Lat (-29) 24.0)
+    (Lon 130 57.0)
 
 _LMWL_ ::
   VFR_Waypoint
@@ -4865,8 +4919,8 @@ _LMWL_ =
     "LAKE MINIGWAL"
     (Just "WA")
     "LMWL"
-    (-29.583333333333332)
-    123.16666666666667
+    (Lat (-29) 35.0)
+    (Lon 123 10.0)
 
 _LOOH_ ::
   VFR_Waypoint
@@ -4875,8 +4929,8 @@ _LOOH_ =
     "LAKE MOOGERAH"
     (Just "QLD")
     "LOOH"
-    (-28.033333333333335)
-    152.55
+    (Lat (-28) 2.0)
+    (Lon 152 33.0)
 
 _LKNL_ ::
   VFR_Waypoint
@@ -4885,8 +4939,8 @@ _LKNL_ =
     "LAKE NEALE"
     (Just "NT")
     "LKNL"
-    (-24.246666666666666)
-    129.96666666666667
+    (Lat (-24) 14.8)
+    (Lon 129 58.0)
 
 _LRID_ ::
   VFR_Waypoint
@@ -4895,8 +4949,8 @@ _LRID_ =
     "LAKE RAESIDE"
     (Just "WA")
     "LRID"
-    (-29.55)
-    122.3
+    (Lat (-29) 33.0)
+    (Lon 122 18.0)
 
 _LRAN_ ::
   VFR_Waypoint
@@ -4905,8 +4959,8 @@ _LRAN_ =
     "LAKE RASON"
     (Just "WA")
     "LRAN"
-    (-28.666666666666668)
-    124.28333333333333
+    (Lat (-28) 40.0)
+    (Lon 124 17.0)
 
 _LSPR_ ::
   VFR_Waypoint
@@ -4915,8 +4969,8 @@ _LSPR_ =
     "LAKE SURPRISE"
     (Just "NT")
     "LSPR"
-    (-20.233333333333334)
-    131.8
+    (Lat (-20) 14.0)
+    (Lon 131 48.0)
 
 _LTOM_ ::
   VFR_Waypoint
@@ -4925,8 +4979,8 @@ _LTOM_ =
     "LAKE THOMSON"
     (Just "WA")
     "LTOM"
-    (-32.151666666666664)
-    115.835
+    (Lat (-32) 9.1)
+    (Lon 115 50.1)
 
 _LTL_ ::
   VFR_Waypoint
@@ -4935,8 +4989,8 @@ _LTL_ =
     "LAKE THROSSELL"
     (Just "WA")
     "LTL"
-    (-27.633333333333333)
-    124.08333333333333
+    (Lat (-27) 38.0)
+    (Lon 124 5.0)
 
 _LTRR_ ::
   VFR_Waypoint
@@ -4945,8 +4999,8 @@ _LTRR_ =
     "LAKE TORRENS"
     (Just "SA")
     "LTRR"
-    (-31.421666666666667)
-    138.08666666666667
+    (Lat (-31) 25.3)
+    (Lon 138 5.2)
 
 _WITE_ ::
   VFR_Waypoint
@@ -4955,8 +5009,8 @@ _WITE_ =
     "LAKE WHITE"
     (Just "NT")
     "WITE"
-    (-21.1)
-    129.05
+    (Lat (-21) 6.0)
+    (Lon 129 3.0)
 
 _LYEO_ ::
   VFR_Waypoint
@@ -4965,8 +5019,8 @@ _LYEO_ =
     "LAKE YEO"
     (Just "WA")
     "LYEO"
-    (-28.051666666666666)
-    124.55166666666666
+    (Lat (-28) 3.1)
+    (Lon 124 33.1)
 
 _LKEE_ ::
   VFR_Waypoint
@@ -4975,8 +5029,8 @@ _LKEE_ =
     "LAKES ENTRANCE"
     (Just "VIC")
     "LKEE"
-    (-37.86666666666667)
-    148.0
+    (Lat (-37) 52.0)
+    (Lon 148 0.0)
 
 _LCD_ ::
   VFR_Waypoint
@@ -4985,8 +5039,8 @@ _LCD_ =
     "LANCEFIELD"
     (Just "VIC")
     "LCD"
-    (-37.278333333333336)
-    144.72833333333332
+    (Lat (-37) 16.7)
+    (Lon 144 43.7)
 
 _LANC_ ::
   VFR_Waypoint
@@ -4995,8 +5049,8 @@ _LANC_ =
     "LANCELIN TOWNSHIP"
     (Just "WA")
     "LANC"
-    (-31.018333333333334)
-    115.32833333333333
+    (Lat (-31) 1.1)
+    (Lon 115 19.7)
 
 _LGH_ ::
   VFR_Waypoint
@@ -5005,8 +5059,8 @@ _LGH_ =
     "LANGHAM"
     (Just "QLD")
     "LGH"
-    (-22.2)
-    150.1
+    (Lat (-22) 12.0)
+    (Lon 150 6.0)
 
 _LHCK_ ::
   VFR_Waypoint
@@ -5015,8 +5069,8 @@ _LHCK_ =
     "LANGHORNE CREEK"
     (Just "SA")
     "LHCK"
-    (-35.29666666666667)
-    139.045
+    (Lat (-35) 17.8)
+    (Lon 139 2.7)
 
 _LSDW_ ::
   VFR_Waypoint
@@ -5025,8 +5079,8 @@ _LSDW_ =
     "LANSDOWNE"
     (Just "WA")
     "LSDW"
-    (-17.615)
-    126.74333333333334
+    (Lat (-17) 36.9)
+    (Lon 126 44.6)
 
 _LUY_ ::
   VFR_Waypoint
@@ -5035,8 +5089,8 @@ _LUY_ =
     "LATROBE UNIVERSITY"
     (Just "VIC")
     "LUY"
-    (-37.71666666666667)
-    145.05
+    (Lat (-37) 43.0)
+    (Lon 145 3.0)
 
 _LAUD_ ::
   VFR_Waypoint
@@ -5045,8 +5099,8 @@ _LAUD_ =
     "LAUDERDALE"
     (Just "TAS")
     "LAUD"
-    (-42.9)
-    147.5
+    (Lat (-42) 54.0)
+    (Lon 147 30.0)
 
 _LVAB_ ::
   VFR_Waypoint
@@ -5055,8 +5109,8 @@ _LVAB_ =
     "LAVERTON"
     (Just "VIC")
     "LVAB"
-    (-37.86333333333333)
-    144.745
+    (Lat (-37) 51.8)
+    (Lon 144 44.7)
 
 _TON_ ::
   VFR_Waypoint
@@ -5065,8 +5119,8 @@ _TON_ =
     "LAVERTON BOM TOWER"
     (Just "VIC")
     "TON"
-    (-37.855)
-    144.755
+    (Lat (-37) 51.3)
+    (Lon 144 45.3)
 
 _LWG_ ::
   VFR_Waypoint
@@ -5075,8 +5129,8 @@ _LWG_ =
     "LAWRENCE GORGE"
     (Just "NT")
     "LWG"
-    (-24.016666666666666)
-    133.40833333333333
+    (Lat (-24) 1.0)
+    (Lon 133 24.5)
 
 _LAOS_ ::
   VFR_Waypoint
@@ -5085,8 +5139,8 @@ _LAOS_ =
     "LAYOAK ISLAND"
     (Just "QLD")
     "LAOS"
-    (-9.85)
-    143.31666666666666
+    (Lat (-9) 51.0)
+    (Lon 143 19.0)
 
 _LPT_ ::
   VFR_Waypoint
@@ -5095,8 +5149,8 @@ _LPT_ =
     "LEE PT"
     (Just "NT")
     "LPT"
-    (-12.333333333333334)
-    130.9
+    (Lat (-12) 20.0)
+    (Lon 130 54.0)
 
 _LPD_ ::
   VFR_Waypoint
@@ -5105,8 +5159,8 @@ _LPD_ =
     "LEOPOLD"
     (Just "VIC")
     "LPD"
-    (-38.19166666666667)
-    144.46666666666667
+    (Lat (-38) 11.5)
+    (Lon 144 28.0)
 
 _LIHR_ ::
   VFR_Waypoint
@@ -5115,8 +5169,8 @@ _LIHR_ =
     "LIGHTHORSE INTERCHANGE M7/M4"
     (Just "NSW")
     "LIHR"
-    (-33.79833333333333)
-    150.85333333333332
+    (Lat (-33) 47.9)
+    (Lon 150 51.2)
 
 _LIY_ ::
   VFR_Waypoint
@@ -5125,8 +5179,8 @@ _LIY_ =
     "LILYDALE"
     (Just "TAS")
     "LIY"
-    (-41.25)
-    147.21666666666667
+    (Lat (-41) 15.0)
+    (Lon 147 13.0)
 
 _LOWS_ ::
   VFR_Waypoint
@@ -5135,8 +5189,8 @@ _LOWS_ =
     "LINDENOW SOUTH"
     (Just "VIC")
     "LOWS"
-    (-37.82833333333333)
-    147.43333333333334
+    (Lat (-37) 49.7)
+    (Lon 147 26.0)
 
 _LVE_ ::
   VFR_Waypoint
@@ -5145,8 +5199,8 @@ _LVE_ =
     "LINVILLE"
     (Just "QLD")
     "LVE"
-    (-26.85)
-    152.26666666666668
+    (Lat (-26) 51.0)
+    (Lon 152 16.0)
 
 _LMGE_ ::
   VFR_Waypoint
@@ -5155,8 +5209,8 @@ _LMGE_ =
     "LITTLE MULGRAVE"
     (Just "QLD")
     "LMGE"
-    (-17.138333333333332)
-    145.725
+    (Lat (-17) 8.3)
+    (Lon 145 43.5)
 
 _LRM_ ::
   VFR_Waypoint
@@ -5165,8 +5219,8 @@ _LRM_ =
     "LITTLE RIVER MOUTH"
     (Just "VIC")
     "LRM"
-    (-38.00666666666667)
-    144.58333333333334
+    (Lat (-38) 0.4)
+    (Lon 144 35.0)
 
 _LBET_ ::
   VFR_Waypoint
@@ -5175,8 +5229,8 @@ _LBET_ =
     "LOBETHAL"
     (Just "SA")
     "LBET"
-    (-34.9)
-    138.86666666666667
+    (Lat (-34) 54.0)
+    (Lon 138 52.0)
 
 _LSR_ ::
   VFR_Waypoint
@@ -5185,8 +5239,8 @@ _LSR_ =
     "LOCH SPORT"
     (Just "VIC")
     "LSR"
-    (-38.05)
-    147.58333333333334
+    (Lat (-38) 3.0)
+    (Lon 147 35.0)
 
 _LOGI_ ::
   VFR_Waypoint
@@ -5195,8 +5249,8 @@ _LOGI_ =
     "LOGIC CENTRE"
     (Just "VIC")
     "LOGI"
-    (-36.07666666666667)
-    146.71833333333333
+    (Lat (-36) 4.6)
+    (Lon 146 43.1)
 
 _LRF_ ::
   VFR_Waypoint
@@ -5205,8 +5259,8 @@ _LRF_ =
     "LONG REEF"
     (Just "NSW")
     "LRF"
-    (-33.74166666666667)
-    151.32166666666666
+    (Lat (-33) 44.5)
+    (Lon 151 19.3)
 
 _LFC_ ::
   VFR_Waypoint
@@ -5215,8 +5269,8 @@ _LFC_ =
     "LONGFORD CREEK"
     (Just "QLD")
     "LFC"
-    (-20.208333333333332)
-    148.36666666666667
+    (Lat (-20) 12.5)
+    (Lon 148 22.0)
 
 _LORN_ ::
   VFR_Waypoint
@@ -5225,8 +5279,8 @@ _LORN_ =
     "LORNE TOWNSHIP"
     (Just "VIC")
     "LORN"
-    (-38.54333333333334)
-    143.97
+    (Lat (-38) 32.6)
+    (Lon 143 58.2)
 
 _LHD_ ::
   VFR_Waypoint
@@ -5235,8 +5289,8 @@ _LHD_ =
     "LOW HEAD"
     (Just "TAS")
     "LHD"
-    (-41.06666666666667)
-    146.8
+    (Lat (-41) 4.0)
+    (Lon 146 48.0)
 
 _LWI_ ::
   VFR_Waypoint
@@ -5245,8 +5299,8 @@ _LWI_ =
     "LOW ISLETS"
     (Just "QLD")
     "LWI"
-    (-16.383333333333333)
-    145.56666666666666
+    (Lat (-16) 23.0)
+    (Lon 145 34.0)
 
 _LRP_ ::
   VFR_Waypoint
@@ -5255,8 +5309,8 @@ _LRP_ =
     "LOW ROCKY PT"
     (Just "TAS")
     "LRP"
-    (-43.0)
-    145.5
+    (Lat (-43) 0.0)
+    (Lon 145 30.0)
 
 _LWD_ ::
   VFR_Waypoint
@@ -5265,8 +5319,8 @@ _LWD_ =
     "LOWOOD"
     (Just "QLD")
     "LWD"
-    (-27.466666666666665)
-    152.58333333333334
+    (Lat (-27) 28.0)
+    (Lon 152 35.0)
 
 _LNDA_ ::
   VFR_Waypoint
@@ -5275,8 +5329,8 @@ _LNDA_ =
     "LUCINDA"
     (Just "QLD")
     "LNDA"
-    (-18.533333333333335)
-    146.33333333333334
+    (Lat (-18) 32.0)
+    (Lon 146 20.0)
 
 _LYNR_ ::
   VFR_Waypoint
@@ -5285,8 +5339,8 @@ _LYNR_ =
     "LYND RIVER"
     (Just "QLD")
     "LYNR"
-    (-17.4)
-    143.75
+    (Lat (-17) 24.0)
+    (Lon 143 45.0)
 
 _MACB_ ::
   VFR_Waypoint
@@ -5295,8 +5349,8 @@ _MACB_ =
     "MACHANS BEACH"
     (Just "QLD")
     "MACB"
-    (-16.85)
-    145.75
+    (Lat (-16) 51.0)
+    (Lon 145 45.0)
 
 _MZR_ ::
   VFR_Waypoint
@@ -5305,8 +5359,8 @@ _MZR_ =
     "MACKENZIE RIVER"
     (Just "QLD")
     "MZR"
-    (-23.166666666666668)
-    149.5
+    (Lat (-23) 10.0)
+    (Lon 149 30.0)
 
 _MKV_ ::
   VFR_Waypoint
@@ -5315,8 +5369,8 @@ _MKV_ =
     "MACKSVILLE"
     (Just "NSW")
     "MKV"
-    (-30.708333333333332)
-    152.915
+    (Lat (-30) 42.5)
+    (Lon 152 54.9)
 
 _MGEW_ ::
   VFR_Waypoint
@@ -5325,8 +5379,8 @@ _MGEW_ =
     "MAGILL ESTATE WINERY"
     (Just "SA")
     "MGEW"
-    (-34.92)
-    138.68
+    (Lat (-34) 55.2)
+    (Lon 138 40.8)
 
 _MAS_ ::
   VFR_Waypoint
@@ -5335,8 +5389,8 @@ _MAS_ =
     "MAGNESITE MINE"
     (Just "QLD")
     "MAS"
-    (-22.888333333333332)
-    150.18333333333334
+    (Lat (-22) 53.3)
+    (Lon 150 11.0)
 
 _MADO_ ::
   VFR_Waypoint
@@ -5345,8 +5399,8 @@ _MADO_ =
     "MANDORAH"
     (Just "NT")
     "MADO"
-    (-12.441666666666666)
-    130.76166666666666
+    (Lat (-12) 26.5)
+    (Lon 130 45.7)
 
 _MDU_ ::
   VFR_Waypoint
@@ -5355,8 +5409,8 @@ _MDU_ =
     "MANDURAH"
     (Just "WA")
     "MDU"
-    (-32.53)
-    115.72166666666666
+    (Lat (-32) 31.8)
+    (Lon 115 43.3)
 
 _MGL_ ::
   VFR_Waypoint
@@ -5365,8 +5419,8 @@ _MGL_ =
     "MANGALORE"
     (Just "TAS")
     "MGL"
-    (-42.65833333333333)
-    147.24166666666667
+    (Lat (-42) 39.5)
+    (Lon 147 14.5)
 
 _MOP_ ::
   VFR_Waypoint
@@ -5375,8 +5429,8 @@ _MOP_ =
     "MANGOPLAH"
     (Just "NSW")
     "MOP"
-    (-35.391666666666666)
-    147.24166666666667
+    (Lat (-35) 23.5)
+    (Lon 147 14.5)
 
 _MAL_ ::
   VFR_Waypoint
@@ -5385,8 +5439,8 @@ _MAL_ =
     "MANILLA"
     (Just "NSW")
     "MAL"
-    (-30.75)
-    150.72333333333333
+    (Lat (-30) 45.0)
+    (Lon 150 43.4)
 
 _MANLY_ ::
   VFR_Waypoint
@@ -5395,8 +5449,8 @@ _MANLY_ =
     "MANLY"
     (Just "NSW")
     "MANLY"
-    (-33.79833333333333)
-    151.28833333333333
+    (Lat (-33) 47.9)
+    (Lon 151 17.3)
 
 _MTD_ ::
   VFR_Waypoint
@@ -5405,8 +5459,8 @@ _MTD_ =
     "MANTON DAM"
     (Just "NT")
     "MTD"
-    (-12.85)
-    131.125
+    (Lat (-12) 51.0)
+    (Lon 131 7.5)
 
 _MBA_ ::
   VFR_Waypoint
@@ -5415,8 +5469,8 @@ _MBA_ =
     "MAREEBA"
     (Just "QLD")
     "MBA"
-    (-17.06833333333333)
-    145.41833333333332
+    (Lat (-17) 4.1)
+    (Lon 145 25.1)
 
 _MRL_ ::
   VFR_Waypoint
@@ -5425,8 +5479,8 @@ _MRL_ =
     "MARIA ISLAND"
     (Just "TAS")
     "MRL"
-    (-42.63333333333333)
-    148.08333333333334
+    (Lat (-42) 38.0)
+    (Lon 148 5.0)
 
 _MLIT_ ::
   VFR_Waypoint
@@ -5435,8 +5489,8 @@ _MLIT_ =
     "MARINO LIGHT HOUSE"
     (Just "SA")
     "MLIT"
-    (-35.055)
-    138.51333333333332
+    (Lat (-35) 3.3)
+    (Lon 138 30.8)
 
 _MARQ_ ::
   VFR_Waypoint
@@ -5445,8 +5499,8 @@ _MARQ_ =
     "MARINO'S QUARRY"
     (Just "QLD")
     "MARQ"
-    (-16.92)
-    145.72666666666666
+    (Lat (-16) 55.2)
+    (Lon 145 43.6)
 
 _MRBR_ ::
   VFR_Waypoint
@@ -5455,8 +5509,8 @@ _MRBR_ =
     "MAROUBRA BEACH"
     (Just "NSW")
     "MRBR"
-    (-33.95)
-    151.25666666666666
+    (Lat (-33) 57.0)
+    (Lon 151 15.4)
 
 _MAR_ ::
   VFR_Waypoint
@@ -5465,8 +5519,8 @@ _MAR_ =
     "MARRAR"
     (Just "NSW")
     "MAR"
-    (-34.825)
-    147.35
+    (Lat (-34) 49.5)
+    (Lon 147 21.0)
 
 _MARR_ ::
   VFR_Waypoint
@@ -5475,8 +5529,8 @@ _MARR_ =
     "MARRAWAH"
     (Just "TAS")
     "MARR"
-    (-40.91)
-    144.70833333333334
+    (Lat (-40) 54.6)
+    (Lon 144 42.5)
 
 _MHT_ ::
   VFR_Waypoint
@@ -5485,8 +5539,8 @@ _MHT_ =
     "MARTHA PT"
     (Just "VIC")
     "MHT"
-    (-38.31666666666667)
-    144.98333333333332
+    (Lat (-38) 19.0)
+    (Lon 144 59.0)
 
 _MKN_ ::
   VFR_Waypoint
@@ -5495,8 +5549,8 @@ _MKN_ =
     "MARY KATHLEEN"
     (Just "QLD")
     "MKN"
-    (-20.783333333333335)
-    139.98333333333332
+    (Lat (-20) 47.0)
+    (Lon 139 59.0)
 
 _MVL_ ::
   VFR_Waypoint
@@ -5505,8 +5559,8 @@ _MVL_ =
     "MARYSVILLE"
     (Just "VIC")
     "MVL"
-    (-37.516666666666666)
-    145.75
+    (Lat (-37) 31.0)
+    (Lon 145 45.0)
 
 _MHD_ ::
   VFR_Waypoint
@@ -5515,8 +5569,8 @@ _MHD_ =
     "MASTHEAD ISLAND"
     (Just "QLD")
     "MHD"
-    (-23.533333333333335)
-    151.73333333333332
+    (Lat (-23) 32.0)
+    (Lon 151 44.0)
 
 _MRH_ ::
   VFR_Waypoint
@@ -5525,8 +5579,8 @@ _MRH_ =
     "MAURICE HILL"
     (Just "QLD")
     "MRH"
-    (-23.933333333333334)
-    151.25
+    (Lat (-23) 56.0)
+    (Lon 151 15.0)
 
 _MAYD_ ::
   VFR_Waypoint
@@ -5535,8 +5589,8 @@ _MAYD_ =
     "MAYDENA"
     (Just "TAS")
     "MAYD"
-    (-42.763333333333335)
-    146.59666666666666
+    (Lat (-42) 45.8)
+    (Lon 146 35.8)
 
 _MYF_ ::
   VFR_Waypoint
@@ -5545,8 +5599,8 @@ _MYF_ =
     "MAYFIELD"
     (Just "NSW")
     "MYF"
-    (-33.96333333333333)
-    150.625
+    (Lat (-33) 57.8)
+    (Lon 150 37.5)
 
 _MAYL_ ::
   VFR_Waypoint
@@ -5555,8 +5609,8 @@ _MAYL_ =
     "MAYLANDS POLICE ACADEMY"
     (Just "WA")
     "MAYL"
-    (-31.946666666666665)
-    115.90333333333334
+    (Lat (-31) 56.8)
+    (Lon 115 54.2)
 
 _MVAL_ ::
   VFR_Waypoint
@@ -5565,8 +5619,8 @@ _MVAL_ =
     "MCLAREN VALE"
     (Just "SA")
     "MVAL"
-    (-35.225)
-    138.54666666666665
+    (Lat (-35) 13.5)
+    (Lon 138 32.8)
 
 _MCTY_ ::
   VFR_Waypoint
@@ -5575,8 +5629,8 @@ _MCTY_ =
     "MELBOURNE CBD"
     (Just "VIC")
     "MCTY"
-    (-37.80833333333333)
-    144.95833333333334
+    (Lat (-37) 48.5)
+    (Lon 144 57.5)
 
 _MCG_ ::
   VFR_Waypoint
@@ -5585,8 +5639,8 @@ _MCG_ =
     "MELBOURNE CRICKET GROUND"
     (Just "VIC")
     "MCG"
-    (-37.82)
-    144.98333333333332
+    (Lat (-37) 49.2)
+    (Lon 144 59.0)
 
 _MELS_ ::
   VFR_Waypoint
@@ -5595,8 +5649,8 @@ _MELS_ =
     "MELTON SOUTH"
     (Just "VIC")
     "MELS"
-    (-37.68333333333333)
-    144.56666666666666
+    (Lat (-37) 41.0)
+    (Lon 144 34.0)
 
 _MEG_ ::
   VFR_Waypoint
@@ -5605,8 +5659,8 @@ _MEG_ =
     "MENANGLE"
     (Just "NSW")
     "MEG"
-    (-34.125)
-    150.74166666666667
+    (Lat (-34) 7.5)
+    (Lon 150 44.5)
 
 _MRI_ ::
   VFR_Waypoint
@@ -5615,8 +5669,8 @@ _MRI_ =
     "MERION"
     (Just "QLD")
     "MRI"
-    (-22.866666666666667)
-    149.03333333333333
+    (Lat (-22) 52.0)
+    (Lon 149 2.0)
 
 _MRJ_ ::
   VFR_Waypoint
@@ -5625,8 +5679,8 @@ _MRJ_ =
     "MERRIJIG"
     (Just "VIC")
     "MRJ"
-    (-37.11666666666667)
-    146.25
+    (Lat (-37) 7.0)
+    (Lon 146 15.0)
 
 _MIAR_ ::
   VFR_Waypoint
@@ -5635,8 +5689,8 @@ _MIAR_ =
     "MIAREE POOL BRIDGE"
     (Just "WA")
     "MIAR"
-    (-20.85)
-    116.61
+    (Lat (-20) 51.0)
+    (Lon 116 36.6)
 
 _MHGO_ ::
   VFR_Waypoint
@@ -5645,8 +5699,8 @@ _MHGO_ =
     "MICHELAGO"
     (Just "NSW")
     "MHGO"
-    (-35.71666666666667)
-    149.16666666666666
+    (Lat (-35) 43.0)
+    (Lon 149 10.0)
 
 _MII_ ::
   VFR_Waypoint
@@ -5655,8 +5709,8 @@ _MII_ =
     "MIDGE ISLAND"
     (Just "QLD")
     "MII"
-    (-20.691666666666666)
-    148.76166666666666
+    (Lat (-20) 41.5)
+    (Lon 148 45.7)
 
 _MCRO_ ::
   VFR_Waypoint
@@ -5665,8 +5719,8 @@ _MCRO_ =
     "MILLS CROSS"
     (Just "NSW")
     "MCRO"
-    (-35.37166666666667)
-    149.425
+    (Lat (-35) 22.3)
+    (Lon 149 25.5)
 
 _MSTM_ ::
   VFR_Waypoint
@@ -5675,8 +5729,8 @@ _MSTM_ =
     "MILLSTREAM STN"
     (Just "WA")
     "MSTM"
-    (-21.616666666666667)
-    117.06666666666666
+    (Lat (-21) 37.0)
+    (Lon 117 4.0)
 
 _MPO_ ::
   VFR_Waypoint
@@ -5685,8 +5739,8 @@ _MPO_ =
     "MILPEROO"
     (Just "QLD")
     "MPO"
-    (-23.183333333333334)
-    141.25
+    (Lat (-23) 11.0)
+    (Lon 141 15.0)
 
 _MIJ_ ::
   VFR_Waypoint
@@ -5695,8 +5749,8 @@ _MIJ_ =
     "MINJILANG"
     (Just "NT")
     "MIJ"
-    (-11.148333333333333)
-    132.58
+    (Lat (-11) 8.9)
+    (Lon 132 34.8)
 
 _MISB_ ::
   VFR_Waypoint
@@ -5705,8 +5759,8 @@ _MISB_ =
     "MISSION BEACH"
     (Just "QLD")
     "MISB"
-    (-17.87)
-    146.10666666666665
+    (Lat (-17) 52.2)
+    (Lon 146 6.4)
 
 _MSC_ ::
   VFR_Waypoint
@@ -5715,8 +5769,8 @@ _MSC_ =
     "MISSION BEACH"
     (Just "QLD")
     "MSC"
-    (-17.883333333333333)
-    146.1
+    (Lat (-17) 53.0)
+    (Lon 146 6.0)
 
 _MITI_ ::
   VFR_Waypoint
@@ -5725,8 +5779,8 @@ _MITI_ =
     "MITIAMO"
     (Just "VIC")
     "MITI"
-    (-36.211666666666666)
-    144.23
+    (Lat (-36) 12.7)
+    (Lon 144 13.8)
 
 _MFBH_ ::
   VFR_Waypoint
@@ -5735,8 +5789,8 @@ _MFBH_ =
     "MOFFAT BEACH"
     (Just "QLD")
     "MFBH"
-    (-26.788333333333334)
-    153.14166666666668
+    (Lat (-26) 47.3)
+    (Lon 153 8.5)
 
 _MFH_ ::
   VFR_Waypoint
@@ -5745,8 +5799,8 @@ _MFH_ =
     "MOFFAT HEAD"
     (Just "QLD")
     "MFH"
-    (-26.79)
-    153.14
+    (Lat (-26) 47.4)
+    (Lon 153 8.4)
 
 _MBH_ ::
   VFR_Waypoint
@@ -5755,8 +5809,8 @@ _MBH_ =
     "MOOLOOLABA"
     (Just "QLD")
     "MBH"
-    (-26.7)
-    153.13333333333333
+    (Lat (-26) 42.0)
+    (Lon 153 8.0)
 
 _MVC_ ::
   VFR_Waypoint
@@ -5765,8 +5819,8 @@ _MVC_ =
     "MOONEE VALLEY RACECOURSE"
     (Just "VIC")
     "MVC"
-    (-37.766666666666666)
-    144.93333333333334
+    (Lat (-37) 46.0)
+    (Lon 144 56.0)
 
 _MIE_ ::
   VFR_Waypoint
@@ -5775,8 +5829,8 @@ _MIE_ =
     "MOONIE"
     (Just "QLD")
     "MIE"
-    (-27.716666666666665)
-    150.36666666666667
+    (Lat (-27) 43.0)
+    (Lon 150 22.0)
 
 _MPSC_ ::
   VFR_Waypoint
@@ -5785,8 +5839,8 @@ _MPSC_ =
     "MOORE PARK SUPA CENTRE"
     (Just "NSW")
     "MPSC"
-    (-33.903333333333336)
-    151.215
+    (Lat (-33) 54.2)
+    (Lon 151 12.9)
 
 _MORN_ ::
   VFR_Waypoint
@@ -5795,8 +5849,8 @@ _MORN_ =
     "MORNINGTON"
     (Just "TAS")
     "MORN"
-    (-42.85666666666667)
-    147.41166666666666
+    (Lat (-42) 51.4)
+    (Lon 147 24.7)
 
 _MSV_ ::
   VFR_Waypoint
@@ -5805,8 +5859,8 @@ _MSV_ =
     "MOSS VALE"
     (Just "NSW")
     "MSV"
-    (-34.525)
-    150.42166666666665
+    (Lat (-34) 31.5)
+    (Lon 150 25.3)
 
 _MMA_ ::
   VFR_Waypoint
@@ -5815,8 +5869,8 @@ _MMA_ =
     "MOSSMAN"
     (Just "QLD")
     "MMA"
-    (-16.458333333333332)
-    145.37166666666667
+    (Lat (-16) 27.5)
+    (Lon 145 22.3)
 
 _BAK_ ::
   VFR_Waypoint
@@ -5825,8 +5879,8 @@ _BAK_ =
     "MOUNT BARKER"
     (Just "SA")
     "BAK"
-    (-35.07833333333333)
-    138.86666666666667
+    (Lat (-35) 4.7)
+    (Lon 138 52.0)
 
 _MBST_ ::
   VFR_Waypoint
@@ -5835,8 +5889,8 @@ _MBST_ =
     "MOUNT BENSTEAD"
     (Just "NT")
     "MBST"
-    (-23.566666666666666)
-    134.275
+    (Lat (-23) 34.0)
+    (Lon 134 16.5)
 
 _MBC_ ::
   VFR_Waypoint
@@ -5845,8 +5899,8 @@ _MBC_ =
     "MOUNT BLACK"
     (Just "QLD")
     "MBC"
-    (-19.283333333333335)
-    146.55833333333334
+    (Lat (-19) 17.0)
+    (Lon 146 33.5)
 
 _MBK_ ::
   VFR_Waypoint
@@ -5855,8 +5909,8 @@ _MBK_ =
     "MOUNT BLACKWOOD"
     (Just "QLD")
     "MBK"
-    (-21.033333333333335)
-    148.94166666666666
+    (Lat (-21) 2.0)
+    (Lon 148 56.5)
 
 _MTBL_ ::
   VFR_Waypoint
@@ -5865,8 +5919,8 @@ _MTBL_ =
     "MOUNT BOHLE"
     (Just "QLD")
     "MTBL"
-    (-19.266666666666666)
-    146.68833333333333
+    (Lat (-19) 16.0)
+    (Lon 146 41.3)
 
 _MBR_ ::
   VFR_Waypoint
@@ -5875,8 +5929,8 @@ _MBR_ =
     "MOUNT BOLD RESV"
     (Just "SA")
     "MBR"
-    (-35.12166666666667)
-    138.7
+    (Lat (-35) 7.3)
+    (Lon 138 42.0)
 
 _MTB_ ::
   VFR_Waypoint
@@ -5885,8 +5939,8 @@ _MTB_ =
     "MOUNT BOYCE"
     (Just "NSW")
     "MTB"
-    (-33.61833333333333)
-    150.27333333333334
+    (Lat (-33) 37.1)
+    (Lon 150 16.4)
 
 _MCAR_ ::
   VFR_Waypoint
@@ -5895,8 +5949,8 @@ _MCAR_ =
     "MOUNT CARNARVON"
     (Just "QLD")
     "MCAR"
-    (-24.916666666666668)
-    148.38333333333333
+    (Lat (-24) 55.0)
+    (Lon 148 23.0)
 
 _MCHR_ ::
   VFR_Waypoint
@@ -5905,8 +5959,8 @@ _MCHR_ =
     "MOUNT CHRISTIE"
     (Just "SA")
     "MCHR"
-    (-30.55)
-    133.21666666666667
+    (Lat (-30) 33.0)
+    (Lon 133 13.0)
 
 _MCOM_ ::
   VFR_Waypoint
@@ -5915,8 +5969,8 @@ _MCOM_ =
     "MOUNT COMPASS"
     (Just "SA")
     "MCOM"
-    (-35.35)
-    138.61666666666667
+    (Lat (-35) 21.0)
+    (Lon 138 37.0)
 
 _MTK_ ::
   VFR_Waypoint
@@ -5925,8 +5979,8 @@ _MTK_ =
     "MOUNT COOKE"
     (Just "WA")
     "MTK"
-    (-32.416666666666664)
-    116.30666666666667
+    (Lat (-32) 25.0)
+    (Lon 116 18.4)
 
 _MTC_ ::
   VFR_Waypoint
@@ -5935,8 +5989,8 @@ _MTC_ =
     "MOUNT COOLUM"
     (Just "QLD")
     "MTC"
-    (-26.561666666666667)
-    153.08333333333334
+    (Lat (-26) 33.7)
+    (Lon 153 5.0)
 
 _MTBA_ ::
   VFR_Waypoint
@@ -5945,8 +5999,8 @@ _MTBA_ =
     "MOUNT CORAMBA"
     (Just "NSW")
     "MTBA"
-    (-30.221666666666668)
-    153.05
+    (Lat (-30) 13.3)
+    (Lon 153 3.0)
 
 _TCR_ ::
   VFR_Waypoint
@@ -5955,8 +6009,8 @@ _TCR_ =
     "MOUNT COREE"
     (Just "ACT")
     "TCR"
-    (-35.30833333333333)
-    148.81
+    (Lat (-35) 18.5)
+    (Lon 148 48.6)
 
 _MCOO_ ::
   VFR_Waypoint
@@ -5965,8 +6019,8 @@ _MCOO_ =
     "MOUNT COTTON"
     (Just "QLD")
     "MCOO"
-    (-27.621666666666666)
-    153.21666666666667
+    (Lat (-27) 37.3)
+    (Lon 153 13.0)
 
 _MCOT_ ::
   VFR_Waypoint
@@ -5975,8 +6029,8 @@ _MCOT_ =
     "MOUNT COTTRELL"
     (Just "VIC")
     "MCOT"
-    (-37.763333333333335)
-    144.62
+    (Lat (-37) 45.8)
+    (Lon 144 37.2)
 
 _MUE_ ::
   VFR_Waypoint
@@ -5985,8 +6039,8 @@ _MUE_ =
     "MOUNT DALE"
     (Just "WA")
     "MUE"
-    (-32.126666666666665)
-    116.29666666666667
+    (Lat (-32) 7.6)
+    (Lon 116 17.8)
 
 _MDY_ ::
   VFR_Waypoint
@@ -5995,8 +6049,8 @@ _MDY_ =
     "MOUNT DAY"
     (Just "WA")
     "MDY"
-    (-32.13333333333333)
-    120.5
+    (Lat (-32) 8.0)
+    (Lon 120 30.0)
 
 _MELE_ ::
   VFR_Waypoint
@@ -6005,8 +6059,8 @@ _MELE_ =
     "MOUNT ELEPHANT"
     (Just "QLD")
     "MELE"
-    (-16.45)
-    144.93333333333334
+    (Lat (-16) 27.0)
+    (Lon 144 56.0)
 
 _MEV_ ::
   VFR_Waypoint
@@ -6015,8 +6069,8 @@ _MEV_ =
     "MOUNT EVERARD"
     (Just "WA")
     "MEV"
-    (-25.183333333333334)
-    125.06666666666666
+    (Lat (-25) 11.0)
+    (Lon 125 4.0)
 
 _MFN_ ::
   VFR_Waypoint
@@ -6025,8 +6079,8 @@ _MFN_ =
     "MOUNT FUNNEL"
     (Just "QLD")
     "MFN"
-    (-21.625)
-    149.38666666666666
+    (Lat (-21) 37.5)
+    (Lon 149 23.2)
 
 _MGLO_ ::
   VFR_Waypoint
@@ -6035,8 +6089,8 @@ _MGLO_ =
     "MOUNT GLORIOUS"
     (Just "QLD")
     "MGLO"
-    (-27.333333333333332)
-    152.76666666666668
+    (Lat (-27) 20.0)
+    (Lon 152 46.0)
 
 _MVT_ ::
   VFR_Waypoint
@@ -6045,8 +6099,8 @@ _MVT_ =
     "MOUNT GRAVATT"
     (Just "QLD")
     "MVT"
-    (-27.55)
-    153.075
+    (Lat (-27) 33.0)
+    (Lon 153 4.5)
 
 _MJK_ ::
   VFR_Waypoint
@@ -6055,8 +6109,8 @@ _MJK_ =
     "MOUNT JACKSON HS"
     (Just "WA")
     "MJK"
-    (-30.2)
-    119.1
+    (Lat (-30) 12.0)
+    (Lon 119 6.0)
 
 _MTKI_ ::
   VFR_Waypoint
@@ -6065,8 +6119,8 @@ _MTKI_ =
     "MOUNT KINGSTON"
     (Just "NT")
     "MTKI"
-    (-25.433333333333334)
-    133.63333333333333
+    (Lat (-25) 26.0)
+    (Lon 133 38.0)
 
 _MLI_ ::
   VFR_Waypoint
@@ -6075,8 +6129,8 @@ _MLI_ =
     "MOUNT LION"
     (Just "QLD")
     "MLI"
-    (-23.391666666666666)
-    150.32166666666666
+    (Lat (-23) 23.5)
+    (Lon 150 19.3)
 
 _MLUY_ ::
   VFR_Waypoint
@@ -6085,8 +6139,8 @@ _MLUY_ =
     "MOUNT LUCY"
     (Just "NT")
     "MLUY"
-    (-22.6)
-    133.53333333333333
+    (Lat (-22) 36.0)
+    (Lon 133 32.0)
 
 _MCD_ ::
   VFR_Waypoint
@@ -6095,8 +6149,8 @@ _MCD_ =
     "MOUNT MACEDON"
     (Just "VIC")
     "MCD"
-    (-37.375)
-    144.57666666666665
+    (Lat (-37) 22.5)
+    (Lon 144 34.6)
 
 _MTMA_ ::
   VFR_Waypoint
@@ -6105,8 +6159,8 @@ _MTMA_ =
     "MOUNT MARIA"
     (Just "QLD")
     "MTMA"
-    (-27.466666666666665)
-    151.48333333333332
+    (Lat (-27) 28.0)
+    (Lon 151 29.0)
 
 _MMY_ ::
   VFR_Waypoint
@@ -6115,8 +6169,8 @@ _MMY_ =
     "MOUNT MOLLOY"
     (Just "QLD")
     "MMY"
-    (-16.678333333333335)
-    145.33
+    (Lat (-16) 40.7)
+    (Lon 145 19.8)
 
 _MOB_ ::
   VFR_Waypoint
@@ -6125,8 +6179,8 @@ _MOB_ =
     "MOUNT MOOMBIL"
     (Just "NSW")
     "MOB"
-    (-30.315)
-    152.85166666666666
+    (Lat (-30) 18.9)
+    (Lon 152 51.1)
 
 _MGN_ ::
   VFR_Waypoint
@@ -6135,8 +6189,8 @@ _MGN_ =
     "MOUNT MORGAN"
     (Just "QLD")
     "MGN"
-    (-23.645)
-    150.39166666666668
+    (Lat (-23) 38.7)
+    (Lon 150 23.5)
 
 _MTM_ ::
   VFR_Waypoint
@@ -6145,8 +6199,8 @@ _MTM_ =
     "MOUNT MUGGA"
     (Just "ACT")
     "MTM"
-    (-35.355)
-    149.13
+    (Lat (-35) 21.3)
+    (Lon 149 7.8)
 
 _MIY_ ::
   VFR_Waypoint
@@ -6155,8 +6209,8 @@ _MIY_ =
     "MOUNT NINDERRY"
     (Just "QLD")
     "MIY"
-    (-26.555)
-    152.99166666666667
+    (Lat (-26) 33.3)
+    (Lon 152 59.5)
 
 _OOR_ ::
   VFR_Waypoint
@@ -6165,8 +6219,8 @@ _OOR_ =
     "MOUNT OORAMINNA"
     (Just "NT")
     "OOR"
-    (-24.091666666666665)
-    134.00333333333333
+    (Lat (-24) 5.5)
+    (Lon 134 0.2)
 
 _MPG_ ::
   VFR_Waypoint
@@ -6175,8 +6229,8 @@ _MPG_ =
     "MOUNT PALERANG"
     (Just "NSW")
     "MPG"
-    (-35.43333333333333)
-    149.6
+    (Lat (-35) 26.0)
+    (Lon 149 36.0)
 
 _PIPR_ ::
   VFR_Waypoint
@@ -6185,8 +6239,8 @@ _PIPR_ =
     "MOUNT PIPER"
     (Just "VIC")
     "PIPR"
-    (-37.205)
-    145.00333333333333
+    (Lat (-37) 12.3)
+    (Lon 145 0.2)
 
 _MPT_ ::
   VFR_Waypoint
@@ -6195,8 +6249,8 @@ _MPT_ =
     "MOUNT PLEASANT"
     (Just "SA")
     "MPT"
-    (-34.775)
-    139.05
+    (Lat (-34) 46.5)
+    (Lon 139 3.0)
 
 _SOV_ ::
   VFR_Waypoint
@@ -6205,8 +6259,8 @@ _SOV_ =
     "MOUNT SOMERVILLE RADAR"
     (Just "NSW")
     "SOV"
-    (-28.215)
-    153.42666666666668
+    (Lat (-28) 12.9)
+    (Lon 153 25.6)
 
 _MTEW_ ::
   VFR_Waypoint
@@ -6215,8 +6269,8 @@ _MTEW_ =
     "MOUNT STEWAN"
     (Just "QLD")
     "MTEW"
-    (-20.366666666666667)
-    144.05
+    (Lat (-20) 22.0)
+    (Lon 144 3.0)
 
 _MUM_ ::
   VFR_Waypoint
@@ -6225,8 +6279,8 @@ _MUM_ =
     "MOUNT STROMLO"
     (Just "ACT")
     "MUM"
-    (-35.31666666666667)
-    149.00833333333333
+    (Lat (-35) 19.0)
+    (Lon 149 0.5)
 
 _MUSD_ ::
   VFR_Waypoint
@@ -6235,8 +6289,8 @@ _MUSD_ =
     "MOUNT SYDNEY"
     (Just "WA")
     "MUSD"
-    (-21.4)
-    121.2
+    (Lat (-21) 24.0)
+    (Lon 121 12.0)
 
 _MTLR_ ::
   VFR_Waypoint
@@ -6245,8 +6299,8 @@ _MTLR_ =
     "MOUNT TAYLOR"
     (Just "ACT")
     "MTLR"
-    (-35.373333333333335)
-    149.07666666666665
+    (Lat (-35) 22.4)
+    (Lon 149 4.6)
 
 _MTY_ ::
   VFR_Waypoint
@@ -6255,8 +6309,8 @@ _MTY_ =
     "MOUNT TYSON"
     (Just "QLD")
     "MTY"
-    (-27.583333333333332)
-    151.56666666666666
+    (Lat (-27) 35.0)
+    (Lon 151 34.0)
 
 _MUO_ ::
   VFR_Waypoint
@@ -6265,8 +6319,8 @@ _MUO_ =
     "MOUNT UNDOOLYA"
     (Just "NT")
     "MUO"
-    (-23.738333333333333)
-    134.10333333333332
+    (Lat (-23) 44.3)
+    (Lon 134 6.2)
 
 _MVO_ ::
   VFR_Waypoint
@@ -6275,8 +6329,8 @@ _MVO_ =
     "MOUNT VERNON HS"
     (Just "WA")
     "MVO"
-    (-24.233333333333334)
-    118.23333333333333
+    (Lat (-24) 14.0)
+    (Lon 118 14.0)
 
 _MVI_ ::
   VFR_Waypoint
@@ -6285,8 +6339,8 @@ _MVI_ =
     "MOUNT VICTORIA"
     (Just "NSW")
     "MVI"
-    (-33.583333333333336)
-    150.25
+    (Lat (-33) 35.0)
+    (Lon 150 15.0)
 
 _MTWK_ ::
   VFR_Waypoint
@@ -6295,8 +6349,8 @@ _MTWK_ =
     "MOUNT WALKER"
     (Just "QLD")
     "MTWK"
-    (-27.788333333333334)
-    152.55666666666667
+    (Lat (-27) 47.3)
+    (Lon 152 33.4)
 
 _MTWG_ ::
   VFR_Waypoint
@@ -6305,8 +6359,8 @@ _MTWG_ =
     "MOUNT WARNING"
     (Just "NSW")
     "MTWG"
-    (-28.4)
-    153.26666666666668
+    (Lat (-28) 24.0)
+    (Lon 153 16.0)
 
 _MTWN_ ::
   VFR_Waypoint
@@ -6315,8 +6369,8 @@ _MTWN_ =
     "MOUNT WELLINGTON"
     (Just "VIC")
     "MTWN"
-    (-37.56)
-    146.81
+    (Lat (-37) 33.6)
+    (Lon 146 48.6)
 
 _MWH_ ::
   VFR_Waypoint
@@ -6325,8 +6379,8 @@ _MWH_ =
     "MOUNT WHEELER"
     (Just "QLD")
     "MWH"
-    (-23.226666666666667)
-    150.68333333333334
+    (Lat (-23) 13.6)
+    (Lon 150 41.0)
 
 _MWK_ ::
   VFR_Waypoint
@@ -6335,8 +6389,8 @@ _MWK_ =
     "MOUNT WILKIE"
     (Just "WA")
     "MWK"
-    (-20.951666666666668)
-    116.41833333333334
+    (Lat (-20) 57.1)
+    (Lon 116 25.1)
 
 _MBKR_ ::
   VFR_Waypoint
@@ -6345,8 +6399,8 @@ _MBKR_ =
     "MOUTH OF THE BLACK RIVER"
     (Just "QLD")
     "MBKR"
-    (-19.18)
-    146.65333333333334
+    (Lat (-19) 10.8)
+    (Lon 146 39.2)
 
 _MBHR_ ::
   VFR_Waypoint
@@ -6355,8 +6409,8 @@ _MBHR_ =
     "MOUTH OF THE BOHLE RIVER"
     (Just "QLD")
     "MBHR"
-    (-19.196666666666665)
-    146.70166666666665
+    (Lat (-19) 11.8)
+    (Lon 146 42.1)
 
 _MMT_ ::
   VFR_Waypoint
@@ -6365,8 +6419,8 @@ _MMT_ =
     "MT MARGARET"
     (Just "QLD")
     "MMT"
-    (-19.35)
-    146.60166666666666
+    (Lat (-19) 21.0)
+    (Lon 146 36.1)
 
 _MUDI_ ::
   VFR_Waypoint
@@ -6375,8 +6429,8 @@ _MUDI_ =
     "MUD ISLAND"
     (Just "QLD")
     "MUDI"
-    (-27.333333333333332)
-    153.25
+    (Lat (-27) 20.0)
+    (Lon 153 15.0)
 
 _MEER_ ::
   VFR_Waypoint
@@ -6385,8 +6439,8 @@ _MEER_ =
     "MUDGEERABA"
     (Just "QLD")
     "MEER"
-    (-28.083333333333332)
-    153.36666666666667
+    (Lat (-28) 5.0)
+    (Lon 153 22.0)
 
 _MUP_ ::
   VFR_Waypoint
@@ -6395,8 +6449,8 @@ _MUP_ =
     "MULLALOO PT"
     (Just "WA")
     "MUP"
-    (-31.808333333333334)
-    115.725
+    (Lat (-31) 48.5)
+    (Lon 115 43.5)
 
 _LLN_ ::
   VFR_Waypoint
@@ -6405,8 +6459,8 @@ _LLN_ =
     "MULLEN"
     (Just "QLD")
     "LLN"
-    (-25.036666666666665)
-    153.0
+    (Lat (-25) 2.2)
+    (Lon 153 0.0)
 
 _MBBY_ ::
   VFR_Waypoint
@@ -6415,8 +6469,8 @@ _MBBY_ =
     "MULLUMBIMBY"
     (Just "NSW")
     "MBBY"
-    (-28.55)
-    153.5
+    (Lat (-28) 33.0)
+    (Lon 153 30.0)
 
 _MWR_ ::
   VFR_Waypoint
@@ -6425,8 +6479,8 @@ _MWR_ =
     "MUNDARING WEIR"
     (Just "WA")
     "MWR"
-    (-31.955)
-    116.15833333333333
+    (Lat (-31) 57.3)
+    (Lon 116 9.5)
 
 _MAA_ ::
   VFR_Waypoint
@@ -6435,8 +6489,8 @@ _MAA_ =
     "MUNGALLALA"
     (Just "QLD")
     "MAA"
-    (-26.45)
-    147.55
+    (Lat (-26) 27.0)
+    (Lon 147 33.0)
 
 _MUNM_ ::
   VFR_Waypoint
@@ -6445,8 +6499,8 @@ _MUNM_ =
     "MUNIGANEEN MT"
     (Just "QLD")
     "MUNM"
-    (-27.408333333333335)
-    151.875
+    (Lat (-27) 24.5)
+    (Lon 151 52.5)
 
 _MHY_ ::
   VFR_Waypoint
@@ -6455,8 +6509,8 @@ _MHY_ =
     "MURPHY'S CREEK"
     (Just "QLD")
     "MHY"
-    (-27.463333333333335)
-    152.055
+    (Lat (-27) 27.8)
+    (Lon 152 3.3)
 
 _MBD_ ::
   VFR_Waypoint
@@ -6465,8 +6519,8 @@ _MBD_ =
     "MURRAY BRIDGE"
     (Just "SA")
     "MBD"
-    (-35.15)
-    139.31
+    (Lat (-35) 9.0)
+    (Lon 139 18.6)
 
 _MYW_ ::
   VFR_Waypoint
@@ -6475,8 +6529,8 @@ _MYW_ =
     "MURRAY DOWNS"
     (Just "QLD")
     "MYW"
-    (-25.033333333333335)
-    139.2
+    (Lat (-25) 2.0)
+    (Lon 139 12.0)
 
 _MMM_ ::
   VFR_Waypoint
@@ -6485,8 +6539,8 @@ _MMM_ =
     "MURRUMBATEMAN"
     (Just "NSW")
     "MMM"
-    (-34.971666666666664)
-    149.025
+    (Lat (-34) 58.3)
+    (Lon 149 1.5)
 
 _MUI_ ::
   VFR_Waypoint
@@ -6495,8 +6549,8 @@ _MUI_ =
     "MURRURUNDI"
     (Just "NSW")
     "MUI"
-    (-31.766666666666666)
-    150.83333333333334
+    (Lat (-31) 46.0)
+    (Lon 150 50.0)
 
 _MUR_ ::
   VFR_Waypoint
@@ -6505,8 +6559,8 @@ _MUR_ =
     "MURWILLUMBAH"
     (Just "NSW")
     "MUR"
-    (-28.325)
-    153.39666666666668
+    (Lat (-28) 19.5)
+    (Lon 153 23.8)
 
 _MUEE_ ::
   VFR_Waypoint
@@ -6515,8 +6569,8 @@ _MUEE_ =
     "MUTARNEE"
     (Just "QLD")
     "MUEE"
-    (-18.95)
-    146.3
+    (Lat (-18) 57.0)
+    (Lon 146 18.0)
 
 _MRTL_ ::
   VFR_Waypoint
@@ -6525,8 +6579,8 @@ _MRTL_ =
     "MYRTLE"
     (Just "QLD")
     "MRTL"
-    (-19.7)
-    146.53333333333333
+    (Lat (-19) 42.0)
+    (Lon 146 32.0)
 
 _NMB_ ::
   VFR_Waypoint
@@ -6535,8 +6589,8 @@ _NMB_ =
     "NAMBOUR"
     (Just "QLD")
     "NMB"
-    (-26.628333333333334)
-    152.95833333333334
+    (Lat (-26) 37.7)
+    (Lon 152 57.5)
 
 _NHS_ ::
   VFR_Waypoint
@@ -6545,8 +6599,8 @@ _NHS_ =
     "NAMBUCCA HEADS"
     (Just "NSW")
     "NHS"
-    (-30.645)
-    153.00833333333333
+    (Lat (-30) 38.7)
+    (Lon 153 0.5)
 
 _NAA_ ::
   VFR_Waypoint
@@ -6555,8 +6609,8 @@ _NAA_ =
     "NARA INLET"
     (Just "QLD")
     "NAA"
-    (-20.15)
-    148.9
+    (Lat (-20) 9.0)
+    (Lon 148 54.0)
 
 _NAMA_ ::
   VFR_Waypoint
@@ -6565,8 +6619,8 @@ _NAMA_ =
     "NAROOMA"
     (Just "NSW")
     "NAMA"
-    (-36.2)
-    150.13333333333333
+    (Lat (-36) 12.0)
+    (Lon 150 8.0)
 
 _NRW_ ::
   VFR_Waypoint
@@ -6575,8 +6629,8 @@ _NRW_ =
     "NARRE WARREN"
     (Just "VIC")
     "NRW"
-    (-38.016666666666666)
-    145.3
+    (Lat (-38) 1.0)
+    (Lon 145 18.0)
 
 _NOOG_ ::
   VFR_Waypoint
@@ -6585,8 +6639,8 @@ _NOOG_ =
     "NARROOGAL"
     (Just "QLD")
     "NOOG"
-    (-10.25)
-    142.5
+    (Lat (-10) 15.0)
+    (Lon 142 30.0)
 
 _NKBO_ ::
   VFR_Waypoint
@@ -6595,8 +6649,8 @@ _NKBO_ =
     "NECKARBOO"
     (Just "NSW")
     "NKBO"
-    (-32.06666666666667)
-    144.61666666666667
+    (Lat (-32) 4.0)
+    (Lon 144 37.0)
 
 _NEM_ ::
   VFR_Waypoint
@@ -6605,8 +6659,8 @@ _NEM_ =
     "NEMINGHA"
     (Just "NSW")
     "NEM"
-    (-31.125)
-    150.99166666666667
+    (Lat (-31) 7.5)
+    (Lon 150 59.5)
 
 _NPBR_ ::
   VFR_Waypoint
@@ -6615,8 +6669,8 @@ _NPBR_ =
     "NEPEAN BRIDGE"
     (Just "NSW")
     "NPBR"
-    (-33.763333333333335)
-    150.66
+    (Lat (-33) 45.8)
+    (Lon 150 39.6)
 
 _NEN_ ::
   VFR_Waypoint
@@ -6625,8 +6679,8 @@ _NEN_ =
     "NERANG"
     (Just "QLD")
     "NEN"
-    (-27.988333333333333)
-    153.33833333333334
+    (Lat (-27) 59.3)
+    (Lon 153 20.3)
 
 _NGI_ ::
   VFR_Waypoint
@@ -6635,8 +6689,8 @@ _NGI_ =
     "NGULUPI"
     (Just "QLD")
     "NGI"
-    (-10.243333333333334)
-    142.41
+    (Lat (-10) 14.6)
+    (Lon 142 24.6)
 
 _NTT_ ::
   VFR_Waypoint
@@ -6645,8 +6699,8 @@ _NTT_ =
     "NIMBIN TV TOWERS"
     (Just "NSW")
     "NTT"
-    (-28.541666666666668)
-    153.29166666666666
+    (Lat (-28) 32.5)
+    (Lon 153 17.5)
 
 _NIM_ ::
   VFR_Waypoint
@@ -6655,8 +6709,8 @@ _NIM_ =
     "NIMROD PASSAGE"
     (Just "QLD")
     "NIM"
-    (-12.1)
-    143.78333333333333
+    (Lat (-12) 6.0)
+    (Lon 143 47.0)
 
 _NDI_ ::
   VFR_Waypoint
@@ -6665,8 +6719,8 @@ _NDI_ =
     "NINDIGULLY"
     (Just "QLD")
     "NDI"
-    (-28.35)
-    148.81666666666666
+    (Lat (-28) 21.0)
+    (Lon 148 49.0)
 
 _NARL_ ::
   VFR_Waypoint
@@ -6675,8 +6729,8 @@ _NARL_ =
     "NOARLUNGA"
     (Just "SA")
     "NARL"
-    (-35.141666666666666)
-    138.48833333333334
+    (Lat (-35) 8.5)
+    (Lon 138 29.3)
 
 _NBB_ ::
   VFR_Waypoint
@@ -6685,8 +6739,8 @@ _NBB_ =
     "NOBBYS HEAD"
     (Just "NSW")
     "NBB"
-    (-32.915)
-    151.79
+    (Lat (-32) 54.9)
+    (Lon 151 47.4)
 
 _NDY_ ::
   VFR_Waypoint
@@ -6695,8 +6749,8 @@ _NDY_ =
     "NODDY REEF"
     (Just "QLD")
     "NDY"
-    (-13.733333333333333)
-    143.75
+    (Lat (-13) 44.0)
+    (Lon 143 45.0)
 
 _NOME_ ::
   VFR_Waypoint
@@ -6705,8 +6759,8 @@ _NOME_ =
     "NOME"
     (Just "QLD")
     "NOME"
-    (-19.376666666666665)
-    146.92
+    (Lat (-19) 22.6)
+    (Lon 146 55.2)
 
 _NNDO_ ::
   VFR_Waypoint
@@ -6715,8 +6769,8 @@ _NNDO_ =
     "NOONDOO"
     (Just "QLD")
     "NNDO"
-    (-28.616666666666667)
-    148.43333333333334
+    (Lat (-28) 37.0)
+    (Lon 148 26.0)
 
 _NOSA_ ::
   VFR_Waypoint
@@ -6725,8 +6779,8 @@ _NOSA_ =
     "NOOSA HEADS"
     (Just "QLD")
     "NOSA"
-    (-26.375)
-    153.11666666666667
+    (Lat (-26) 22.5)
+    (Lon 153 7.0)
 
 _NEQ_ ::
   VFR_Waypoint
@@ -6735,8 +6789,8 @@ _NEQ_ =
     "NORTH EAST QUARRY"
     (Just "VIC")
     "NEQ"
-    (-37.94166666666667)
-    144.58333333333334
+    (Lat (-37) 56.5)
+    (Lon 144 35.0)
 
 _NOHD_ ::
   VFR_Waypoint
@@ -6745,8 +6799,8 @@ _NOHD_ =
     "NORTH HEAD"
     (Just "NSW")
     "NOHD"
-    (-33.821666666666665)
-    151.29166666666666
+    (Lat (-33) 49.3)
+    (Lon 151 17.5)
 
 _NORT_ ::
   VFR_Waypoint
@@ -6755,8 +6809,8 @@ _NORT_ =
     "NORTH LAKE"
     (Just "WA")
     "NORT"
-    (-32.07666666666667)
-    115.82333333333334
+    (Lat (-32) 4.6)
+    (Lon 115 49.4)
 
 _NSTA_ ::
   VFR_Waypoint
@@ -6765,8 +6819,8 @@ _NSTA_ =
     "NORTH STAR"
     (Just "NSW")
     "NSTA"
-    (-28.916666666666668)
-    150.41666666666666
+    (Lat (-28) 55.0)
+    (Lon 150 25.0)
 
 _NBRR_ ::
   VFR_Waypoint
@@ -6775,8 +6829,8 @@ _NBRR_ =
     "NORTHERN TIP BERSERKERS"
     (Just "QLD")
     "NBRR"
-    (-23.278333333333332)
-    150.58833333333334
+    (Lat (-23) 16.7)
+    (Lon 150 35.3)
 
 _NRWN_ ::
   VFR_Waypoint
@@ -6785,8 +6839,8 @@ _NRWN_ =
     "NORWIN"
     (Just "QLD")
     "NRWN"
-    (-27.558333333333334)
-    151.38
+    (Lat (-27) 33.5)
+    (Lon 151 22.8)
 
 _NUDG_ ::
   VFR_Waypoint
@@ -6795,8 +6849,8 @@ _NUDG_ =
     "NUDGEE TIP"
     (Just "QLD")
     "NUDG"
-    (-27.358333333333334)
-    153.09166666666667
+    (Lat (-27) 21.5)
+    (Lon 153 5.5)
 
 _NUA_ ::
   VFR_Waypoint
@@ -6805,8 +6859,8 @@ _NUA_ =
     "NUNAMARA"
     (Just "TAS")
     "NUA"
-    (-41.391666666666666)
-    147.3
+    (Lat (-41) 23.5)
+    (Lon 147 18.0)
 
 _NUN_ ::
   VFR_Waypoint
@@ -6815,8 +6869,8 @@ _NUN_ =
     "NUNDLE"
     (Just "NSW")
     "NUN"
-    (-31.466666666666665)
-    151.125
+    (Lat (-31) 28.0)
+    (Lon 151 7.5)
 
 _NUPA_ ::
   VFR_Waypoint
@@ -6825,8 +6879,8 @@ _NUPA_ =
     "NURIOOTPA"
     (Just "SA")
     "NUPA"
-    (-34.483333333333334)
-    139.0
+    (Lat (-34) 29.0)
+    (Lon 139 0.0)
 
 _NCHU_ ::
   VFR_Waypoint
@@ -6835,8 +6889,8 @@ _NCHU_ =
     "NYCHUM"
     (Just "QLD")
     "NCHU"
-    (-16.843333333333334)
-    144.46166666666667
+    (Lat (-16) 50.6)
+    (Lon 144 27.7)
 
 _OAT_ ::
   VFR_Waypoint
@@ -6845,8 +6899,8 @@ _OAT_ =
     "OATLANDS"
     (Just "TAS")
     "OAT"
-    (-42.3)
-    147.36666666666667
+    (Lat (-42) 18.0)
+    (Lon 147 22.0)
 
 _OBC_ ::
   VFR_Waypoint
@@ -6855,8 +6909,8 @@ _OBC_ =
     "OBSERVATION CITY"
     (Just "WA")
     "OBC"
-    (-31.895)
-    115.755
+    (Lat (-31) 53.7)
+    (Lon 115 45.3)
 
 _OBSH_ ::
   VFR_Waypoint
@@ -6865,8 +6919,8 @@ _OBSH_ =
     "OBSERVATORY HILL"
     (Just "SA")
     "OBSH"
-    (-28.966666666666665)
-    132.0
+    (Lat (-28) 58.0)
+    (Lon 132 0.0)
 
 _OBY_ ::
   VFR_Waypoint
@@ -6875,8 +6929,8 @@ _OBY_ =
     "OLD BOMBANDY"
     (Just "QLD")
     "OBY"
-    (-22.433333333333334)
-    148.63333333333333
+    (Lat (-22) 26.0)
+    (Lon 148 38.0)
 
 _OLCO_ ::
   VFR_Waypoint
@@ -6885,8 +6939,8 @@ _OLCO_ =
     "OLD CORK"
     (Just "QLD")
     "OLCO"
-    (-22.933333333333334)
-    141.86666666666667
+    (Lat (-22) 56.0)
+    (Lon 141 52.0)
 
 _OLSOD_ ::
   VFR_Waypoint
@@ -6895,8 +6949,8 @@ _OLSOD_ =
     "OLSOD"
     Nothing
     "OLSOD"
-    (-8.54)
-    144.45333333333335
+    (Lat (-8) 32.4)
+    (Lon 144 27.2)
 
 _ONPK_ ::
   VFR_Waypoint
@@ -6905,8 +6959,8 @@ _ONPK_ =
     "ORAN PARK"
     (Just "NSW")
     "ONPK"
-    (-34.00833333333333)
-    150.74166666666667
+    (Lat (-34) 0.5)
+    (Lon 150 44.5)
 
 _ORKS_ ::
   VFR_Waypoint
@@ -6915,8 +6969,8 @@ _ORKS_ =
     "ORCHARD ROCKS"
     (Just "QLD")
     "ORKS"
-    (-19.11)
-    146.88166666666666
+    (Lat (-19) 6.6)
+    (Lon 146 52.9)
 
 _ORF_ ::
   VFR_Waypoint
@@ -6925,8 +6979,8 @@ _ORF_ =
     "ORFORD NESS"
     (Just "QLD")
     "ORF"
-    (-11.3)
-    142.81666666666666
+    (Lat (-11) 18.0)
+    (Lon 142 49.0)
 
 _OHB_ ::
   VFR_Waypoint
@@ -6935,8 +6989,8 @@ _OHB_ =
     "OUTER HARBOR"
     (Just "SA")
     "OHB"
-    (-34.775)
-    138.48333333333332
+    (Lat (-34) 46.5)
+    (Lon 138 29.0)
 
 _OVL_ ::
   VFR_Waypoint
@@ -6945,8 +6999,8 @@ _OVL_ =
     "OVERLANDER"
     (Just "WA")
     "OVL"
-    (-26.4)
-    114.46666666666667
+    (Lat (-26) 24.0)
+    (Lon 114 28.0)
 
 _OEN_ ::
   VFR_Waypoint
@@ -6955,8 +7009,8 @@ _OEN_ =
     "OWEN"
     (Just "SA")
     "OEN"
-    (-34.27)
-    138.54166666666666
+    (Lat (-34) 16.2)
+    (Lon 138 32.5)
 
 _OWS_ ::
   VFR_Waypoint
@@ -6965,8 +7019,8 @@ _OWS_ =
     "OWEN SPRINGS"
     (Just "NT")
     "OWS"
-    (-23.875)
-    133.47166666666666
+    (Lat (-23) 52.5)
+    (Lon 133 28.3)
 
 _OFD_ ::
   VFR_Waypoint
@@ -6975,8 +7029,8 @@ _OFD_ =
     "OXENFORD"
     (Just "QLD")
     "OFD"
-    (-27.883333333333333)
-    153.31666666666666
+    (Lat (-27) 53.0)
+    (Lon 153 19.0)
 
 _PCVE_ ::
   VFR_Waypoint
@@ -6985,8 +7039,8 @@ _PCVE_ =
     "PALM COVE"
     (Just "QLD")
     "PCVE"
-    (-16.75)
-    145.66666666666666
+    (Lat (-16) 45.0)
+    (Lon 145 40.0)
 
 _PFRM_ ::
   VFR_Waypoint
@@ -6995,8 +7049,8 @@ _PFRM_ =
     "PALM FARM"
     (Just "QLD")
     "PFRM"
-    (-17.043333333333333)
-    145.76166666666666
+    (Lat (-17) 2.6)
+    (Lon 145 45.7)
 
 _PLW_ ::
   VFR_Waypoint
@@ -7005,8 +7059,8 @@ _PLW_ =
     "PALM MEADOWS"
     (Just "QLD")
     "PLW"
-    (-28.033333333333335)
-    152.40833333333333
+    (Lat (-28) 2.0)
+    (Lon 152 24.5)
 
 _PLU_ ::
   VFR_Waypoint
@@ -7015,8 +7069,8 @@ _PLU_ =
     "PALUMA DAM"
     (Just "QLD")
     "PLU"
-    (-18.955)
-    146.145
+    (Lat (-18) 57.3)
+    (Lon 146 8.7)
 
 _SFG_ ::
   VFR_Waypoint
@@ -7025,8 +7079,8 @@ _SFG_ =
     "PARADISE GARDENS"
     (Just "QLD")
     "SFG"
-    (-28.018333333333334)
-    153.375
+    (Lat (-28) 1.1)
+    (Lon 153 22.5)
 
 _PKR_ ::
   VFR_Waypoint
@@ -7035,8 +7089,8 @@ _PKR_ =
     "PARK RIDGE WATER TOWER"
     (Just "QLD")
     "PKR"
-    (-27.705)
-    153.03833333333333
+    (Lat (-27) 42.3)
+    (Lon 153 2.3)
 
 _PRKH_ ::
   VFR_Waypoint
@@ -7045,8 +7099,8 @@ _PRKH_ =
     "PARKHURST"
     (Just "QLD")
     "PRKH"
-    (-23.303333333333335)
-    150.51333333333332
+    (Lat (-23) 18.2)
+    (Lon 150 30.8)
 
 _PRT_ ::
   VFR_Waypoint
@@ -7055,8 +7109,8 @@ _PRT_ =
     "PARRAMATTA"
     (Just "NSW")
     "PRT"
-    (-33.81666666666667)
-    151.005
+    (Lat (-33) 49.0)
+    (Lon 151 0.3)
 
 _PAA_ ::
   VFR_Waypoint
@@ -7065,8 +7119,8 @@ _PAA_ =
     "PATONGA"
     (Just "NSW")
     "PAA"
-    (-33.55166666666667)
-    151.26333333333332
+    (Lat (-33) 33.1)
+    (Lon 151 15.8)
 
 _PECO_ ::
   VFR_Waypoint
@@ -7075,8 +7129,8 @@ _PECO_ =
     "PEACOCK"
     (Just "QLD")
     "PECO"
-    (-18.683333333333334)
-    145.98333333333332
+    (Lat (-18) 41.0)
+    (Lon 145 59.0)
 
 _PDNE_ ::
   VFR_Waypoint
@@ -7085,8 +7139,8 @@ _PDNE_ =
     "PEAK DOWNS MINE"
     (Just "QLD")
     "PDNE"
-    (-22.25)
-    148.18333333333334
+    (Lat (-22) 15.0)
+    (Lon 148 11.0)
 
 _PEAR_ ::
   VFR_Waypoint
@@ -7095,8 +7149,8 @@ _PEAR_ =
     "PEARSON ISLES"
     (Just "SA")
     "PEAR"
-    (-33.95)
-    134.26666666666668
+    (Lat (-33) 57.0)
+    (Lon 134 16.0)
 
 _PCCK_ ::
   VFR_Waypoint
@@ -7105,8 +7159,8 @@ _PCCK_ =
     "PELICAN CREEK"
     (Just "QLD")
     "PCCK"
-    (-25.233333333333334)
-    150.9
+    (Lat (-25) 14.0)
+    (Lon 150 54.0)
 
 _PENH_ ::
   VFR_Waypoint
@@ -7115,8 +7169,8 @@ _PENH_ =
     "PENNANT HILLS STROBE"
     (Just "NSW")
     "PENH"
-    (-33.74)
-    151.07
+    (Lat (-33) 44.4)
+    (Lon 151 4.2)
 
 _PENT_ ::
   VFR_Waypoint
@@ -7125,8 +7179,8 @@ _PENT_ =
     "PENRITH"
     (Just "NSW")
     "PENT"
-    (-33.75833333333333)
-    150.7
+    (Lat (-33) 45.5)
+    (Lon 150 42.0)
 
 _PVS_ ::
   VFR_Waypoint
@@ -7135,8 +7189,8 @@ _PVS_ =
     "PERCIVAL LAKES"
     (Just "WA")
     "PVS"
-    (-21.58)
-    124.16
+    (Lat (-21) 34.8)
+    (Lon 124 9.6)
 
 _PEG_ ::
   VFR_Waypoint
@@ -7145,8 +7199,8 @@ _PEG_ =
     "PEREGIAN"
     (Just "QLD")
     "PEG"
-    (-26.516666666666666)
-    153.1
+    (Lat (-26) 31.0)
+    (Lon 153 6.0)
 
 _PCKD_ ::
   VFR_Waypoint
@@ -7155,8 +7209,8 @@ _PCKD_ =
     "PERSEVERENCE CREEK DAM"
     (Just "QLD")
     "PCKD"
-    (-27.305)
-    152.12166666666667
+    (Lat (-27) 18.3)
+    (Lon 152 7.3)
 
 _PCTY_ ::
   VFR_Waypoint
@@ -7165,8 +7219,8 @@ _PCTY_ =
     "PERTH CITY"
     (Just "WA")
     "PCTY"
-    (-31.955)
-    115.85666666666667
+    (Lat (-31) 57.3)
+    (Lon 115 51.4)
 
 _PTI_ ::
   VFR_Waypoint
@@ -7175,8 +7229,8 @@ _PTI_ =
     "PETRIE"
     (Just "QLD")
     "PTI"
-    (-27.266666666666666)
-    152.975
+    (Lat (-27) 16.0)
+    (Lon 152 58.5)
 
 _PIB_ ::
   VFR_Waypoint
@@ -7185,8 +7239,8 @@ _PIB_ =
     "PICKERING BROOK GOLF COURSE"
     (Just "WA")
     "PIB"
-    (-32.038333333333334)
-    116.11166666666666
+    (Lat (-32) 2.3)
+    (Lon 116 6.7)
 
 _PIL_ ::
   VFR_Waypoint
@@ -7195,8 +7249,8 @@ _PIL_ =
     "PICKET HILL"
     (Just "NSW")
     "PIL"
-    (-30.571666666666665)
-    152.98333333333332
+    (Lat (-30) 34.3)
+    (Lon 152 59.0)
 
 _PCA_ ::
   VFR_Waypoint
@@ -7205,8 +7259,8 @@ _PCA_ =
     "PICNIC BAY"
     (Just "QLD")
     "PCA"
-    (-19.183333333333334)
-    146.85
+    (Lat (-19) 11.0)
+    (Lon 146 51.0)
 
 _PNP_ ::
   VFR_Waypoint
@@ -7215,8 +7269,8 @@ _PNP_ =
     "PICNIC PT"
     (Just "NSW")
     "PNP"
-    (-33.98)
-    151.00166666666667
+    (Lat (-33) 58.8)
+    (Lon 151 0.1)
 
 _PIC_ ::
   VFR_Waypoint
@@ -7225,8 +7279,8 @@ _PIC_ =
     "PICTON"
     (Just "NSW")
     "PIC"
-    (-34.175)
-    150.61666666666667
+    (Lat (-34) 10.5)
+    (Lon 150 37.0)
 
 _PIG_ ::
   VFR_Waypoint
@@ -7235,8 +7289,8 @@ _PIG_ =
     "PIGGERY"
     (Just "NSW")
     "PIG"
-    (-36.013333333333335)
-    146.79166666666666
+    (Lat (-36) 0.8)
+    (Lon 146 47.5)
 
 _PIPT_ ::
   VFR_Waypoint
@@ -7245,8 +7299,8 @@ _PIPT_ =
     "PINE PT"
     (Just "SA")
     "PIPT"
-    (-34.56666666666667)
-    137.88333333333333
+    (Lat (-34) 34.0)
+    (Lon 137 53.0)
 
 _PING_ ::
   VFR_Waypoint
@@ -7255,8 +7309,8 @@ _PING_ =
     "PINGARING"
     (Just "WA")
     "PING"
-    (-32.75833333333333)
-    118.625
+    (Lat (-32) 45.5)
+    (Lon 118 37.5)
 
 _PII_ ::
   VFR_Waypoint
@@ -7265,8 +7319,8 @@ _PII_ =
     "PIRATE PT"
     (Just "QLD")
     "PII"
-    (-23.508333333333333)
-    150.64166666666668
+    (Lat (-23) 30.5)
+    (Lon 150 38.5)
 
 _PWH_ ::
   VFR_Waypoint
@@ -7275,8 +7329,8 @@ _PWH_ =
     "PITTSWORTH"
     (Just "QLD")
     "PWH"
-    (-27.721666666666668)
-    151.63333333333333
+    (Lat (-27) 43.3)
+    (Lon 151 38.0)
 
 _PTOM_ ::
   VFR_Waypoint
@@ -7285,8 +7339,8 @@ _PTOM_ =
     "POINT ORMOND"
     (Just "VIC")
     "PTOM"
-    (-37.88333333333333)
-    144.98333333333332
+    (Lat (-37) 53.0)
+    (Lon 144 59.0)
 
 _PSS_ ::
   VFR_Waypoint
@@ -7295,8 +7349,8 @@ _PSS_ =
     "POINT STEPHENS LIGHTHOUSE"
     (Just "NSW")
     "PSS"
-    (-32.74666666666667)
-    152.20833333333334
+    (Lat (-32) 44.8)
+    (Lon 152 12.5)
 
 _PRP_ ::
   VFR_Waypoint
@@ -7305,8 +7359,8 @@ _PRP_ =
     "PORPOISE PT"
     (Just "QLD")
     "PRP"
-    (-27.936666666666667)
-    153.425
+    (Lat (-27) 56.2)
+    (Lon 153 25.5)
 
 _PAL_ ::
   VFR_Waypoint
@@ -7315,8 +7369,8 @@ _PAL_ =
     "PORT ADELAIDE"
     (Just "SA")
     "PAL"
-    (-34.85)
-    138.5
+    (Lat (-34) 51.0)
+    (Lon 138 30.0)
 
 _PMA_ ::
   VFR_Waypoint
@@ -7325,8 +7379,8 @@ _PMA_ =
     "PORT ALMA"
     (Just "QLD")
     "PMA"
-    (-23.583333333333332)
-    150.85833333333332
+    (Lat (-23) 35.0)
+    (Lon 150 51.5)
 
 _POMP_ ::
   VFR_Waypoint
@@ -7335,8 +7389,8 @@ _POMP_ =
     "PORT CAMPBELL"
     (Just "VIC")
     "POMP"
-    (-38.62)
-    142.995
+    (Lat (-38) 37.2)
+    (Lon 142 59.7)
 
 _PDV_ ::
   VFR_Waypoint
@@ -7345,8 +7399,8 @@ _PDV_ =
     "PORT DAVEY"
     (Just "TAS")
     "PDV"
-    (-43.333333333333336)
-    145.88333333333333
+    (Lat (-43) 20.0)
+    (Lon 145 53.0)
 
 _PTD_ ::
   VFR_Waypoint
@@ -7355,8 +7409,8 @@ _PTD_ =
     "PORT DOUGLAS"
     (Just "QLD")
     "PTD"
-    (-16.483333333333334)
-    145.46333333333334
+    (Lat (-16) 29.0)
+    (Lon 145 27.8)
 
 _PJUL_ ::
   VFR_Waypoint
@@ -7365,8 +7419,8 @@ _PJUL_ =
     "PORT JULIA"
     (Just "SA")
     "PJUL"
-    (-34.666666666666664)
-    137.87833333333333
+    (Lat (-34) 40.0)
+    (Lon 137 52.7)
 
 _PMG_ ::
   VFR_Waypoint
@@ -7375,8 +7429,8 @@ _PMG_ =
     "PORT MUSGRAVE"
     (Just "QLD")
     "PMG"
-    (-12.0)
-    141.93333333333334
+    (Lat (-12) 0.0)
+    (Lon 141 56.0)
 
 _PNE_ ::
   VFR_Waypoint
@@ -7385,8 +7439,8 @@ _PNE_ =
     "PORT NEILL"
     (Just "SA")
     "PNE"
-    (-34.11666666666667)
-    136.35
+    (Lat (-34) 7.0)
+    (Lon 136 21.0)
 
 _PNL_ ::
   VFR_Waypoint
@@ -7395,8 +7449,8 @@ _PNL_ =
     "PORT NOARLUNGA"
     (Just "SA")
     "PNL"
-    (-35.15)
-    138.46666666666667
+    (Lat (-35) 9.0)
+    (Lon 138 28.0)
 
 _PIPS_ ::
   VFR_Waypoint
@@ -7405,8 +7459,8 @@ _PIPS_ =
     "PORT PHILLIP HEADS"
     (Just "VIC")
     "PIPS"
-    (-38.29333333333334)
-    144.63333333333333
+    (Lat (-38) 17.6)
+    (Lon 144 38.0)
 
 _PVCT_ ::
   VFR_Waypoint
@@ -7415,8 +7469,8 @@ _PVCT_ =
     "PORT VINCENT"
     (Just "SA")
     "PVCT"
-    (-34.781666666666666)
-    137.86166666666668
+    (Lat (-34) 46.9)
+    (Lon 137 51.7)
 
 _POWR_ ::
   VFR_Waypoint
@@ -7425,8 +7479,8 @@ _POWR_ =
     "POWERHOUSE"
     (Just "WA")
     "POWR"
-    (-32.095)
-    115.75666666666666
+    (Lat (-32) 5.7)
+    (Lon 115 45.4)
 
 _PWLC_ ::
   VFR_Waypoint
@@ -7435,8 +7489,8 @@ _PWLC_ =
     "POWERLINE CROSSING"
     (Just "VIC")
     "PWLC"
-    (-37.61333333333333)
-    144.77833333333334
+    (Lat (-37) 36.8)
+    (Lon 144 46.7)
 
 _PRES_ ::
   VFR_Waypoint
@@ -7445,8 +7499,8 @@ _PRES_ =
     "PRESCOTT LAKES"
     (Just "WA")
     "PRES"
-    (-20.75)
-    125.16666666666667
+    (Lat (-20) 45.0)
+    (Lon 125 10.0)
 
 _PRS_ ::
   VFR_Waypoint
@@ -7455,8 +7509,8 @@ _PRS_ =
     "PRIMROSE SANDS"
     (Just "TAS")
     "PRS"
-    (-42.88333333333333)
-    147.66666666666666
+    (Lat (-42) 53.0)
+    (Lon 147 40.0)
 
 _PCB_ ::
   VFR_Waypoint
@@ -7465,8 +7519,8 @@ _PCB_ =
     "PRINCESS CHARLOTTE BAY"
     (Just "QLD")
     "PCB"
-    (-14.333333333333334)
-    144.11666666666667
+    (Lat (-14) 20.0)
+    (Lon 144 7.0)
 
 _PSP_ ::
   VFR_Waypoint
@@ -7475,8 +7529,8 @@ _PSP_ =
     "PROSPECT RESV"
     (Just "NSW")
     "PSP"
-    (-33.81666666666667)
-    150.91666666666666
+    (Lat (-33) 49.0)
+    (Lon 150 55.0)
 
 _PSF_ ::
   VFR_Waypoint
@@ -7485,8 +7539,8 @@ _PSF_ =
     "PROSSERS SUGARLOAF"
     (Just "TAS")
     "PSF"
-    (-42.675)
-    147.825
+    (Lat (-42) 40.5)
+    (Lon 147 49.5)
 
 _PSTO_ ::
   VFR_Waypoint
@@ -7495,8 +7549,8 @@ _PSTO_ =
     "PROSTON"
     (Just "QLD")
     "PSTO"
-    (-26.166666666666668)
-    151.6
+    (Lat (-26) 10.0)
+    (Lon 151 36.0)
 
 _DNGR_ ::
   VFR_Waypoint
@@ -7505,8 +7559,8 @@ _DNGR_ =
     "PT DANGER"
     (Just "NSW")
     "DNGR"
-    (-28.165)
-    153.55166666666668
+    (Lat (-28) 9.9)
+    (Lon 153 33.1)
 
 _FAW_ ::
   VFR_Waypoint
@@ -7515,8 +7569,8 @@ _FAW_ =
     "PT FAWCETT"
     (Just "NT")
     "FAW"
-    (-11.8)
-    130.01666666666668
+    (Lat (-11) 48.0)
+    (Lon 130 1.0)
 
 _PMPH_ ::
   VFR_Waypoint
@@ -7525,8 +7579,8 @@ _PMPH_ =
     "PUMPHREY'S BRIDGE"
     (Just "WA")
     "PMPH"
-    (-32.666666666666664)
-    116.9
+    (Lat (-32) 40.0)
+    (Lon 116 54.0)
 
 _PBF_ ::
   VFR_Waypoint
@@ -7535,8 +7589,8 @@ _PBF_ =
     "PURLINGBROOKE FALLS"
     (Just "QLD")
     "PBF"
-    (-28.166666666666668)
-    153.26666666666668
+    (Lat (-28) 10.0)
+    (Lon 153 16.0)
 
 _PWDA_ ::
   VFR_Waypoint
@@ -7545,8 +7599,8 @@ _PWDA_ =
     "PURRAWUNDA"
     (Just "QLD")
     "PWDA"
-    (-27.538333333333334)
-    151.625
+    (Lat (-27) 32.3)
+    (Lon 151 37.5)
 
 _PUTY_ ::
   VFR_Waypoint
@@ -7555,8 +7609,8 @@ _PUTY_ =
     "PUTTY"
     (Just "NSW")
     "PUTY"
-    (-32.96666666666667)
-    150.75
+    (Lat (-32) 58.0)
+    (Lon 150 45.0)
 
 _PYA_ ::
   VFR_Waypoint
@@ -7565,8 +7619,8 @@ _PYA_ =
     "PYALONG"
     (Just "VIC")
     "PYA"
-    (-37.11666666666667)
-    144.855
+    (Lat (-37) 7.0)
+    (Lon 144 51.3)
 
 _PYK_ ::
   VFR_Waypoint
@@ -7575,8 +7629,8 @@ _PYK_ =
     "PYKES CREEK RESV"
     (Just "VIC")
     "PYK"
-    (-37.6)
-    144.295
+    (Lat (-37) 36.0)
+    (Lon 144 17.7)
 
 _QE2_ ::
   VFR_Waypoint
@@ -7585,8 +7639,8 @@ _QE2_ =
     "QE2 STADIUM"
     (Just "QLD")
     "QE2"
-    (-27.558333333333334)
-    153.06333333333333
+    (Lat (-27) 33.5)
+    (Lon 153 3.8)
 
 _QAI_ ::
   VFR_Waypoint
@@ -7595,8 +7649,8 @@ _QAI_ =
     "QUAIL ISLAND"
     (Just "QLD")
     "QAI"
-    (-22.133333333333333)
-    150.0
+    (Lat (-22) 8.0)
+    (Lon 150 0.0)
 
 _QBN_ ::
   VFR_Waypoint
@@ -7605,8 +7659,8 @@ _QBN_ =
     "QUEANBEYAN"
     (Just "NSW")
     "QBN"
-    (-35.36)
-    149.24333333333334
+    (Lat (-35) 21.6)
+    (Lon 149 14.6)
 
 _Q1_ ::
   VFR_Waypoint
@@ -7615,8 +7669,8 @@ _Q1_ =
     "QUEBEC ONE"
     (Just "QLD")
     "Q1"
-    (-28.006666666666668)
-    153.43
+    (Lat (-28) 0.4)
+    (Lon 153 25.8)
 
 _QLW_ ::
   VFR_Waypoint
@@ -7625,8 +7679,8 @@ _QLW_ =
     "QUINALOW"
     (Just "QLD")
     "QLW"
-    (-27.105)
-    151.62166666666667
+    (Lat (-27) 6.3)
+    (Lon 151 37.3)
 
 _QNDI_ ::
   VFR_Waypoint
@@ -7635,8 +7689,8 @@ _QNDI_ =
     "QUIRINDI"
     (Just "NSW")
     "QNDI"
-    (-31.49)
-    150.51333333333332
+    (Lat (-31) 29.4)
+    (Lon 150 30.8)
 
 _RIL_ ::
   VFR_Waypoint
@@ -7645,8 +7699,8 @@ _RIL_ =
     "RABBIT ISLAND"
     (Just "QLD")
     "RIL"
-    (-20.833333333333332)
-    148.9
+    (Lat (-20) 50.0)
+    (Lon 148 54.0)
 
 _RBY_ ::
   VFR_Waypoint
@@ -7655,8 +7709,8 @@ _RBY_ =
     "RABY BAY"
     (Just "QLD")
     "RBY"
-    (-27.516666666666666)
-    153.275
+    (Lat (-27) 31.0)
+    (Lon 153 16.5)
 
 _RDRS_ ::
   VFR_Waypoint
@@ -7665,8 +7719,8 @@ _RDRS_ =
     "RADAR SITE"
     (Just "QLD")
     "RDRS"
-    (-19.2)
-    146.76666666666668
+    (Lat (-19) 12.0)
+    (Lon 146 46.0)
 
 _RADT_ ::
   VFR_Waypoint
@@ -7675,8 +7729,8 @@ _RADT_ =
     "RADIO TELESCOPE"
     (Just "TAS")
     "RADT"
-    (-42.81666666666667)
-    147.45
+    (Lat (-42) 49.0)
+    (Lon 147 27.0)
 
 _RAIS_ ::
   VFR_Waypoint
@@ -7685,8 +7739,8 @@ _RAIS_ =
     "RAINE ISLAND"
     (Just "QLD")
     "RAIS"
-    (-11.6)
-    144.03333333333333
+    (Lat (-11) 36.0)
+    (Lon 144 2.0)
 
 _RNN_ ::
   VFR_Waypoint
@@ -7695,8 +7749,8 @@ _RNN_ =
     "RANNES"
     (Just "QLD")
     "RNN"
-    (-24.1)
-    150.11666666666667
+    (Lat (-24) 6.0)
+    (Lon 150 7.0)
 
 _RAPD_ ::
   VFR_Waypoint
@@ -7705,8 +7759,8 @@ _RAPD_ =
     "RAPID BAY"
     (Just "SA")
     "RAPD"
-    (-35.52166666666667)
-    138.18333333333334
+    (Lat (-35) 31.3)
+    (Lon 138 11.0)
 
 _RTY_ ::
   VFR_Waypoint
@@ -7715,8 +7769,8 @@ _RTY_ =
     "RATHDOWNEY"
     (Just "QLD")
     "RTY"
-    (-28.216666666666665)
-    152.86666666666667
+    (Lat (-28) 13.0)
+    (Lon 152 52.0)
 
 _RKI_ ::
   VFR_Waypoint
@@ -7725,8 +7779,8 @@ _RKI_ =
     "RATTLESNAKE ISLAND"
     (Just "QLD")
     "RKI"
-    (-19.033333333333335)
-    146.61166666666668
+    (Lat (-19) 2.0)
+    (Lon 146 36.7)
 
 _RCS_ ::
   VFR_Waypoint
@@ -7735,8 +7789,8 @@ _RCS_ =
     "RED CLIFFS"
     (Just "VIC")
     "RCS"
-    (-34.3)
-    142.21666666666667
+    (Lat (-34) 18.0)
+    (Lon 142 13.0)
 
 _RDHI_ ::
   VFR_Waypoint
@@ -7745,8 +7799,8 @@ _RDHI_ =
     "RED HILL"
     (Just "QLD")
     "RDHI"
-    (-21.633333333333333)
-    148.05
+    (Lat (-21) 38.0)
+    (Lon 148 3.0)
 
 _RER_ ::
   VFR_Waypoint
@@ -7755,8 +7809,8 @@ _RER_ =
     "RED ROCK"
     (Just "NSW")
     "RER"
-    (-29.986666666666668)
-    153.225
+    (Lat (-29) 59.2)
+    (Lon 153 13.5)
 
 _REDC_ ::
   VFR_Waypoint
@@ -7765,8 +7819,8 @@ _REDC_ =
     "REDCLIFFE BRIDGE"
     (Just "WA")
     "REDC"
-    (-31.93)
-    115.93833333333333
+    (Lat (-31) 55.8)
+    (Lon 115 56.3)
 
 _RDV_ ::
   VFR_Waypoint
@@ -7775,8 +7829,8 @@ _RDV_ =
     "REDCLIFFE VALE HS"
     (Just "QLD")
     "RDV"
-    (-21.116666666666667)
-    148.11666666666667
+    (Lat (-21) 7.0)
+    (Lon 148 7.0)
 
 _REDF_ ::
   VFR_Waypoint
@@ -7785,8 +7839,8 @@ _REDF_ =
     "REDFERN RAILWAY STATION"
     (Just "NSW")
     "REDF"
-    (-33.891666666666666)
-    151.19833333333332
+    (Lat (-33) 53.5)
+    (Lon 151 11.9)
 
 _REDB_ ::
   VFR_Waypoint
@@ -7795,8 +7849,8 @@ _REDB_ =
     "REDLAND BAY"
     (Just "QLD")
     "REDB"
-    (-27.6)
-    153.3
+    (Lat (-27) 36.0)
+    (Lon 153 18.0)
 
 _REDL_ ::
   VFR_Waypoint
@@ -7805,8 +7859,8 @@ _REDL_ =
     "REDLYNCH"
     (Just "QLD")
     "REDL"
-    (-16.883333333333333)
-    145.7
+    (Lat (-16) 53.0)
+    (Lon 145 42.0)
 
 _RENR_ ::
   VFR_Waypoint
@@ -7815,8 +7869,8 @@ _RENR_ =
     "RENNER SPRINGS"
     (Just "NT")
     "RENR"
-    (-18.316666666666666)
-    133.8
+    (Lat (-18) 19.0)
+    (Lon 133 48.0)
 
 _RESC_ ::
   VFR_Waypoint
@@ -7825,8 +7879,8 @@ _RESC_ =
     "RESEARCH CENTRE"
     (Just "NT")
     "RESC"
-    (-14.78)
-    131.93666666666667
+    (Lat (-14) 46.8)
+    (Lon 131 56.2)
 
 _RCH_ ::
   VFR_Waypoint
@@ -7835,8 +7889,8 @@ _RCH_ =
     "RICHMOND"
     (Just "TAS")
     "RCH"
-    (-42.733333333333334)
-    147.43333333333334
+    (Lat (-42) 44.0)
+    (Lon 147 26.0)
 
 _RIT_ ::
   VFR_Waypoint
@@ -7845,8 +7899,8 @@ _RIT_ =
     "RING TANK"
     (Just "QLD")
     "RIT"
-    (-26.75)
-    153.09166666666667
+    (Lat (-26) 45.0)
+    (Lon 153 5.5)
 
 _RMH_ ::
   VFR_Waypoint
@@ -7855,8 +7909,8 @@ _RMH_ =
     "RIVER MOUTH"
     (Just "SA")
     "RMH"
-    (-34.583333333333336)
-    138.35833333333332
+    (Lat (-34) 35.0)
+    (Lon 138 21.5)
 
 _RIV_ ::
   VFR_Waypoint
@@ -7865,8 +7919,8 @@ _RIV_ =
     "RIVERINA CAMPUS"
     (Just "NSW")
     "RIV"
-    (-35.055)
-    147.34666666666666
+    (Lat (-35) 3.3)
+    (Lon 147 20.8)
 
 _RVTN_ ::
   VFR_Waypoint
@@ -7875,8 +7929,8 @@ _RVTN_ =
     "RIVERTON"
     (Just "SA")
     "RVTN"
-    (-34.165)
-    138.74666666666667
+    (Lat (-34) 9.9)
+    (Lon 138 44.8)
 
 _ROTC_ ::
   VFR_Waypoint
@@ -7885,8 +7939,8 @@ _ROTC_ =
     "ROBINA TOWN CENTRE"
     (Just "QLD")
     "ROTC"
-    (-28.076666666666668)
-    153.385
+    (Lat (-28) 4.6)
+    (Lon 153 23.1)
 
 _ROK_ ::
   VFR_Waypoint
@@ -7895,8 +7949,8 @@ _ROK_ =
     "ROCKBANK"
     (Just "VIC")
     "ROK"
-    (-37.72833333333333)
-    144.65333333333334
+    (Lat (-37) 43.7)
+    (Lon 144 39.2)
 
 _ROHM_ ::
   VFR_Waypoint
@@ -7905,8 +7959,8 @@ _ROHM_ =
     "ROCKINGHAM"
     (Just "WA")
     "ROHM"
-    (-32.291666666666664)
-    115.74166666666666
+    (Lat (-32) 17.5)
+    (Lon 115 44.5)
 
 _RLY_ ::
   VFR_Waypoint
@@ -7915,8 +7969,8 @@ _RLY_ =
     "ROLEYSTONE"
     (Just "WA")
     "RLY"
-    (-32.11666666666667)
-    116.075
+    (Lat (-32) 7.0)
+    (Lon 116 4.5)
 
 _RGS_ ::
   VFR_Waypoint
@@ -7925,8 +7979,8 @@ _RGS_ =
     "ROLLINGSTONE"
     (Just "QLD")
     "RGS"
-    (-19.046666666666667)
-    146.38833333333332
+    (Lat (-19) 2.8)
+    (Lon 146 23.3)
 
 _RKWC_ ::
   VFR_Waypoint
@@ -7935,8 +7989,8 @@ _RKWC_ =
     "ROOKWOOD CEMETERY"
     (Just "NSW")
     "RKWC"
-    (-33.875)
-    151.055
+    (Lat (-33) 52.5)
+    (Lon 151 3.3)
 
 _RSH_ ::
   VFR_Waypoint
@@ -7945,8 +7999,8 @@ _RSH_ =
     "ROSEHILL RACECOURSE"
     (Just "NSW")
     "RSH"
-    (-33.825)
-    151.025
+    (Lat (-33) 49.5)
+    (Lon 151 1.5)
 
 _RVB_ ::
   VFR_Waypoint
@@ -7955,8 +8009,8 @@ _RVB_ =
     "ROSEVILLE BRIDGE"
     (Just "NSW")
     "RVB"
-    (-33.766666666666666)
-    151.2
+    (Lat (-33) 46.0)
+    (Lon 151 12.0)
 
 _RSWD_ ::
   VFR_Waypoint
@@ -7965,8 +8019,8 @@ _RSWD_ =
     "ROSEWOOD"
     (Just "QLD")
     "RSWD"
-    (-27.636666666666667)
-    152.59333333333333
+    (Lat (-27) 38.2)
+    (Lon 152 35.6)
 
 _RSEW_ ::
   VFR_Waypoint
@@ -7975,8 +8029,8 @@ _RSEW_ =
     "ROSEWOOD ISLAND"
     (Just "QLD")
     "RSEW"
-    (-22.4)
-    149.73333333333332
+    (Lat (-22) 24.0)
+    (Lon 149 44.0)
 
 _RRDM_ ::
   VFR_Waypoint
@@ -7985,8 +8039,8 @@ _RRDM_ =
     "ROSS RIVER DAM"
     (Just "QLD")
     "RRDM"
-    (-19.411666666666665)
-    146.73333333333332
+    (Lat (-19) 24.7)
+    (Lon 146 44.0)
 
 _RLR_ ::
   VFR_Waypoint
@@ -7995,8 +8049,8 @@ _RLR_ =
     "ROSSLYNNE RESV"
     (Just "VIC")
     "RLR"
-    (-37.47)
-    144.56333333333333
+    (Lat (-37) 28.2)
+    (Lon 144 33.8)
 
 _RMT_ ::
   VFR_Waypoint
@@ -8005,8 +8059,8 @@ _RMT_ =
     "ROUND MT"
     (Just "QLD")
     "RMT"
-    (-19.461666666666666)
-    146.695
+    (Lat (-19) 27.7)
+    (Lon 146 41.7)
 
 _RCB_ ::
   VFR_Waypoint
@@ -8015,8 +8069,8 @@ _RCB_ =
     "RUSH CUTTERS BAY"
     (Just "NSW")
     "RCB"
-    (-33.873333333333335)
-    151.23166666666665
+    (Lat (-33) 52.4)
+    (Lon 151 13.9)
 
 _RUIS_ ::
   VFR_Waypoint
@@ -8025,8 +8079,8 @@ _RUIS_ =
     "RUSSELL ISLAND"
     (Just "QLD")
     "RUIS"
-    (-27.666666666666668)
-    153.38333333333333
+    (Lat (-27) 40.0)
+    (Lon 153 23.0)
 
 _RYB_ ::
   VFR_Waypoint
@@ -8035,8 +8089,8 @@ _RYB_ =
     "RYDE BRIDGE"
     (Just "NSW")
     "RYB"
-    (-33.825)
-    151.09166666666667
+    (Lat (-33) 49.5)
+    (Lon 151 5.5)
 
 _SADD_ ::
   VFR_Waypoint
@@ -8045,8 +8099,8 @@ _SADD_ =
     "SADDLE MT"
     (Just "QLD")
     "SADD"
-    (-16.82)
-    145.65
+    (Lat (-16) 49.2)
+    (Lon 145 39.0)
 
 _SSV_ ::
   VFR_Waypoint
@@ -8055,8 +8109,8 @@ _SSV_ =
     "SAMSONVALE"
     (Just "QLD")
     "SSV"
-    (-27.278333333333332)
-    152.855
+    (Lat (-27) 16.7)
+    (Lon 152 51.3)
 
 _SAU_ ::
   VFR_Waypoint
@@ -8065,8 +8119,8 @@ _SAU_ =
     "SANCTUARY COVE"
     (Just "QLD")
     "SAU"
-    (-27.858333333333334)
-    153.375
+    (Lat (-27) 51.5)
+    (Lon 153 22.5)
 
 _SALW_ ::
   VFR_Waypoint
@@ -8075,8 +8129,8 @@ _SALW_ =
     "SANDALWOOD"
     (Just "SA")
     "SALW"
-    (-34.95)
-    140.13333333333333
+    (Lat (-34) 57.0)
+    (Lon 140 8.0)
 
 _SSTO_ ::
   VFR_Waypoint
@@ -8085,8 +8139,8 @@ _SSTO_ =
     "SANDERSTON"
     (Just "SA")
     "SSTO"
-    (-34.74333333333333)
-    139.25166666666667
+    (Lat (-34) 44.6)
+    (Lon 139 15.1)
 
 _SAND_ ::
   VFR_Waypoint
@@ -8095,8 +8149,8 @@ _SAND_ =
     "SANDGATE PIER"
     (Just "QLD")
     "SAND"
-    (-27.328333333333333)
-    153.08833333333334
+    (Lat (-27) 19.7)
+    (Lon 153 5.3)
 
 _SDP_ ::
   VFR_Waypoint
@@ -8105,8 +8159,8 @@ _SDP_ =
     "SANDY PT"
     (Just "VIC")
     "SDP"
-    (-38.416666666666664)
-    145.23333333333332
+    (Lat (-38) 25.0)
+    (Lon 145 14.0)
 
 _STT_ ::
   VFR_Waypoint
@@ -8115,8 +8169,8 @@ _STT_ =
     "SANTA TERESA"
     (Just "NT")
     "STT"
-    (-24.133333333333333)
-    134.37333333333333
+    (Lat (-24) 8.0)
+    (Lon 134 22.4)
 
 _SJI_ ::
   VFR_Waypoint
@@ -8125,8 +8179,8 @@ _SJI_ =
     "SARAJI"
     (Just "QLD")
     "SJI"
-    (-22.433333333333334)
-    148.28333333333333
+    (Lat (-22) 26.0)
+    (Lon 148 17.0)
 
 _SRIN_ ::
   VFR_Waypoint
@@ -8135,8 +8189,8 @@ _SRIN_ =
     "SARINA"
     (Just "QLD")
     "SRIN"
-    (-21.425)
-    149.21666666666667
+    (Lat (-21) 25.5)
+    (Lon 149 13.0)
 
 _SVR_ ::
   VFR_Waypoint
@@ -8145,8 +8199,8 @@ _SVR_ =
     "SAVAGE RIVER"
     (Just "TAS")
     "SVR"
-    (-41.583333333333336)
-    145.13333333333333
+    (Lat (-41) 35.0)
+    (Lon 145 8.0)
 
 _SWTE_ ::
   VFR_Waypoint
@@ -8155,8 +8209,8 @@ _SWTE_ =
     "SAWTELL"
     (Just "NSW")
     "SWTE"
-    (-30.366666666666667)
-    153.1
+    (Lat (-30) 22.0)
+    (Lon 153 6.0)
 
 _SWY_ ::
   VFR_Waypoint
@@ -8165,8 +8219,8 @@ _SWY_ =
     "SAWYERS VALLEY"
     (Just "WA")
     "SWY"
-    (-31.905)
-    116.205
+    (Lat (-31) 54.3)
+    (Lon 116 12.3)
 
 _STC_ ::
   VFR_Waypoint
@@ -8175,8 +8229,8 @@ _STC_ =
     "SCOTT CREEK"
     (Just "NT")
     "STC"
-    (-14.833333333333334)
-    131.83333333333334
+    (Lat (-14) 50.0)
+    (Lon 131 50.0)
 
 _STTE_ ::
   VFR_Waypoint
@@ -8185,8 +8239,8 @@ _STTE_ =
     "SCOTTSDALE"
     (Just "TAS")
     "STTE"
-    (-41.166666666666664)
-    147.51666666666668
+    (Lat (-41) 10.0)
+    (Lon 147 31.0)
 
 _SECF_ ::
   VFR_Waypoint
@@ -8195,8 +8249,8 @@ _SECF_ =
     "SEA CLIFF BRIDGE"
     (Just "NSW")
     "SECF"
-    (-34.25333333333333)
-    150.975
+    (Lat (-34) 15.2)
+    (Lon 150 58.5)
 
 _SVAL_ ::
   VFR_Waypoint
@@ -8205,8 +8259,8 @@ _SVAL_ =
     "SECOND VALLEY"
     (Just "SA")
     "SVAL"
-    (-35.516666666666666)
-    138.21666666666667
+    (Lat (-35) 31.0)
+    (Lon 138 13.0)
 
 _SLB_ ::
   VFR_Waypoint
@@ -8215,8 +8269,8 @@ _SLB_ =
     "SELLICKS BEACH"
     (Just "SA")
     "SLB"
-    (-35.34166666666667)
-    138.45
+    (Lat (-35) 20.5)
+    (Lon 138 27.0)
 
 _SDS_ ::
   VFR_Waypoint
@@ -8225,8 +8279,8 @@ _SDS_ =
     "SHAUNA DOWNS"
     (Just "QLD")
     "SDS"
-    (-24.616666666666667)
-    149.91666666666666
+    (Lat (-24) 37.0)
+    (Lon 149 55.0)
 
 _SHCR_ ::
   VFR_Waypoint
@@ -8235,8 +8289,8 @@ _SHCR_ =
     "SHAW CREEK"
     (Just "NT")
     "SHCR"
-    (-25.216666666666665)
-    129.73
+    (Lat (-25) 13.0)
+    (Lon 129 43.8)
 
 _SHI_ ::
   VFR_Waypoint
@@ -8245,8 +8299,8 @@ _SHI_ =
     "SHAW ISLAND"
     (Just "QLD")
     "SHI"
-    (-20.513333333333332)
-    149.08666666666667
+    (Lat (-20) 30.8)
+    (Lon 149 5.2)
 
 _SHL_ ::
   VFR_Waypoint
@@ -8255,8 +8309,8 @@ _SHL_ =
     "SHELBURNE BAY"
     (Just "QLD")
     "SHL"
-    (-11.883333333333333)
-    143.01666666666668
+    (Lat (-11) 53.0)
+    (Lon 143 1.0)
 
 _SEL_ ::
   VFR_Waypoint
@@ -8265,8 +8319,8 @@ _SEL_ =
     "SHELLEY BRIDGE"
     (Just "WA")
     "SEL"
-    (-32.025)
-    115.9
+    (Lat (-32) 1.5)
+    (Lon 115 54.0)
 
 _SHOAL_ ::
   VFR_Waypoint
@@ -8275,8 +8329,8 @@ _SHOAL_ =
     "SHOAL"
     (Just "VIC")
     "SHOAL"
-    (-38.06666666666667)
-    145.03333333333333
+    (Lat (-38) 4.0)
+    (Lon 145 2.0)
 
 _SSG_ ::
   VFR_Waypoint
@@ -8285,8 +8339,8 @@ _SSG_ =
     "SIMPSONS GAP"
     (Just "NT")
     "SSG"
-    (-23.68)
-    133.71666666666667
+    (Lat (-23) 40.8)
+    (Lon 133 43.0)
 
 _SIXS_ ::
   VFR_Waypoint
@@ -8295,8 +8349,8 @@ _SIXS_ =
     "SIX SOUTH"
     (Just "WA")
     "SIXS"
-    (-32.185)
-    115.93333333333334
+    (Lat (-32) 11.1)
+    (Lon 115 56.0)
 
 _SKP_ ::
   VFR_Waypoint
@@ -8305,8 +8359,8 @@ _SKP_ =
     "SKIPTON"
     (Just "VIC")
     "SKP"
-    (-37.68333333333333)
-    143.36666666666667
+    (Lat (-37) 41.0)
+    (Lon 143 22.0)
 
 _SLPT_ ::
   VFR_Waypoint
@@ -8315,8 +8369,8 @@ _SLPT_ =
     "SLADE POINT"
     (Just "QLD")
     "SLPT"
-    (-21.065)
-    149.225
+    (Lat (-21) 3.9)
+    (Lon 149 13.5)
 
 _SGK_ ::
   VFR_Waypoint
@@ -8325,8 +8379,8 @@ _SGK_ =
     "SLOPING HUMMOCK"
     (Just "QLD")
     "SGK"
-    (-24.85)
-    152.43333333333334
+    (Lat (-24) 51.0)
+    (Lon 152 26.0)
 
 _SLP_ ::
   VFR_Waypoint
@@ -8335,8 +8389,8 @@ _SLP_ =
     "SLOPING ISLAND"
     (Just "TAS")
     "SLP"
-    (-42.94833333333333)
-    147.64833333333334
+    (Lat (-42) 56.9)
+    (Lon 147 38.9)
 
 _SMIF_ ::
   VFR_Waypoint
@@ -8345,8 +8399,8 @@ _SMIF_ =
     "SMITHFIELD"
     (Just "QLD")
     "SMIF"
-    (-16.833333333333332)
-    145.68333333333334
+    (Lat (-16) 50.0)
+    (Lon 145 41.0)
 
 _SYI_ ::
   VFR_Waypoint
@@ -8355,8 +8409,8 @@ _SYI_ =
     "SNOWY INTERSECTION"
     (Just "NSW")
     "SYI"
-    (-35.18333333333333)
-    147.86833333333334
+    (Lat (-35) 11.0)
+    (Lon 147 52.1)
 
 _SOFA_ ::
   VFR_Waypoint
@@ -8365,8 +8419,8 @@ _SOFA_ =
     "SOFALA"
     (Just "NSW")
     "SOFA"
-    (-33.016666666666666)
-    149.68333333333334
+    (Lat (-33) 1.0)
+    (Lon 149 41.0)
 
 _SRP_ ::
   VFR_Waypoint
@@ -8375,8 +8429,8 @@ _SRP_ =
     "SOLDIERS POINT"
     (Just "NSW")
     "SRP"
-    (-32.7)
-    152.06333333333333
+    (Lat (-32) 42.0)
+    (Lon 152 3.8)
 
 _SMD_ ::
   VFR_Waypoint
@@ -8385,8 +8439,8 @@ _SMD_ =
     "SOMERSET DAM"
     (Just "QLD")
     "SMD"
-    (-27.121666666666666)
-    152.55
+    (Lat (-27) 7.3)
+    (Lon 152 33.0)
 
 _SMN_ ::
   VFR_Waypoint
@@ -8395,8 +8449,8 @@ _SMN_ =
     "SOMERTON"
     (Just "NSW")
     "SMN"
-    (-30.941666666666666)
-    150.63666666666666
+    (Lat (-30) 56.5)
+    (Lon 150 38.2)
 
 _SORL_ ::
   VFR_Waypoint
@@ -8405,8 +8459,8 @@ _SORL_ =
     "SORELL"
     (Just "TAS")
     "SORL"
-    (-42.78333333333333)
-    147.58333333333334
+    (Lat (-42) 47.0)
+    (Lon 147 35.0)
 
 _SEC_ ::
   VFR_Waypoint
@@ -8415,8 +8469,8 @@ _SEC_ =
     "SOUTH EAST CAPE"
     (Just "TAS")
     "SEC"
-    (-43.65)
-    146.81666666666666
+    (Lat (-43) 39.0)
+    (Lon 146 49.0)
 
 _SMIB_ ::
   VFR_Waypoint
@@ -8425,8 +8479,8 @@ _SMIB_ =
     "SOUTH MISSION BEACH"
     (Just "QLD")
     "SMIB"
-    (-17.948333333333334)
-    146.09166666666667
+    (Lat (-17) 56.9)
+    (Lon 146 5.5)
 
 _SPR_ ::
   VFR_Waypoint
@@ -8435,8 +8489,8 @@ _SPR_ =
     "SOUTH PARA RESV"
     (Just "SA")
     "SPR"
-    (-34.68333333333333)
-    138.86666666666667
+    (Lat (-34) 41.0)
+    (Lon 138 52.0)
 
 _SPN_ ::
   VFR_Waypoint
@@ -8445,8 +8499,8 @@ _SPN_ =
     "SOUTH PINNACLE"
     (Just "QLD")
     "SPN"
-    (-19.408333333333335)
-    146.63333333333333
+    (Lat (-19) 24.5)
+    (Lon 146 38.0)
 
 _SDG_ ::
   VFR_Waypoint
@@ -8455,8 +8509,8 @@ _SDG_ =
     "SOUTHEDGE"
     (Just "QLD")
     "SDG"
-    (-16.816666666666666)
-    145.21666666666667
+    (Lat (-16) 49.0)
+    (Lon 145 13.0)
 
 _SBRR_ ::
   VFR_Waypoint
@@ -8465,8 +8519,8 @@ _SBRR_ =
     "SOUTHERN TIP BERSERKERS"
     (Just "QLD")
     "SBRR"
-    (-23.4)
-    150.625
+    (Lat (-23) 24.0)
+    (Lon 150 37.5)
 
 _SPT_ ::
   VFR_Waypoint
@@ -8475,8 +8529,8 @@ _SPT_ =
     "SOUTHPORT"
     (Just "QLD")
     "SPT"
-    (-27.916666666666668)
-    153.37166666666667
+    (Lat (-27) 55.0)
+    (Lon 153 22.3)
 
 _STR_ ::
   VFR_Waypoint
@@ -8485,8 +8539,8 @@ _STR_ =
     "SOUTHPORT ROAD"
     (Just "NT")
     "STR"
-    (-12.65)
-    130.775
+    (Lat (-12) 39.0)
+    (Lon 130 46.5)
 
 _SPIT_ ::
   VFR_Waypoint
@@ -8495,8 +8549,8 @@ _SPIT_ =
     "SPIT BRIDGE"
     (Just "NSW")
     "SPIT"
-    (-33.803333333333335)
-    151.24666666666667
+    (Lat (-33) 48.2)
+    (Lon 151 14.8)
 
 _SRR_ ::
   VFR_Waypoint
@@ -8505,8 +8559,8 @@ _SRR_ =
     "SPLIT ROCK RESV"
     (Just "NSW")
     "SRR"
-    (-30.575)
-    150.7
+    (Lat (-30) 34.5)
+    (Lon 150 42.0)
 
 _SOI_ ::
   VFR_Waypoint
@@ -8515,8 +8569,8 @@ _SOI_ =
     "SPLIT SOLITARY ISLAND"
     (Just "NSW")
     "SOI"
-    (-30.241666666666667)
-    153.18
+    (Lat (-30) 14.5)
+    (Lon 153 10.8)
 
 _SPMT_ ::
   VFR_Waypoint
@@ -8525,8 +8579,8 @@ _SPMT_ =
     "SPRING MOUNTAIN"
     (Just "QLD")
     "SPMT"
-    (-27.713333333333335)
-    152.885
+    (Lat (-27) 42.8)
+    (Lon 152 53.1)
 
 _SBK_ ::
   VFR_Waypoint
@@ -8535,8 +8589,8 @@ _SBK_ =
     "SPRINGBROOK"
     (Just "NSW")
     "SBK"
-    (-28.231666666666666)
-    153.27833333333334
+    (Lat (-28) 13.9)
+    (Lon 153 16.7)
 
 _SGM_ ::
   VFR_Waypoint
@@ -8545,8 +8599,8 @@ _SGM_ =
     "ST GEORGES MINE"
     (Just "QLD")
     "SGM"
-    (-16.5)
-    144.4
+    (Lat (-16) 30.0)
+    (Lon 144 24.0)
 
 _SHIS_ ::
   VFR_Waypoint
@@ -8555,8 +8609,8 @@ _SHIS_ =
     "ST HELENA ISLAND"
     (Just "QLD")
     "SHIS"
-    (-27.378333333333334)
-    153.23333333333332
+    (Lat (-27) 22.7)
+    (Lon 153 14.0)
 
 _SIS_ ::
   VFR_Waypoint
@@ -8565,8 +8619,8 @@ _SIS_ =
     "ST IVES SHOWGROUND"
     (Just "NSW")
     "SIS"
-    (-33.705)
-    151.18333333333334
+    (Lat (-33) 42.3)
+    (Lon 151 11.0)
 
 _SKI_ ::
   VFR_Waypoint
@@ -8575,8 +8629,8 @@ _SKI_ =
     "ST KILDA"
     (Just "SA")
     "SKI"
-    (-34.74166666666667)
-    138.53
+    (Lat (-34) 44.5)
+    (Lon 138 31.8)
 
 _SRY_ ::
   VFR_Waypoint
@@ -8585,8 +8639,8 @@ _SRY_ =
     "STANSBURY"
     (Just "SA")
     "SRY"
-    (-34.91166666666667)
-    137.78833333333333
+    (Lat (-34) 54.7)
+    (Lon 137 47.3)
 
 _SLL_ ::
   VFR_Waypoint
@@ -8595,8 +8649,8 @@ _SLL_ =
     "STANWELL PARK"
     (Just "NSW")
     "SLL"
-    (-34.22833333333333)
-    150.98833333333334
+    (Lat (-34) 13.7)
+    (Lon 150 59.3)
 
 _SPS_ ::
   VFR_Waypoint
@@ -8605,8 +8659,8 @@ _SPS_ =
     "STANWELL POWER STN"
     (Just "QLD")
     "SPS"
-    (-23.5)
-    150.33333333333334
+    (Lat (-23) 30.0)
+    (Lon 150 20.0)
 
 _STARF_ ::
   VFR_Waypoint
@@ -8615,8 +8669,8 @@ _STARF_ =
     "STARF"
     Nothing
     "STARF"
-    (-9.126666666666667)
-    146.725
+    (Lat (-9) 7.6)
+    (Lon 146 43.5)
 
 _SNP_ ::
   VFR_Waypoint
@@ -8625,8 +8679,8 @@ _SNP_ =
     "STATION PIER"
     (Just "VIC")
     "SNP"
-    (-37.848333333333336)
-    144.93
+    (Lat (-37) 50.9)
+    (Lon 144 55.8)
 
 _STPK_ ::
   VFR_Waypoint
@@ -8635,8 +8689,8 @@ _STPK_ =
     "STEPHENSONS PEAK"
     (Just "NT")
     "STPK"
-    (-25.5)
-    130.18333333333334
+    (Lat (-25) 30.0)
+    (Lon 130 11.0)
 
 _SCRK_ ::
   VFR_Waypoint
@@ -8645,8 +8699,8 @@ _SCRK_ =
     "STONEY CREEK"
     (Just "QLD")
     "SCRK"
-    (-16.878333333333334)
-    145.655
+    (Lat (-16) 52.7)
+    (Lon 145 39.3)
 
 _SBD_ ::
   VFR_Waypoint
@@ -8655,8 +8709,8 @@ _SBD_ =
     "STORY BRIDGE"
     (Just "QLD")
     "SBD"
-    (-27.465)
-    153.03833333333333
+    (Lat (-27) 27.9)
+    (Lon 153 2.3)
 
 _STOT_ ::
   VFR_Waypoint
@@ -8665,8 +8719,8 @@ _STOT_ =
     "STOTTS ISLAND"
     (Just "NSW")
     "STOT"
-    (-28.268333333333334)
-    153.5
+    (Lat (-28) 16.1)
+    (Lon 153 30.0)
 
 _SYN_ ::
   VFR_Waypoint
@@ -8675,8 +8729,8 @@ _SYN_ =
     "STRATHALBYN"
     (Just "SA")
     "SYN"
-    (-35.25833333333333)
-    138.895
+    (Lat (-35) 15.5)
+    (Lon 138 53.7)
 
 _SFE_ ::
   VFR_Waypoint
@@ -8685,8 +8739,8 @@ _SFE_ =
     "STRATHFINELLA"
     (Just "QLD")
     "SFE"
-    (-23.35)
-    143.55
+    (Lat (-23) 21.0)
+    (Lon 143 33.0)
 
 _STRA_ ::
   VFR_Waypoint
@@ -8695,8 +8749,8 @@ _STRA_ =
     "STRATHGORDON"
     (Just "TAS")
     "STRA"
-    (-42.766666666666666)
-    146.03666666666666
+    (Lat (-42) 46.0)
+    (Lon 146 2.2)
 
 _SLY_ ::
   VFR_Waypoint
@@ -8705,8 +8759,8 @@ _SLY_ =
     "STRELLEY HS"
     (Just "WA")
     "SLY"
-    (-20.441666666666666)
-    118.98333333333333
+    (Lat (-20) 26.5)
+    (Lon 118 59.0)
 
 _SRO_ ::
   VFR_Waypoint
@@ -8715,8 +8769,8 @@ _SRO_ =
     "STROUD ROAD"
     (Just "NSW")
     "SRO"
-    (-32.346666666666664)
-    151.91833333333332
+    (Lat (-32) 20.8)
+    (Lon 151 55.1)
 
 _SUA_ ::
   VFR_Waypoint
@@ -8725,8 +8779,8 @@ _SUA_ =
     "STUART"
     (Just "QLD")
     "SUA"
-    (-19.35)
-    146.83333333333334
+    (Lat (-19) 21.0)
+    (Lon 146 50.0)
 
 _STUM_ ::
   VFR_Waypoint
@@ -8735,8 +8789,8 @@ _STUM_ =
     "STUMERS CREEK"
     (Just "QLD")
     "STUM"
-    (-26.52)
-    153.085
+    (Lat (-26) 31.2)
+    (Lon 153 5.1)
 
 _SUI_ ::
   VFR_Waypoint
@@ -8745,8 +8799,8 @@ _SUI_ =
     "STURT INTERSECTION"
     (Just "NSW")
     "SUI"
-    (-35.22)
-    147.79333333333332
+    (Lat (-35) 13.2)
+    (Lon 147 47.6)
 
 _SUB_ ::
   VFR_Waypoint
@@ -8755,8 +8809,8 @@ _SUB_ =
     "SUBSTATION"
     (Just "SA")
     "SUB"
-    (-34.736666666666665)
-    138.71333333333334
+    (Lat (-34) 44.2)
+    (Lon 138 42.8)
 
 _SUTR_ ::
   VFR_Waypoint
@@ -8765,8 +8819,8 @@ _SUTR_ =
     "SUGAR TERMINAL"
     (Just "QLD")
     "SUTR"
-    (-16.941666666666666)
-    145.76666666666668
+    (Lat (-16) 56.5)
+    (Lon 145 46.0)
 
 _SLMT_ ::
   VFR_Waypoint
@@ -8775,8 +8829,8 @@ _SLMT_ =
     "SUGARLOAF MT"
     (Just "NSW")
     "SLMT"
-    (-31.433333333333334)
-    150.875
+    (Lat (-31) 26.0)
+    (Lon 150 52.5)
 
 _SUG_ ::
   VFR_Waypoint
@@ -8785,8 +8839,8 @@ _SUG_ =
     "SUGARLOAF PT"
     (Just "NSW")
     "SUG"
-    (-32.445)
-    152.54
+    (Lat (-32) 26.7)
+    (Lon 152 32.4)
 
 _SGSV_ ::
   VFR_Waypoint
@@ -8795,8 +8849,8 @@ _SGSV_ =
     "SUGARLOAF RESERVOIR"
     (Just "VIC")
     "SGSV"
-    (-37.675)
-    145.3
+    (Lat (-37) 40.5)
+    (Lon 145 18.0)
 
 _SWLD_ ::
   VFR_Waypoint
@@ -8805,8 +8859,8 @@ _SWLD_ =
     "SUGARWORLD"
     (Just "QLD")
     "SWLD"
-    (-17.016666666666666)
-    145.73166666666665
+    (Lat (-17) 1.0)
+    (Lon 145 43.9)
 
 _SUNZ_ ::
   VFR_Waypoint
@@ -8815,8 +8869,8 @@ _SUNZ_ =
     "SUN ZINC REFINERY"
     (Just "QLD")
     "SUNZ"
-    (-19.333333333333332)
-    146.88666666666666
+    (Lat (-19) 20.0)
+    (Lon 146 53.2)
 
 _SBU_ ::
   VFR_Waypoint
@@ -8825,8 +8879,8 @@ _SBU_ =
     "SUNBURY"
     (Just "VIC")
     "SBU"
-    (-37.583333333333336)
-    144.725
+    (Lat (-37) 35.0)
+    (Lon 144 43.5)
 
 _SWT_ ::
   VFR_Waypoint
@@ -8835,8 +8889,8 @@ _SWT_ =
     "SUNBURY WATER TANK"
     (Just "VIC")
     "SWT"
-    (-37.54833333333333)
-    144.69166666666666
+    (Lat (-37) 32.9)
+    (Lon 144 41.5)
 
 _SBIT_ ::
   VFR_Waypoint
@@ -8845,8 +8899,8 @@ _SBIT_ =
     "SURBITON"
     (Just "QLD")
     "SBIT"
-    (-23.15)
-    146.61666666666667
+    (Lat (-23) 9.0)
+    (Lon 146 37.0)
 
 _SUPA_ ::
   VFR_Waypoint
@@ -8855,8 +8909,8 @@ _SUPA_ =
     "SURFER'S PARADISE"
     (Just "QLD")
     "SUPA"
-    (-28.0)
-    153.43333333333334
+    (Lat (-28) 0.0)
+    (Lon 153 26.0)
 
 _SUD_ ::
   VFR_Waypoint
@@ -8865,8 +8919,8 @@ _SUD_ =
     "SUTHERLAND"
     (Just "NSW")
     "SUD"
-    (-34.038333333333334)
-    151.055
+    (Lat (-34) 2.3)
+    (Lon 151 3.3)
 
 _SHER_ ::
   VFR_Waypoint
@@ -8875,8 +8929,8 @@ _SHER_ =
     "SUTHERLANDS"
     (Just "SA")
     "SHER"
-    (-34.15)
-    139.23333333333332
+    (Lat (-34) 9.0)
+    (Lon 139 14.0)
 
 _SUE_ ::
   VFR_Waypoint
@@ -8885,8 +8939,8 @@ _SUE_ =
     "SUTTON ROAD OVERPASS"
     (Just "NSW")
     "SUE"
-    (-35.18333333333333)
-    149.25833333333333
+    (Lat (-35) 11.0)
+    (Lon 149 15.5)
 
 _SBCH_ ::
   VFR_Waypoint
@@ -8895,8 +8949,8 @@ _SBCH_ =
     "SUTTONS BEACH"
     (Just "QLD")
     "SBCH"
-    (-27.235)
-    153.115
+    (Lat (-27) 14.1)
+    (Lon 153 6.9)
 
 _SCTY_ ::
   VFR_Waypoint
@@ -8905,8 +8959,8 @@ _SCTY_ =
     "SYDNEY CBD"
     (Just "NSW")
     "SCTY"
-    (-33.86666666666667)
-    151.2
+    (Lat (-33) 52.0)
+    (Lon 151 12.0)
 
 _SCG_ ::
   VFR_Waypoint
@@ -8915,8 +8969,8 @@ _SCG_ =
     "SYDNEY CRICKET GROUND"
     (Just "NSW")
     "SCG"
-    (-33.891666666666666)
-    151.22333333333333
+    (Lat (-33) 53.5)
+    (Lon 151 13.4)
 
 _SYHD_ ::
   VFR_Waypoint
@@ -8925,8 +8979,8 @@ _SYHD_ =
     "SYDNEY HEADS"
     (Just "NSW")
     "SYHD"
-    (-33.833333333333336)
-    151.29166666666666
+    (Lat (-33) 50.0)
+    (Lon 151 17.5)
 
 _SYP_ ::
   VFR_Waypoint
@@ -8935,8 +8989,8 @@ _SYP_ =
     "SYMMONS PLAINS"
     (Just "TAS")
     "SYP"
-    (-41.655)
-    147.25
+    (Lat (-41) 39.3)
+    (Lon 147 15.0)
 
 _TBL_ ::
   VFR_Waypoint
@@ -8945,8 +8999,8 @@ _TBL_ =
     "TABULAM"
     (Just "NSW")
     "TBL"
-    (-28.886666666666667)
-    152.56833333333333
+    (Lat (-28) 53.2)
+    (Lon 152 34.1)
 
 _TCH_ ::
   VFR_Waypoint
@@ -8955,8 +9009,8 @@ _TCH_ =
     "TALC HEAD"
     (Just "NT")
     "TCH"
-    (-12.48)
-    130.76666666666668
+    (Lat (-12) 28.8)
+    (Lon 130 46.0)
 
 _TLAG_ ::
   VFR_Waypoint
@@ -8965,8 +9019,8 @@ _TLAG_ =
     "TALLANGATTA"
     (Just "VIC")
     "TLAG"
-    (-36.21666666666667)
-    147.175
+    (Lat (-36) 13.0)
+    (Lon 147 10.5)
 
 _TLY_ ::
   VFR_Waypoint
@@ -8975,8 +9029,8 @@ _TLY_ =
     "TALLANGATTA CAUSEWAY"
     (Just "VIC")
     "TLY"
-    (-36.21333333333333)
-    147.24666666666667
+    (Lat (-36) 12.8)
+    (Lon 147 14.8)
 
 _TRWL_ ::
   VFR_Waypoint
@@ -8985,8 +9039,8 @@ _TRWL_ =
     "TALLARINGA WELL"
     (Just "SA")
     "TRWL"
-    (-29.033333333333335)
-    133.28333333333333
+    (Lat (-29) 2.0)
+    (Lon 133 17.0)
 
 _TLK_ ::
   VFR_Waypoint
@@ -8995,8 +9049,8 @@ _TLK_ =
     "TALLAROOK"
     (Just "VIC")
     "TLK"
-    (-37.1)
-    145.1
+    (Lat (-37) 6.0)
+    (Lon 145 6.0)
 
 _TID_ ::
   VFR_Waypoint
@@ -9005,8 +9059,8 @@ _TID_ =
     "TAMAR ISLAND"
     (Just "TAS")
     "TID"
-    (-41.38333333333333)
-    147.08333333333334
+    (Lat (-41) 23.0)
+    (Lon 147 5.0)
 
 _TGN_ ::
   VFR_Waypoint
@@ -9015,8 +9069,8 @@ _TGN_ =
     "TANGORIN"
     (Just "QLD")
     "TGN"
-    (-21.733333333333334)
-    144.2
+    (Lat (-21) 44.0)
+    (Lon 144 12.0)
 
 _TUND_ ::
   VFR_Waypoint
@@ -9025,8 +9079,8 @@ _TUND_ =
     "TANUNDA"
     (Just "SA")
     "TUND"
-    (-34.53333333333333)
-    138.96666666666667
+    (Lat (-34) 32.0)
+    (Lon 138 58.0)
 
 _TAGO_ ::
   VFR_Waypoint
@@ -9035,8 +9089,8 @@ _TAGO_ =
     "TARAGO"
     (Just "NSW")
     "TAGO"
-    (-35.07)
-    149.655
+    (Lat (-35) 4.2)
+    (Lon 149 39.3)
 
 _TOWI_ ::
   VFR_Waypoint
@@ -9045,8 +9099,8 @@ _TOWI_ =
     "TARCOWIE"
     (Just "SA")
     "TOWI"
-    (-32.95)
-    138.51666666666668
+    (Lat (-32) 57.0)
+    (Lon 138 31.0)
 
 _TRT_ ::
   VFR_Waypoint
@@ -9055,8 +9109,8 @@ _TRT_ =
     "TARCUTTA"
     (Just "NSW")
     "TRT"
-    (-35.28)
-    147.73833333333334
+    (Lat (-35) 16.8)
+    (Lon 147 44.3)
 
 _TAP_ ::
   VFR_Waypoint
@@ -9065,8 +9119,8 @@ _TAP_ =
     "TARGA GAP"
     (Just "TAS")
     "TAP"
-    (-41.31166666666667)
-    147.36833333333334
+    (Lat (-41) 18.7)
+    (Lon 147 22.1)
 
 _TAR_ ::
   VFR_Waypoint
@@ -9075,8 +9129,8 @@ _TAR_ =
     "TARGET"
     (Just "QLD")
     "TAR"
-    (-27.613333333333333)
-    153.12666666666667
+    (Lat (-27) 36.8)
+    (Lon 153 7.6)
 
 _TLEE_ ::
   VFR_Waypoint
@@ -9085,8 +9139,8 @@ _TLEE_ =
     "TARLEE"
     (Just "SA")
     "TLEE"
-    (-34.275)
-    138.76833333333335
+    (Lat (-34) 16.5)
+    (Lon 138 46.1)
 
 _TAS_ ::
   VFR_Waypoint
@@ -9095,8 +9149,8 @@ _TAS_ =
     "TASMAN BRIDGE"
     (Just "TAS")
     "TAS"
-    (-42.86666666666667)
-    147.35
+    (Lat (-42) 52.0)
+    (Lon 147 21.0)
 
 _CKO_ ::
   VFR_Waypoint
@@ -9105,8 +9159,8 @@ _CKO_ =
     "TELEGRAPH OFFICE"
     (Just "QLD")
     "CKO"
-    (-19.233333333333334)
-    145.48333333333332
+    (Lat (-19) 14.0)
+    (Lon 145 29.0)
 
 _TPL_ ::
   VFR_Waypoint
@@ -9115,8 +9169,8 @@ _TPL_ =
     "TEMPLE BAY"
     (Just "QLD")
     "TPL"
-    (-12.266666666666667)
-    143.15
+    (Lat (-12) 16.0)
+    (Lon 143 9.0)
 
 _TLC_ ::
   VFR_Waypoint
@@ -9125,8 +9179,8 @@ _TLC_ =
     "TERRANORA LAKES COUNTRY CLUB"
     (Just "QLD")
     "TLC"
-    (-28.215)
-    153.47333333333333
+    (Lat (-28) 12.9)
+    (Lon 153 28.4)
 
 _TWT_ ::
   VFR_Waypoint
@@ -9135,8 +9189,8 @@ _TWT_ =
     "TEWANTIN"
     (Just "QLD")
     "TWT"
-    (-26.4)
-    153.03333333333333
+    (Lat (-26) 24.0)
+    (Lon 153 2.0)
 
 _THW_ ::
   VFR_Waypoint
@@ -9145,8 +9199,8 @@ _THW_ =
     "THARWA"
     (Just "ACT")
     "THW"
-    (-35.513333333333335)
-    149.07
+    (Lat (-35) 30.8)
+    (Lon 149 4.2)
 
 _TCNR_ ::
   VFR_Waypoint
@@ -9155,8 +9209,8 @@ _TCNR_ =
     "THE CORNER"
     (Just "QLD")
     "TCNR"
-    (-19.325)
-    146.72833333333332
+    (Lat (-19) 19.5)
+    (Lon 146 43.7)
 
 _THUM_ ::
   VFR_Waypoint
@@ -9165,8 +9219,8 @@ _THUM_ =
     "THE GUMS"
     (Just "SA")
     "THUM"
-    (-33.833333333333336)
-    139.33333333333334
+    (Lat (-33) 50.0)
+    (Lon 139 20.0)
 
 _TGU_ ::
   VFR_Waypoint
@@ -9175,8 +9229,8 @@ _TGU_ =
     "THE GUMS HS"
     (Just "SA")
     "TGU"
-    (-33.85)
-    139.35
+    (Lat (-33) 51.0)
+    (Lon 139 21.0)
 
 _TLMI_ ::
   VFR_Waypoint
@@ -9185,8 +9239,8 @@ _TLMI_ =
     "THE LAKES MINE"
     (Just "WA")
     "TLMI"
-    (-31.865)
-    116.35833333333333
+    (Lat (-31) 51.9)
+    (Lon 116 21.5)
 
 _THK_ ::
   VFR_Waypoint
@@ -9195,8 +9249,8 @@ _THK_ =
     "THE OAKS"
     (Just "NSW")
     "THK"
-    (-34.07833333333333)
-    150.57833333333335
+    (Lat (-34) 4.7)
+    (Lon 150 34.7)
 
 _PIN_ ::
   VFR_Waypoint
@@ -9205,8 +9259,8 @@ _PIN_ =
     "THE PINES"
     (Just "QLD")
     "PIN"
-    (-28.141666666666666)
-    153.46666666666667
+    (Lat (-28) 8.5)
+    (Lon 153 28.0)
 
 _RCK_ ::
   VFR_Waypoint
@@ -9215,8 +9269,8 @@ _RCK_ =
     "THE ROCK"
     (Just "NSW")
     "RCK"
-    (-35.275)
-    147.07166666666666
+    (Lat (-35) 16.5)
+    (Lon 147 4.3)
 
 _APST_ ::
   VFR_Waypoint
@@ -9225,8 +9279,8 @@ _APST_ =
     "THE STAMFORD (HOTEL)"
     (Just "NSW")
     "APST"
-    (-33.931666666666665)
-    151.185
+    (Lat (-33) 55.9)
+    (Lon 151 11.1)
 
 _WHF_ ::
   VFR_Waypoint
@@ -9235,8 +9289,8 @@ _WHF_ =
     "THE WHARF"
     (Just "VIC")
     "WHF"
-    (-38.1)
-    144.53333333333333
+    (Lat (-38) 6.0)
+    (Lon 144 32.0)
 
 _THB_ ::
   VFR_Waypoint
@@ -9245,8 +9299,8 @@ _THB_ =
     "THEEBINE"
     (Just "QLD")
     "THB"
-    (-25.95)
-    152.55
+    (Lat (-25) 57.0)
+    (Lon 152 33.0)
 
 _THSM_ ::
   VFR_Waypoint
@@ -9255,8 +9309,8 @@ _THSM_ =
     "THOMPSON 1"
     (Just "QLD")
     "THSM"
-    (-17.011666666666667)
-    145.75166666666667
+    (Lat (-17) 0.7)
+    (Lon 145 45.1)
 
 _TORN_ ::
   VFR_Waypoint
@@ -9265,8 +9319,8 @@ _TORN_ =
     "THORNTON"
     (Just "QLD")
     "TORN"
-    (-27.816666666666666)
-    152.38333333333333
+    (Lat (-27) 49.0)
+    (Lon 152 23.0)
 
 _TNP_ ::
   VFR_Waypoint
@@ -9275,8 +9329,8 @@ _TNP_ =
     "THORNTON GAP"
     (Just "QLD")
     "TNP"
-    (-19.358333333333334)
-    146.46166666666667
+    (Lat (-19) 21.5)
+    (Lon 146 27.7)
 
 _TBRT_ ::
   VFR_Waypoint
@@ -9285,8 +9339,8 @@ _TBRT_ =
     "TIMBERTOP"
     (Just "QLD")
     "TBRT"
-    (-16.958333333333332)
-    145.805
+    (Lat (-16) 57.5)
+    (Lon 145 48.3)
 
 _TING_ ::
   VFR_Waypoint
@@ -9295,8 +9349,8 @@ _TING_ =
     "TINGALPA RESERVOIR"
     (Just "QLD")
     "TING"
-    (-27.54)
-    153.16666666666666
+    (Lat (-27) 32.4)
+    (Lon 153 10.0)
 
 _TMPT_ ::
   VFR_Waypoint
@@ -9305,8 +9359,8 @@ _TMPT_ =
     "TOM PRICE"
     (Just "WA")
     "TMPT"
-    (-22.695)
-    117.79166666666667
+    (Lat (-22) 41.7)
+    (Lon 117 47.5)
 
 _TOO_ ::
   VFR_Waypoint
@@ -9315,8 +9369,8 @@ _TOO_ =
     "TOOBORAC"
     (Just "VIC")
     "TOO"
-    (-37.05)
-    144.8
+    (Lat (-37) 3.0)
+    (Lon 144 48.0)
 
 _TLN_ ::
   VFR_Waypoint
@@ -9325,8 +9379,8 @@ _TLN_ =
     "TOOLLEEN"
     (Just "VIC")
     "TLN"
-    (-36.71666666666667)
-    144.68333333333334
+    (Lat (-36) 43.0)
+    (Lon 144 41.0)
 
 _TOOU_ ::
   VFR_Waypoint
@@ -9335,8 +9389,8 @@ _TOOU_ =
     "TOOMULLA"
     (Just "QLD")
     "TOOU"
-    (-19.083333333333332)
-    146.46666666666667
+    (Lat (-19) 5.0)
+    (Lon 146 28.0)
 
 _TOGA_ ::
   VFR_Waypoint
@@ -9345,8 +9399,8 @@ _TOGA_ =
     "TOORONGA"
     (Just "VIC")
     "TOGA"
-    (-37.848333333333336)
-    145.04666666666665
+    (Lat (-37) 50.9)
+    (Lon 145 2.8)
 
 _TOWA_ ::
   VFR_Waypoint
@@ -9355,8 +9409,8 @@ _TOWA_ =
     "TOWRANA HS"
     (Just "WA")
     "TOWA"
-    (-25.433333333333334)
-    115.23333333333333
+    (Lat (-25) 26.0)
+    (Lon 115 14.0)
 
 _TVM_ ::
   VFR_Waypoint
@@ -9365,8 +9419,8 @@ _TVM_ =
     "TREVALLYN DAM"
     (Just "TAS")
     "TVM"
-    (-41.455)
-    147.08833333333334
+    (Lat (-41) 27.3)
+    (Lon 147 5.3)
 
 _TRIN_ ::
   VFR_Waypoint
@@ -9375,8 +9429,8 @@ _TRIN_ =
     "TRINITY BEACH"
     (Just "QLD")
     "TRIN"
-    (-16.783333333333335)
-    145.7
+    (Lat (-16) 47.0)
+    (Lon 145 42.0)
 
 _TRUO_ ::
   VFR_Waypoint
@@ -9385,8 +9439,8 @@ _TRUO_ =
     "TRURO"
     (Just "SA")
     "TRUO"
-    (-34.41166666666667)
-    139.12
+    (Lat (-34) 24.7)
+    (Lon 139 7.2)
 
 _TKER_ ::
   VFR_Waypoint
@@ -9395,8 +9449,8 @@ _TKER_ =
     "TUCKER"
     (Just "QLD")
     "TKER"
-    (-24.483333333333334)
-    149.2
+    (Lat (-24) 29.0)
+    (Lon 149 12.0)
 
 _TUK_ ::
   VFR_Waypoint
@@ -9405,8 +9459,8 @@ _TUK_ =
     "TUCKERS KNOB"
     (Just "NSW")
     "TUK"
-    (-30.343333333333334)
-    152.98
+    (Lat (-30) 20.6)
+    (Lon 152 58.8)
 
 _TGC_ ::
   VFR_Waypoint
@@ -9415,8 +9469,8 @@ _TGC_ =
     "TUGGERANONG TOWN CENTRE"
     (Just "ACT")
     "TGC"
-    (-35.416666666666664)
-    149.06666666666666
+    (Lat (-35) 25.0)
+    (Lon 149 4.0)
 
 _TUMB_ ::
   VFR_Waypoint
@@ -9425,8 +9479,8 @@ _TUMB_ =
     "TUMBULGUM"
     (Just "NSW")
     "TUMB"
-    (-28.278333333333332)
-    153.46666666666667
+    (Lat (-28) 16.7)
+    (Lon 153 28.0)
 
 _TTLE_ ::
   VFR_Waypoint
@@ -9435,8 +9489,8 @@ _TTLE_ =
     "TURTLE PT"
     (Just "NT")
     "TTLE"
-    (-14.85)
-    129.25
+    (Lat (-14) 51.0)
+    (Lon 129 15.0)
 
 _TWRN_ ::
   VFR_Waypoint
@@ -9445,8 +9499,8 @@ _TWRN_ =
     "TWO RN"
     (Just "NSW")
     "TWRN"
-    (-33.93666666666667)
-    150.88833333333332
+    (Lat (-33) 56.2)
+    (Lon 150 53.3)
 
 _TOS_ ::
   VFR_Waypoint
@@ -9455,8 +9509,8 @@ _TOS_ =
     "TWO ROCKS"
     (Just "WA")
     "TOS"
-    (-31.491666666666667)
-    115.58333333333333
+    (Lat (-31) 29.5)
+    (Lon 115 35.0)
 
 _UKER_ ::
   VFR_Waypoint
@@ -9465,8 +9519,8 @@ _UKER_ =
     "UKEREBAGH ISLAND"
     (Just "NSW")
     "UKER"
-    (-28.18)
-    153.54666666666665
+    (Lat (-28) 10.8)
+    (Lon 153 32.8)
 
 _UDA_ ::
   VFR_Waypoint
@@ -9475,8 +9529,8 @@ _UDA_ =
     "ULLADULLA"
     (Just "NSW")
     "UDA"
-    (-35.35)
-    150.48333333333332
+    (Lat (-35) 21.0)
+    (Lon 150 29.0)
 
 _UNDW_ ::
   VFR_Waypoint
@@ -9485,8 +9539,8 @@ _UNDW_ =
     "UNDEMOW WATERHOLE"
     (Just "NT")
     "UNDW"
-    (-17.583333333333332)
-    135.25
+    (Lat (-17) 35.0)
+    (Lon 135 15.0)
 
 _UQLD_ ::
   VFR_Waypoint
@@ -9495,8 +9549,8 @@ _UQLD_ =
     "UNI OF QLD ST LUCIA"
     (Just "QLD")
     "UQLD"
-    (-27.498333333333335)
-    153.01333333333332
+    (Lat (-27) 29.9)
+    (Lon 153 0.8)
 
 _USW_ ::
   VFR_Waypoint
@@ -9505,8 +9559,8 @@ _USW_ =
     "UPPER SWAN"
     (Just "WA")
     "USW"
-    (-31.77166666666667)
-    116.01666666666667
+    (Lat (-31) 46.3)
+    (Lon 116 1.0)
 
 _URAN_ ::
   VFR_Waypoint
@@ -9515,8 +9569,8 @@ _URAN_ =
     "URANGAN"
     (Just "QLD")
     "URAN"
-    (-25.283333333333335)
-    152.9
+    (Lat (-25) 17.0)
+    (Lon 152 54.0)
 
 _URA_ ::
   VFR_Waypoint
@@ -9525,8 +9579,8 @@ _URA_ =
     "URANQUINTY"
     (Just "NSW")
     "URA"
-    (-35.19166666666667)
-    147.24666666666667
+    (Lat (-35) 11.5)
+    (Lon 147 14.8)
 
 _URC_ ::
   VFR_Waypoint
@@ -9535,8 +9589,8 @@ _URC_ =
     "URRBRAE AGRICULTURAL HIGH SCHOOL"
     (Just "SA")
     "URC"
-    (-34.96666666666667)
-    138.625
+    (Lat (-34) 58.0)
+    (Lon 138 37.5)
 
 _URU_ ::
   VFR_Waypoint
@@ -9545,8 +9599,8 @@ _URU_ =
     "URUNGA"
     (Just "NSW")
     "URU"
-    (-30.491666666666667)
-    153.01666666666668
+    (Lat (-30) 29.5)
+    (Lon 153 1.0)
 
 _VTG_ ::
   VFR_Waypoint
@@ -9555,8 +9609,8 @@ _VTG_ =
     "VEHICLE TESTING GROUND"
     (Just "VIC")
     "VTG"
-    (-37.88333333333333)
-    144.41666666666666
+    (Lat (-37) 53.0)
+    (Lon 144 25.0)
 
 _VELO_ ::
   VFR_Waypoint
@@ -9565,8 +9619,8 @@ _VELO_ =
     "VELODROME"
     (Just "SA")
     "VELO"
-    (-34.843333333333334)
-    138.61166666666668
+    (Lat (-34) 50.6)
+    (Lon 138 36.7)
 
 _VICP_ ::
   VFR_Waypoint
@@ -9575,8 +9629,8 @@ _VICP_ =
     "VICTORIA PARK"
     (Just "SA")
     "VICP"
-    (-34.93333333333333)
-    138.62166666666667
+    (Lat (-34) 56.0)
+    (Lon 138 37.3)
 
 _VOKH_ ::
   VFR_Waypoint
@@ -9585,8 +9639,8 @@ _VOKH_ =
     "VOKES HILL"
     (Just "SA")
     "VOKH"
-    (-28.483333333333334)
-    130.58333333333334
+    (Lat (-28) 29.0)
+    (Lon 130 35.0)
 
 _VPH_ ::
   VFR_Waypoint
@@ -9595,8 +9649,8 @@ _VPH_ =
     "VPH"
     (Just "WA")
     "VPH"
-    (-31.945)
-    115.96
+    (Lat (-31) 56.7)
+    (Lon 115 57.6)
 
 _WGL_ ::
   VFR_Waypoint
@@ -9605,8 +9659,8 @@ _WGL_ =
     "WAIGEN LAKES"
     (Just "WA")
     "WGL"
-    (-27.616666666666667)
-    128.78333333333333
+    (Lat (-27) 37.0)
+    (Lon 128 47.0)
 
 _WTC_ ::
   VFR_Waypoint
@@ -9615,8 +9669,8 @@ _WTC_ =
     "WAITE CAMPUS"
     (Just "SA")
     "WTC"
-    (-34.97)
-    138.635
+    (Lat (-34) 58.2)
+    (Lon 138 38.1)
 
 _WKT_ ::
   VFR_Waypoint
@@ -9625,8 +9679,8 @@ _WKT_ =
     "WALKERSTON"
     (Just "QLD")
     "WKT"
-    (-21.163333333333334)
-    149.06333333333333
+    (Lat (-21) 9.8)
+    (Lon 149 3.8)
 
 _WBH_ ::
   VFR_Waypoint
@@ -9635,8 +9689,8 @@ _WBH_ =
     "WALLABADAH"
     (Just "NSW")
     "WBH"
-    (-31.538333333333334)
-    150.825
+    (Lat (-31) 32.3)
+    (Lon 150 49.5)
 
 _WAN_ ::
   VFR_Waypoint
@@ -9645,8 +9699,8 @@ _WAN_ =
     "WALLAN"
     (Just "VIC")
     "WAN"
-    (-37.40833333333333)
-    144.97666666666666
+    (Lat (-37) 24.5)
+    (Lon 144 58.6)
 
 _WGR_ ::
   VFR_Waypoint
@@ -9655,8 +9709,8 @@ _WGR_ =
     "WALLANGARRA"
     (Just "NSW")
     "WGR"
-    (-28.916666666666668)
-    151.93333333333334
+    (Lat (-28) 55.0)
+    (Lon 151 56.0)
 
 _WRO_ ::
   VFR_Waypoint
@@ -9665,8 +9719,8 @@ _WRO_ =
     "WALLAROO"
     (Just "SA")
     "WRO"
-    (-33.93333333333333)
-    137.63333333333333
+    (Lat (-33) 56.0)
+    (Lon 137 38.0)
 
 _WMB_ ::
   VFR_Waypoint
@@ -9675,8 +9729,8 @@ _WMB_ =
     "WALLUMBILLA"
     (Just "QLD")
     "WMB"
-    (-26.583333333333332)
-    149.18333333333334
+    (Lat (-26) 35.0)
+    (Lon 149 11.0)
 
 _WPE_ ::
   VFR_Waypoint
@@ -9685,8 +9739,8 @@ _WPE_ =
     "WALPOLE"
     (Just "WA")
     "WPE"
-    (-34.983333333333334)
-    116.73333333333333
+    (Lat (-34) 59.0)
+    (Lon 116 44.0)
 
 _WTBG_ ::
   VFR_Waypoint
@@ -9695,8 +9749,8 @@ _WTBG_ =
     "WALTER TAYLOR BRIDGE"
     (Just "QLD")
     "WTBG"
-    (-27.505)
-    152.97333333333333
+    (Lat (-27) 30.3)
+    (Lon 152 58.4)
 
 _WDN_ ::
   VFR_Waypoint
@@ -9705,8 +9759,8 @@ _WDN_ =
     "WANDANDIAN"
     (Just "NSW")
     "WDN"
-    (-35.083333333333336)
-    150.51666666666668
+    (Lat (-35) 5.0)
+    (Lon 150 31.0)
 
 _WAND_ ::
   VFR_Waypoint
@@ -9715,8 +9769,8 @@ _WAND_ =
     "WANDERING"
     (Just "WA")
     "WAND"
-    (-32.675)
-    116.66666666666667
+    (Lat (-32) 40.5)
+    (Lon 116 40.0)
 
 _WAT_ ::
   VFR_Waypoint
@@ -9725,8 +9779,8 @@ _WAT_ =
     "WANGETTI"
     (Just "QLD")
     "WAT"
-    (-16.665)
-    145.56666666666666
+    (Lat (-16) 39.9)
+    (Lon 145 34.0)
 
 _WAG_ ::
   VFR_Waypoint
@@ -9735,8 +9789,8 @@ _WAG_ =
     "WANTABADGERY"
     (Just "NSW")
     "WAG"
-    (-35.05833333333333)
-    147.72166666666666
+    (Lat (-35) 3.5)
+    (Lon 147 43.3)
 
 _WRNA_ ::
   VFR_Waypoint
@@ -9745,8 +9799,8 @@ _WRNA_ =
     "WAROONA"
     (Just "WA")
     "WRNA"
-    (-32.84166666666667)
-    115.91666666666667
+    (Lat (-32) 50.5)
+    (Lon 115 55.0)
 
 _WAD_ ::
   VFR_Waypoint
@@ -9755,8 +9809,8 @@ _WAD_ =
     "WARRAGAMBA DAM"
     (Just "NSW")
     "WAD"
-    (-33.885)
-    150.59166666666667
+    (Lat (-33) 53.1)
+    (Lon 150 35.5)
 
 _WASL_ ::
   VFR_Waypoint
@@ -9765,8 +9819,8 @@ _WASL_ =
     "WARRAL SILO"
     (Just "NSW")
     "WASL"
-    (-31.15)
-    150.85833333333332
+    (Lat (-31) 9.0)
+    (Lon 150 51.5)
 
 _WRD_ ::
   VFR_Waypoint
@@ -9775,8 +9829,8 @@ _WRD_ =
     "WARRANDYTE"
     (Just "VIC")
     "WRD"
-    (-37.75)
-    145.20833333333334
+    (Lat (-37) 45.0)
+    (Lon 145 12.5)
 
 _WRR_ ::
   VFR_Waypoint
@@ -9785,8 +9839,8 @@ _WRR_ =
     "WARREN RESERVOIR"
     (Just "SA")
     "WRR"
-    (-34.708333333333336)
-    138.93333333333334
+    (Lat (-34) 42.5)
+    (Lon 138 56.0)
 
 _WFM_ ::
   VFR_Waypoint
@@ -9795,8 +9849,8 @@ _WFM_ =
     "WARWICK FARM"
     (Just "NSW")
     "WFM"
-    (-33.91166666666667)
-    150.94666666666666
+    (Lat (-33) 54.7)
+    (Lon 150 56.8)
 
 _WFL_ ::
   VFR_Waypoint
@@ -9805,8 +9859,8 @@ _WFL_ =
     "WATERFALL"
     (Just "NSW")
     "WFL"
-    (-34.13666666666666)
-    150.99166666666667
+    (Lat (-34) 8.2)
+    (Lon 150 59.5)
 
 _WAYS_ ::
   VFR_Waypoint
@@ -9815,8 +9869,8 @@ _WAYS_ =
     "WAYSIDE"
     (Just "NT")
     "WAYS"
-    (-15.575)
-    131.04
+    (Lat (-15) 34.5)
+    (Lon 131 2.4)
 
 _WWN_ ::
   VFR_Waypoint
@@ -9825,8 +9879,8 @@ _WWN_ =
     "WEALWANDANGIE"
     (Just "QLD")
     "WWN"
-    (-24.416666666666668)
-    148.05
+    (Lat (-24) 25.0)
+    (Lon 148 3.0)
 
 _WCP_ ::
   VFR_Waypoint
@@ -9835,8 +9889,8 @@ _WCP_ =
     "WELLCAMP DOWNS"
     (Just "QLD")
     "WCP"
-    (-27.55)
-    151.85
+    (Lat (-27) 33.0)
+    (Lon 151 51.0)
 
 _WELL_ ::
   VFR_Waypoint
@@ -9845,8 +9899,8 @@ _WELL_ =
     "WELLINGTON PT"
     (Just "QLD")
     "WELL"
-    (-27.468333333333334)
-    153.24166666666667
+    (Lat (-27) 28.1)
+    (Lon 153 14.5)
 
 _WLS_ ::
   VFR_Waypoint
@@ -9855,8 +9909,8 @@ _WLS_ =
     "WELLSHOT"
     (Just "QLD")
     "WLS"
-    (-23.9)
-    144.43333333333334
+    (Lat (-23) 54.0)
+    (Lon 144 26.0)
 
 _WELS_ ::
   VFR_Waypoint
@@ -9865,8 +9919,8 @@ _WELS_ =
     "WELSHPOOL"
     (Just "VIC")
     "WELS"
-    (-38.665)
-    146.43833333333333
+    (Lat (-38) 39.9)
+    (Lon 146 26.3)
 
 _WBER_ ::
   VFR_Waypoint
@@ -9875,8 +9929,8 @@ _WBER_ =
     "WERRIBEE RACECOURSE"
     (Just "VIC")
     "WBER"
-    (-37.9)
-    144.64166666666668
+    (Lat (-37) 54.0)
+    (Lon 144 38.5)
 
 _WBES_ ::
   VFR_Waypoint
@@ -9885,8 +9939,8 @@ _WBES_ =
     "WERRIBEE SOUTH"
     (Just "VIC")
     "WBES"
-    (-37.97666666666667)
-    144.68833333333333
+    (Lat (-37) 58.6)
+    (Lon 144 41.3)
 
 _WEK_ ::
   VFR_Waypoint
@@ -9895,8 +9949,8 @@ _WEK_ =
     "WERRIS CREEK"
     (Just "NSW")
     "WEK"
-    (-31.358333333333334)
-    150.65
+    (Lat (-31) 21.5)
+    (Lon 150 39.0)
 
 _WSM_ ::
   VFR_Waypoint
@@ -9905,8 +9959,8 @@ _WSM_ =
     "WEST ARM"
     (Just "NT")
     "WSM"
-    (-12.55)
-    130.78833333333333
+    (Lat (-12) 33.0)
+    (Lon 130 47.3)
 
 _WEBS_ ::
   VFR_Waypoint
@@ -9915,8 +9969,8 @@ _WEBS_ =
     "WEST BASS"
     (Just "VIC")
     "WEBS"
-    (-39.5)
-    141.0
+    (Lat (-39) 30.0)
+    (Lon 141 0.0)
 
 _WTG_ ::
   VFR_Waypoint
@@ -9925,8 +9979,8 @@ _WTG_ =
     "WEST GAP"
     (Just "TAS")
     "WTG"
-    (-41.345)
-    146.775
+    (Lat (-41) 20.7)
+    (Lon 146 46.5)
 
 _WSN_ ::
   VFR_Waypoint
@@ -9935,8 +9989,8 @@ _WSN_ =
     "WEST LAGOON"
     (Just "TAS")
     "WSN"
-    (-41.60333333333333)
-    147.02833333333334
+    (Lat (-41) 36.2)
+    (Lon 147 1.7)
 
 _WEP_ ::
   VFR_Waypoint
@@ -9945,8 +9999,8 @@ _WEP_ =
     "WEST PT"
     (Just "QLD")
     "WEP"
-    (-19.128333333333334)
-    146.77833333333334
+    (Lat (-19) 7.7)
+    (Lon 146 46.7)
 
 _WNFE_ ::
   VFR_Waypoint
@@ -9955,8 +10009,8 @@ _WNFE_ =
     "WESTERN FREEWAY"
     (Just "QLD")
     "WNFE"
-    (-27.575)
-    152.945
+    (Lat (-27) 34.5)
+    (Lon 152 56.7)
 
 _WES_ ::
   VFR_Waypoint
@@ -9965,8 +10019,8 @@ _WES_ =
     "WESTGATE BRIDGE"
     (Just "VIC")
     "WES"
-    (-37.83)
-    144.89666666666668
+    (Lat (-37) 49.8)
+    (Lon 144 53.8)
 
 _WMR_ ::
   VFR_Waypoint
@@ -9975,8 +10029,8 @@ _WMR_ =
     "WESTMAR"
     (Just "QLD")
     "WMR"
-    (-27.916666666666668)
-    149.71666666666667
+    (Lat (-27) 55.0)
+    (Lon 149 43.0)
 
 _WST_ ::
   VFR_Waypoint
@@ -9985,8 +10039,8 @@ _WST_ =
     "WESTMEAD"
     (Just "NSW")
     "WST"
-    (-33.803333333333335)
-    150.98666666666668
+    (Lat (-33) 48.2)
+    (Lon 150 59.2)
 
 _WTB_ ::
   VFR_Waypoint
@@ -9995,8 +10049,8 @@ _WTB_ =
     "WETHERBY"
     (Just "QLD")
     "WTB"
-    (-21.5)
-    142.83333333333334
+    (Lat (-21) 30.0)
+    (Lon 142 50.0)
 
 _WHM_ ::
   VFR_Waypoint
@@ -10005,8 +10059,8 @@ _WHM_ =
     "WHIM CREEK"
     (Just "WA")
     "WHM"
-    (-20.833333333333332)
-    117.83333333333333
+    (Lat (-20) 50.0)
+    (Lon 117 50.0)
 
 _WTRK_ ::
   VFR_Waypoint
@@ -10015,8 +10069,8 @@ _WTRK_ =
     "WHITE ROCK"
     (Just "QLD")
     "WTRK"
-    (-18.778333333333332)
-    146.71833333333333
+    (Lat (-18) 46.7)
+    (Lon 146 43.1)
 
 _WHW_ ::
   VFR_Waypoint
@@ -10025,8 +10079,8 @@ _WHW_ =
     "WHITEWOOD"
     (Just "QLD")
     "WHW"
-    (-21.483333333333334)
-    143.6
+    (Lat (-21) 29.0)
+    (Lon 143 36.0)
 
 _WTS_ ::
   VFR_Waypoint
@@ -10035,8 +10089,8 @@ _WTS_ =
     "WHITTLESEA"
     (Just "VIC")
     "WTS"
-    (-37.516666666666666)
-    145.11666666666667
+    (Lat (-37) 31.0)
+    (Lon 145 7.0)
 
 _WIKP_ ::
   VFR_Waypoint
@@ -10045,8 +10099,8 @@ _WIKP_ =
     "WICKHAM PT"
     (Just "NT")
     "WIKP"
-    (-12.505)
-    130.86
+    (Lat (-12) 30.3)
+    (Lon 130 51.6)
 
 _WHPL_ ::
   VFR_Waypoint
@@ -10055,8 +10109,8 @@ _WHPL_ =
     "WILD HORSE PLAINS"
     (Just "SA")
     "WHPL"
-    (-34.36)
-    138.28833333333333
+    (Lat (-34) 21.6)
+    (Lon 138 17.3)
 
 _WILE_ ::
   VFR_Waypoint
@@ -10065,8 +10119,8 @@ _WILE_ =
     "WILLEROO"
     (Just "NT")
     "WILE"
-    (-15.283333333333333)
-    131.565
+    (Lat (-15) 17.0)
+    (Lon 131 33.9)
 
 _WMS_ ::
   VFR_Waypoint
@@ -10075,8 +10129,8 @@ _WMS_ =
     "WILLIAMSTOWN"
     (Just "VIC")
     "WMS"
-    (-37.87)
-    144.91166666666666
+    (Lat (-37) 52.2)
+    (Lon 144 54.7)
 
 _WICK_ ::
   VFR_Waypoint
@@ -10085,8 +10139,8 @@ _WICK_ =
     "WILLIE CREEK"
     (Just "WA")
     "WICK"
-    (-17.75)
-    122.20833333333333
+    (Lat (-17) 45.0)
+    (Lon 122 12.5)
 
 _WIE_ ::
   VFR_Waypoint
@@ -10095,8 +10149,8 @@ _WIE_ =
     "WIMMERA"
     (Just "NSW")
     "WIE"
-    (-31.158333333333335)
-    150.81666666666666
+    (Lat (-31) 9.5)
+    (Lon 150 49.0)
 
 _WDU_ ::
   VFR_Waypoint
@@ -10105,8 +10159,8 @@ _WDU_ =
     "WIRRADGURIE"
     (Just "NSW")
     "WDU"
-    (-31.9)
-    152.06666666666666
+    (Lat (-31) 54.0)
+    (Lon 152 4.0)
 
 _WSFR_ ::
   VFR_Waypoint
@@ -10115,8 +10169,8 @@ _WSFR_ =
     "WISEMANS FERRY"
     (Just "NSW")
     "WSFR"
-    (-33.38)
-    150.98833333333334
+    (Lat (-33) 22.8)
+    (Lon 150 59.3)
 
 _WTHB_ ::
   VFR_Waypoint
@@ -10125,8 +10179,8 @@ _WTHB_ =
     "WITHNELL BAY"
     (Just "WA")
     "WTHB"
-    (-20.58)
-    116.78666666666666
+    (Lat (-20) 34.8)
+    (Lon 116 47.2)
 
 _WHDW_ ::
   VFR_Waypoint
@@ -10135,8 +10189,8 @@ _WHDW_ =
     "WIVENHOE DAM WALL"
     (Just "QLD")
     "WHDW"
-    (-27.395)
-    152.60833333333332
+    (Lat (-27) 23.7)
+    (Lon 152 36.5)
 
 _WBK_ ::
   VFR_Waypoint
@@ -10145,8 +10199,8 @@ _WBK_ =
     "WOODBROOK"
     (Just "WA")
     "WBK"
-    (-20.911666666666665)
-    117.11666666666666
+    (Lat (-20) 54.7)
+    (Lon 117 7.0)
 
 _WOT_ ::
   VFR_Waypoint
@@ -10155,8 +10209,8 @@ _WOT_ =
     "WOODGATE"
     (Just "QLD")
     "WOT"
-    (-25.116666666666667)
-    152.56666666666666
+    (Lat (-25) 7.0)
+    (Lon 152 34.0)
 
 _WOOS_ ::
   VFR_Waypoint
@@ -10165,8 +10219,8 @@ _WOOS_ =
     "WOODLANDS GOLF COURSE"
     (Just "VIC")
     "WOOS"
-    (-37.99666666666667)
-    145.1
+    (Lat (-37) 59.8)
+    (Lon 145 6.0)
 
 _WMP_ ::
   VFR_Waypoint
@@ -10175,8 +10229,8 @@ _WMP_ =
     "WOODMAN PT"
     (Just "WA")
     "WMP"
-    (-32.141666666666666)
-    115.73333333333333
+    (Lat (-32) 8.5)
+    (Lon 115 44.0)
 
 _WYPT_ ::
   VFR_Waypoint
@@ -10185,8 +10239,8 @@ _WYPT_ =
     "WOODY PT"
     (Just "QLD")
     "WYPT"
-    (-27.265)
-    153.10333333333332
+    (Lat (-27) 15.9)
+    (Lon 153 6.2)
 
 _WGG_ ::
   VFR_Waypoint
@@ -10195,8 +10249,8 @@ _WGG_ =
     "WOOLGOOLGA"
     (Just "NSW")
     "WGG"
-    (-30.113333333333333)
-    153.2
+    (Lat (-30) 6.8)
+    (Lon 153 12.0)
 
 _WOI_ ::
   VFR_Waypoint
@@ -10205,8 +10259,8 @@ _WOI_ =
     "WOOLLAMIA"
     (Just "NSW")
     "WOI"
-    (-35.02)
-    150.66
+    (Lat (-35) 1.2)
+    (Lon 150 39.6)
 
 _WNK_ ::
   VFR_Waypoint
@@ -10215,8 +10269,8 @@ _WNK_ =
     "WOOMANOOKA"
     (Just "QLD")
     "WNK"
-    (-13.733333333333333)
-    141.58333333333334
+    (Lat (-13) 44.0)
+    (Lon 141 35.0)
 
 _WAM_ ::
   VFR_Waypoint
@@ -10225,8 +10279,8 @@ _WAM_ =
     "WOOMARGAMA"
     (Just "NSW")
     "WAM"
-    (-35.833333333333336)
-    147.24833333333333
+    (Lat (-35) 50.0)
+    (Lon 147 14.9)
 
 _WRM_ ::
   VFR_Waypoint
@@ -10235,8 +10289,8 @@ _WRM_ =
     "WOORIM"
     (Just "QLD")
     "WRM"
-    (-27.078333333333333)
-    153.20333333333335
+    (Lat (-27) 4.7)
+    (Lon 153 12.2)
 
 _WUN_ ::
   VFR_Waypoint
@@ -10245,8 +10299,8 @@ _WUN_ =
     "WUNDOWIE"
     (Just "WA")
     "WUN"
-    (-31.766666666666666)
-    116.37666666666667
+    (Lat (-31) 46.0)
+    (Lon 116 22.6)
 
 _WUTUL_ ::
   VFR_Waypoint
@@ -10255,8 +10309,8 @@ _WUTUL_ =
     "WUTUL"
     (Just "QLD")
     "WUTUL"
-    (-27.03)
-    151.80833333333334
+    (Lat (-27) 1.8)
+    (Lon 151 48.5)
 
 _WMF_ ::
   VFR_Waypoint
@@ -10265,8 +10319,8 @@ _WMF_ =
     "WYMAH FERRY"
     (Just "NSW")
     "WMF"
-    (-36.041666666666664)
-    147.26333333333332
+    (Lat (-36) 2.5)
+    (Lon 147 15.8)
 
 _WYR_ ::
   VFR_Waypoint
@@ -10275,8 +10329,8 @@ _WYR_ =
     "WYREEMA"
     (Just "QLD")
     "WYR"
-    (-27.65)
-    151.85833333333332
+    (Lat (-27) 39.0)
+    (Lon 151 51.5)
 
 _YMA_ ::
   VFR_Waypoint
@@ -10285,8 +10339,8 @@ _YMA_ =
     "YAAMBA"
     (Just "QLD")
     "YMA"
-    (-23.133333333333333)
-    150.36666666666667
+    (Lat (-23) 8.0)
+    (Lon 150 22.0)
 
 _YBU_ ::
   VFR_Waypoint
@@ -10295,8 +10349,8 @@ _YBU_ =
     "YABULU"
     (Just "QLD")
     "YBU"
-    (-19.213333333333335)
-    146.59666666666666
+    (Lat (-19) 12.8)
+    (Lon 146 35.8)
 
 _YKH_ ::
   VFR_Waypoint
@@ -10305,8 +10359,8 @@ _YKH_ =
     "YACKANDANDAH"
     (Just "VIC")
     "YKH"
-    (-36.31166666666667)
-    146.84166666666667
+    (Lat (-36) 18.7)
+    (Lon 146 50.5)
 
 _ALBO_ ::
   VFR_Waypoint
@@ -10315,8 +10369,8 @@ _ALBO_ =
     "YALBOROO"
     (Just "QLD")
     "ALBO"
-    (-20.833333333333332)
-    148.65
+    (Lat (-20) 50.0)
+    (Lon 148 39.0)
 
 _YYN_ ::
   VFR_Waypoint
@@ -10325,8 +10379,8 @@ _YYN_ =
     "YAN YEAN RESV"
     (Just "VIC")
     "YYN"
-    (-37.55833333333333)
-    145.13833333333332
+    (Lat (-37) 33.5)
+    (Lon 145 8.3)
 
 _ANDA_ ::
   VFR_Waypoint
@@ -10335,8 +10389,8 @@ _ANDA_ =
     "YANDARAN"
     (Just "QLD")
     "ANDA"
-    (-24.716666666666665)
-    152.11666666666667
+    (Lat (-24) 43.0)
+    (Lon 152 7.0)
 
 _YNA_ ::
   VFR_Waypoint
@@ -10345,8 +10399,8 @@ _YNA_ =
     "YANDINA"
     (Just "QLD")
     "YNA"
-    (-26.563333333333333)
-    152.955
+    (Lat (-26) 33.8)
+    (Lon 152 57.3)
 
 _YGB_ ::
   VFR_Waypoint
@@ -10355,8 +10409,8 @@ _YGB_ =
     "YANGEBUP LAKE"
     (Just "WA")
     "YGB"
-    (-32.12)
-    115.83333333333333
+    (Lat (-32) 7.2)
+    (Lon 115 50.0)
 
 _YYM_ ::
   VFR_Waypoint
@@ -10365,8 +10419,8 @@ _YYM_ =
     "YARINGA YACHT MARINA"
     (Just "VIC")
     "YYM"
-    (-38.24666666666667)
-    145.25166666666667
+    (Lat (-38) 14.8)
+    (Lon 145 15.1)
 
 _YBH_ ::
   VFR_Waypoint
@@ -10375,8 +10429,8 @@ _YBH_ =
     "YARRABAH"
     (Just "QLD")
     "YBH"
-    (-16.916666666666668)
-    145.88333333333333
+    (Lat (-16) 55.0)
+    (Lon 145 53.0)
 
 _ASST_ ::
   VFR_Waypoint
@@ -10385,8 +10439,8 @@ _ASST_ =
     "YASS TOWNSHIP"
     (Just "NSW")
     "ASST"
-    (-34.85)
-    148.91666666666666
+    (Lat (-34) 51.0)
+    (Lon 148 55.0)
 
 _ORKT_ ::
   VFR_Waypoint
@@ -10395,8 +10449,8 @@ _ORKT_ =
     "YORK TOWNSHIP"
     (Just "WA")
     "ORKT"
-    (-31.883333333333333)
-    116.76666666666667
+    (Lat (-31) 53.0)
+    (Lon 116 46.0)
 
 _YKS_ ::
   VFR_Waypoint
@@ -10405,8 +10459,8 @@ _YKS_ =
     "YORKEYS KNOB"
     (Just "QLD")
     "YKS"
-    (-16.81)
-    145.725
+    (Lat (-16) 48.6)
+    (Lon 145 43.5)
 
 _ORNN_ ::
   VFR_Waypoint
@@ -10415,8 +10469,8 @@ _ORNN_ =
     "YORNANING TOWNSHIP"
     (Just "WA")
     "ORNN"
-    (-32.733333333333334)
-    117.16666666666667
+    (Lat (-32) 44.0)
+    (Lon 117 10.0)
 
 _ULAB_ ::
   VFR_Waypoint
@@ -10425,8 +10479,8 @@ _ULAB_ =
     "YULABILLA"
     (Just "QLD")
     "ULAB"
-    (-27.066666666666666)
-    149.7
+    (Lat (-27) 4.0)
+    (Lon 149 42.0)
 
 _URAR_ ::
   VFR_Waypoint
@@ -10435,8 +10489,8 @@ _URAR_ =
     "YURARABA"
     (Just "QLD")
     "URAR"
-    (-28.333333333333332)
-    151.4
+    (Lat (-28) 20.0)
+    (Lon 151 24.0)
 
 _ZIN_ ::
   VFR_Waypoint
@@ -10445,8 +10499,8 @@ _ZIN_ =
     "ZUIZIN ISLAND"
     (Just "QLD")
     "ZIN"
-    (-10.1)
-    143.33333333333334
+    (Lat (-10) 6.0)
+    (Lon 143 20.0)
 
 all_VFR_Waypoint ::
   VFR_Waypoints

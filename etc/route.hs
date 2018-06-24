@@ -206,14 +206,17 @@ render ws =
           , "\n    "
           , show x2
           , "\n    "
+          , "(Lat "
           , paren (x3<0) (show x3)
-          , "\n    "
+          , " "
           , printf "%.1f" x3'
+          , ")"
           , "\n    "
+          , "(Lon "
           , paren (x4<0) (show x4)
-          , "\n    "
+          , " "
           , printf "%.1f" x4'
-          , "\n"
+          , ")\n"
           ]
       all_wpts w =
         let str s =
