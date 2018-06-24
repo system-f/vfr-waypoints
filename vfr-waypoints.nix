@@ -1,4 +1,4 @@
-{ mkDerivation, base, checkers, containers, hedgehog, lens
+{ mkDerivation, base, checkers, containers, fuzzy, hedgehog, lens
 , QuickCheck, stdenv, tasty, tasty-hedgehog, tasty-hunit
 , tasty-quickcheck, transformers
 }:
@@ -8,7 +8,7 @@ mkDerivation {
   src = ./.;
   isLibrary = true;
   isExecutable = true;
-  libraryHaskellDepends = [ base containers lens ];
+  libraryHaskellDepends = [ base containers fuzzy lens ];
   executableHaskellDepends = [ base lens ];
   testHaskellDepends = [
     base checkers hedgehog lens QuickCheck tasty tasty-hedgehog
