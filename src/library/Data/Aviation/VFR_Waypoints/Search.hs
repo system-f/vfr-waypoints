@@ -9,16 +9,24 @@ module Data.Aviation.VFR_Waypoints.Search(
 , searchFuzzyCodeName
 ) where
 
-import Control.Lens
-import Data.Aviation.VFR_Waypoints
-import Data.Char
-import Data.List
+import Control.Category((.))
+import Control.Lens(_Wrapped, (^.))
+import Data.Aviation.VFR_Waypoints(VFR_Waypoint(VFR_Waypoint), all_VFR_Waypoint, code, name)
+import Data.Bool(Bool)
+import Data.Char(isAlpha, toUpper)
+import Data.Foldable(foldl')
+import Data.Functor((<$>), fmap)
+import Data.Function(($))
+import Data.List(sortBy, filter)
 import Data.Map(Map)
-import qualified Data.Map as Map
+import qualified Data.Map as Map(fromList, lookup, insertWith, toList)
+import Data.Maybe(Maybe)
 import Data.Monoid.Textual(TextualMonoid)
-import qualified Text.Fuzzy as Fuzzy
+import Data.Ord(Ord((>), compare))
+import Data.String(String)
+import qualified Text.Fuzzy as Fuzzy(filter, score)
 import Text.Fuzzy(Fuzzy(Fuzzy))
-import Prelude
+import Prelude(Double)
 
 all_VFR_Waypoint_codes_index ::
   Map String (String, Maybe String, Double, Double)
