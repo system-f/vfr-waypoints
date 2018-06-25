@@ -20,7 +20,7 @@ main =
           )
         )
   in  do  Options c h m t x <- opts
-          let output =
+          let output h' =
                 case t of
                   Exact ->
                     let k =
@@ -33,7 +33,7 @@ main =
                               searchIndexCodeName
                         render w =
                           renderVFR_Waypoint (w, "-")
-                    in  render0ResultsOr
+                    in  render0ResultsOr h'
                           (render <$> k x)
                   Inexact sc ->
                     let k =
@@ -51,24 +51,24 @@ main =
                             Nothing ->
                               True
                             Just sc' ->
-                              sc' >= s
-                    in  render0ResultsList (
-                          fmap render . 
-                          filter scores $
-                          (k x "" "" False)
-                        )
-              decideheader r1 r2 =
-                let h' =
-                      if h
-                        then
-                          []
-                        else
-                          r1 ++ "\n"
-                in  h' ++ r2
+                              s >= sc'
+                    in  render0ResultsList h'
+                          (
+                            fmap render . 
+                            filter scores $
+                            (k x "" "" False)
+                          )
+              decideheader2 =
+                if h
+                  then
+                    pure ""
+                  else
+                    (++ "\n") <$> renderVFR_WaypointHeader
+                  
               alloutput =
-                liftA2 decideheader renderVFR_WaypointHeader output
+                output decideheader2
           putStrLn (runColour alloutput (not c))
-
+          
 data MatchOptions =
   Code
   | Name

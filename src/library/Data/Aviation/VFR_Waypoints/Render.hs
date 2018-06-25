@@ -87,18 +87,24 @@ render0Results =
   colour "0 search results" "\ESC[97m\ESC[41m"
 
 render0ResultsOr ::
-  Maybe (Colour String)
+  Colour String
+  -> Maybe (Colour String)
   -> Colour String
-render0ResultsOr =
-  fromMaybe render0Results
+render0ResultsOr before m =
+  do  x <- before
+      y <- fromMaybe render0Results m
+      pure (x ++ y)
 
 render0ResultsList ::
-  [Colour String]
+  Colour String
+  -> [Colour String]
   -> Colour String
-render0ResultsList [] =
+render0ResultsList _ [] =
   render0Results
-render0ResultsList q@(_:_) =
-  fmap (>>= (++ "\n")) (sequence q)
+render0ResultsList before q@(_:_) =
+  do  x <- before
+      y <- fmap (>>= (++ "\n")) (sequence q)
+      pure (x ++ y)
 
 renderVFR_WaypointSeparator ::
   Colour String
