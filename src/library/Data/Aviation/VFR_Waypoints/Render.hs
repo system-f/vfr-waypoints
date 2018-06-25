@@ -1,25 +1,31 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Data.Aviation.VFR_Waypoints.Render {- (
+module Data.Aviation.VFR_Waypoints.Render (
+  Colour(..)
+, runColour
+, colour
+, renderVFR_WaypointSeparator
+, renderVFR_WaypointHeader
+, renderVFR_Waypoint
+) where
 
-) -} where
-
-import Control.Lens
-import Data.Aviation.VFR_Waypoints
-import Data.List
-import Prelude
-import qualified Text.Fuzzy as Fuzzy
-import Text.Fuzzy(Fuzzy)
-import Text.Printf
-
-toDecimal ::
-  (Integral a, Integral b, Ord c, Fractional c) =>
-  (a, b, c) ->
-  c
-toDecimal (x, y, z) =
-  let x' = fromIntegral x
-      (.?.) = if x' < 0 then (-) else (+)
-  in  x' .?. (fromIntegral y/60 + z/60)
+import Control.Applicative(Applicative(pure, (<*>)))
+import Control.Category((.))
+import Control.Lens((^.))
+import Control.Monad(Monad(return, (>>=)))
+import Data.Aviation.VFR_Waypoints(HasVFR_Waypoint(name, state, code, lat, lon), latitudeDegrees, latitudeMinutes, latitudeMantissa, longitudeDegrees, longitudeMinutes, longitudeMantissa)
+import Data.Bool(Bool)
+import Data.Foldable(length)
+import Data.Function(($))
+import Data.Functor(Functor(fmap))
+import Data.Int(Int)
+import Data.List(intercalate, take, drop, (++), replicate, concat)
+import Data.Maybe(Maybe(Nothing, Just))
+import Data.Ord(Ord((<)))
+import Data.String(String)
+import Data.Traversable(traverse)
+import Prelude(Integral, Fractional, (-), (+), (/), fromIntegral, show)
+import Text.Printf(printf)
 
 mkN ::
   Int
@@ -29,46 +35,75 @@ mkN n x =
   let n' = n - length (take n x)
   in  x ++ replicate n' ' '
 
-renderVFR_WaypointSeparator ::
-  String
-renderVFR_WaypointSeparator =
-  "\ESC[34m\ESC[44m \ESC[m"
+data Colour a =  
+  Colour (Bool -> a)
 
-renderVFR_WaypointHeader ::
+runColour ::
+  Colour a
+  -> Bool
+  -> a
+runColour (Colour x) =
+  x
+
+instance Functor Colour where
+  fmap f (Colour g) =
+    Colour (f . g)
+
+instance Applicative Colour where
+  pure =
+    Colour . pure
+  Colour f <*> Colour a =
+    Colour (f <*> a)
+
+instance Monad Colour where
+  return =
+    pure
+  Colour x >>= f =
+    Colour (\p -> runColour (f (x p)) p)
+
+colour ::
   String
-renderVFR_WaypointHeader =
-  let colour x =
+  -> String
+  -> Colour String
+colour s c =
+  Colour (\p ->
+    if p
+      then
         concat
           [
-            "\ESC[31m\ESC[47m"
-          , x
+            c
+          , s
           , "\ESC[m"
           ]
-  in  intercalate renderVFR_WaypointSeparator . fmap colour $
-        [
-          mkN 32 "WAYPOINT"
-        , "STATE"
-        , mkN 5 "CODE"
-        , mkN 22 "LAT"
-        , mkN 22 "LON"
-        , "SCORE"
-        ]
+      else
+        s)
+
+renderVFR_WaypointSeparator ::
+  Colour String
+renderVFR_WaypointSeparator =
+  colour " " "\ESC[34m\ESC[44m"
+  
+renderVFR_WaypointHeader ::
+  Colour String
+renderVFR_WaypointHeader =
+  do  s <- renderVFR_WaypointSeparator
+      y <- traverse (`colour` "\ESC[31m\ESC[47m")
+            [
+              mkN 32 "WAYPOINT"
+            , "STATE"
+            , mkN 5 "CODE"
+            , mkN 20 "LAT"
+            , mkN 20 "LON"
+            , "SCORE"
+            ]
+      pure (intercalate s y)
 
 renderVFR_Waypoint ::
   HasVFR_Waypoint w =>
-  Fuzzy w String
-  -> String
-renderVFR_Waypoint w' =
-  let w =
-        Fuzzy.original w'
-      white_black x =
-        concat
-          [
-            "\ESC[40m\ESC[37m"
-          , x
-          , "\ESC[m"
-          ]
-      name' =
+  (w, String)
+  -> Colour String
+renderVFR_Waypoint (w, sc) =
+  let name' =
         w ^. name
       state' =
         w ^. state
@@ -78,38 +113,49 @@ renderVFR_Waypoint w' =
         w ^. lat
       lon' =
         w ^. lon
-  in  intercalate renderVFR_WaypointSeparator . fmap (white_black =<<) $
-        [
-          [
-            mkN 32 name'
-          ]
-        , [
-            case state' of
-              Nothing ->
-                ""
-              Just s ->
-                mkN 5 s
-          ]
-        , [
-            mkN 5 code'
-          ]
-        , [
-            printf "%03d" (lat' ^. latitudeDegrees)
-          , " "
-          , printf "%02d" (lat' ^. latitudeMinutes)
-          , drop 1 . printf "%.1f" $ (lat' ^. latitudeMantissa)
-          , "    "
-          , printf "%.6f" (toDecimal (lat' ^. latitudeDegrees, lat' ^. latitudeMinutes, lat' ^. latitudeMantissa))
-          ]
-        , [
-            show (lon' ^. longitudeDegrees)
-          , " "
-          , printf "%02d" (lon' ^. longitudeMinutes)
-          , drop 1 . printf "%.1f" $ (lon' ^. longitudeMantissa)
-          , "    "
-          , printf "%.6f" (toDecimal (lon' ^. longitudeDegrees, lon' ^. longitudeMinutes, lon' ^. longitudeMantissa))
-          ]
-        , [
-             mkN 5 (show (Fuzzy.score w'))
-          ]
-        ]
+      toDecimal ::
+        (Integral a, Integral b, Ord c, Fractional c) =>
+        (a, b, c) ->
+        c
+      toDecimal (x, y, z) =
+        let x' = fromIntegral x
+            (.?.) = if x' < 0 then (-) else (+)
+        in  x' .?. (fromIntegral y/60 + z/60)
+
+  in  do  s <- renderVFR_WaypointSeparator
+          y <- traverse (`colour` "\ESC[40m\ESC[37m") . fmap concat $
+                  [
+                    [
+                      mkN 32 name'
+                    ]
+                  , [
+                      case state' of
+                        Nothing ->
+                          ""
+                        Just st ->
+                          mkN 5 st
+                    ]
+                  , [
+                      mkN 5 code'
+                    ]
+                  , [
+                      printf "%03d" (lat' ^. latitudeDegrees)
+                    , " "
+                    , printf "%02d" (lat' ^. latitudeMinutes)
+                    , drop 1 . printf "%.1f" $ (lat' ^. latitudeMantissa)
+                    , "    "
+                    , printf "%.4f" (toDecimal (lat' ^. latitudeDegrees, lat' ^. latitudeMinutes, lat' ^. latitudeMantissa))
+                    ]
+                  , [
+                      show (lon' ^. longitudeDegrees)
+                    , " "
+                    , printf "%02d" (lon' ^. longitudeMinutes)
+                    , drop 1 . printf "%.1f" $ (lon' ^. longitudeMantissa)
+                    , "    "
+                    , printf "%.4f" (toDecimal (lon' ^. longitudeDegrees, lon' ^. longitudeMinutes, lon' ^. longitudeMantissa))
+                    ]
+                  , [
+                       mkN 5 sc
+                    ]
+                  ]
+          pure (intercalate s y)

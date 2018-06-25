@@ -2,12 +2,12 @@ module Main(
   main
 ) where
 
-import Data.Aviation.VFR_Waypoints
+import Control.Applicative
 import Data.Aviation.VFR_Waypoints.Render
 import Data.Aviation.VFR_Waypoints.Search
 
 import System.Environment
-import qualified Text.Fuzzy as Fuzzy
+import Text.Fuzzy(Fuzzy(Fuzzy))
 
 main ::
   IO ()
@@ -17,7 +17,7 @@ main =
         [] ->
           putStrLn "args"
         h:_ ->
-          let rs = searchFuzzyCodeName h "" "" False
-              s = rs >>= \r -> renderVFR_Waypoint r ++ "\n"
-          in  do  putStrLn renderVFR_WaypointHeader
-                  putStrLn s
+          let rs = (\(Fuzzy o _ s) -> (o, show s)) <$> searchFuzzyCodeName h "" "" False
+              ps = (>>= (++ "\n")) <$> traverse (\x -> renderVFR_Waypoint x) rs
+              z = liftA2 (\hd w -> hd ++ "\n" ++ w) renderVFR_WaypointHeader ps
+          in  putStrLn (runColour z True)
