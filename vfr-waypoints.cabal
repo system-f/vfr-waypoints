@@ -47,6 +47,8 @@ executable vfr-waypoints
   build-depends:        base >=4.8 && <4.11                    
                       , lens >=4.15 && <4.17
                       , vfr-waypoints
+                      , fuzzy
+                      , optparse-applicative
                     
   ghc-options:         -Wall
 

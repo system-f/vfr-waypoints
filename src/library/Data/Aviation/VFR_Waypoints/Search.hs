@@ -4,11 +4,14 @@ module Data.Aviation.VFR_Waypoints.Search(
   all_VFR_Waypoint_codes_index
 , all_VFR_Waypoint_names_index
 , searchIndexCode
+, searchIndexName
+, searchIndexCodeName
 , searchFuzzyCode
 , searchFuzzyName
 , searchFuzzyCodeName
 ) where
 
+import Control.Applicative((<|>))
 import Control.Category((.))
 import Control.Lens(_Wrapped, (^.))
 import Data.Aviation.VFR_Waypoints(VFR_Waypoint(VFR_Waypoint), Latitude, Longitude, all_VFR_Waypoint, code, name)
@@ -43,6 +46,19 @@ searchIndexCode ::
 searchIndexCode s =
   let s' = filter isAlpha . fmap toUpper $ s
   in  (\(_name, _state, _lat, _lon) -> VFR_Waypoint _name _state s' _lat _lon) <$> Map.lookup s' all_VFR_Waypoint_codes_index
+
+searchIndexName ::
+  String
+  -> Maybe VFR_Waypoint
+searchIndexName s =
+  let s' = filter isAlpha . fmap toUpper $ s
+  in  (\(_state, _code, _lat, _lon) -> VFR_Waypoint s' _state _code _lat _lon) <$> Map.lookup s' all_VFR_Waypoint_names_index
+
+searchIndexCodeName ::
+  String
+  -> Maybe VFR_Waypoint
+searchIndexCodeName s =
+  searchIndexCode s <|> searchIndexName s
 
 searchFuzzyCode ::
   String

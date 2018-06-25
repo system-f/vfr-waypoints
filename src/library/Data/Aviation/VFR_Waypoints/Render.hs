@@ -4,6 +4,9 @@ module Data.Aviation.VFR_Waypoints.Render (
   Colour(..)
 , runColour
 , colour
+, render0Results
+, render0ResultsOr
+, render0ResultsList
 , renderVFR_WaypointSeparator
 , renderVFR_WaypointHeader
 , renderVFR_Waypoint
@@ -20,10 +23,10 @@ import Data.Function(($))
 import Data.Functor(Functor(fmap))
 import Data.Int(Int)
 import Data.List(intercalate, take, drop, (++), replicate, concat)
-import Data.Maybe(Maybe(Nothing, Just))
+import Data.Maybe(Maybe(Nothing, Just), fromMaybe)
 import Data.Ord(Ord((<)))
 import Data.String(String)
-import Data.Traversable(traverse)
+import Data.Traversable(traverse, sequence)
 import Prelude(Integral, Fractional, (-), (+), (/), fromIntegral, show)
 import Text.Printf(printf)
 
@@ -78,11 +81,30 @@ colour s c =
       else
         s)
 
+render0Results ::
+  Colour String
+render0Results =
+  colour "0 search results" "\ESC[97m\ESC[41m"
+
+render0ResultsOr ::
+  Maybe (Colour String)
+  -> Colour String
+render0ResultsOr =
+  fromMaybe render0Results
+
+render0ResultsList ::
+  [Colour String]
+  -> Colour String
+render0ResultsList [] =
+  render0Results
+render0ResultsList q@(_:_) =
+  fmap (>>= (++ "\n")) (sequence q)
+
 renderVFR_WaypointSeparator ::
   Colour String
 renderVFR_WaypointSeparator =
   colour " " "\ESC[34m\ESC[44m"
-  
+
 renderVFR_WaypointHeader ::
   Colour String
 renderVFR_WaypointHeader =
