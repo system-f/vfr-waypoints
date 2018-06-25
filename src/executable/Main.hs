@@ -12,8 +12,7 @@ import Text.Fuzzy(Fuzzy(Fuzzy))
 main ::
   IO ()
 main =
-  let opts :: IO Options
-      opts =
+  let opts =
         execParser
           (info (parserOptions <**> helper) (
             fullDesc <>
