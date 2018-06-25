@@ -150,7 +150,6 @@ renderVFR_Waypoint (w, sc) =
         let x' = fromIntegral x
             (.?.) = if x' < 0 then (-) else (+)
         in  x' .?. (fromIntegral y/60 + z/60)
-
   in  do  s <- renderVFR_WaypointSeparator
           y <- traverse ((`colour` "\ESC[40m\ESC[37m") . concat) $
                   [
@@ -189,7 +188,7 @@ renderVFR_Waypoint (w, sc) =
                         , lat''
                         , "&mlon="
                         , lon''
-                        , "#map=14/"
+                        , "#map=13/"
                         , lat''
                         , "/"
                         , lon''
