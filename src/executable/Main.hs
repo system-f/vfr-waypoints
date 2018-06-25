@@ -21,3 +21,8 @@ main =
               ps = (>>= (++ "\n")) <$> traverse (\x -> renderVFR_Waypoint x) rs
               z = liftA2 (\hd w -> hd ++ "\n" ++ w) renderVFR_WaypointHeader ps
           in  putStrLn (runColour z True)
+
+-- code, name or both
+-- colours on/off
+-- exact match
+-- copy URL to clipboard

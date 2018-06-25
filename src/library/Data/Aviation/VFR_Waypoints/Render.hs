@@ -92,8 +92,9 @@ renderVFR_WaypointHeader =
               mkN 32 "WAYPOINT"
             , "STATE"
             , mkN 5 "CODE"
-            , mkN 20 "LAT"
-            , mkN 20 "LON"
+            , mkN 8 "LAT"
+            , mkN 8 "LON"
+            , mkN 83 "openstreetmap.org"
             , "SCORE"
             ]
       pure (intercalate s y)
@@ -123,17 +124,18 @@ renderVFR_Waypoint (w, sc) =
         in  x' .?. (fromIntegral y/60 + z/60)
 
   in  do  s <- renderVFR_WaypointSeparator
-          y <- traverse (`colour` "\ESC[40m\ESC[37m") . fmap concat $
+          y <- traverse ((`colour` "\ESC[40m\ESC[37m") . concat) $
                   [
                     [
                       mkN 32 name'
                     ]
                   , [
-                      case state' of
-                        Nothing ->
-                          ""
-                        Just st ->
-                          mkN 5 st
+                      mkN 5 $
+                        case state' of
+                          Nothing ->
+                            ""
+                          Just st ->
+                            mkN 5 st
                     ]
                   , [
                       mkN 5 code'
@@ -143,17 +145,27 @@ renderVFR_Waypoint (w, sc) =
                     , " "
                     , printf "%02d" (lat' ^. latitudeMinutes)
                     , drop 1 . printf "%.1f" $ (lat' ^. latitudeMantissa)
-                    , "    "
-                    , printf "%.4f" (toDecimal (lat' ^. latitudeDegrees, lat' ^. latitudeMinutes, lat' ^. latitudeMantissa))
                     ]
                   , [
                       show (lon' ^. longitudeDegrees)
                     , " "
                     , printf "%02d" (lon' ^. longitudeMinutes)
                     , drop 1 . printf "%.1f" $ (lon' ^. longitudeMantissa)
-                    , "    "
-                    , printf "%.4f" (toDecimal (lon' ^. longitudeDegrees, lon' ^. longitudeMinutes, lon' ^. longitudeMantissa))
                     ]
+                  , let lat'' =
+                          printf "%08.4f" (toDecimal (lat' ^. latitudeDegrees, lat' ^. latitudeMinutes, lat' ^. latitudeMantissa))
+                        lon'' =
+                          printf "%08.4f" (toDecimal (lon' ^. longitudeDegrees, lon' ^. longitudeMinutes, lon' ^. longitudeMantissa))
+                    in  [
+                          "https://www.openstreetmap.org/?mlat="
+                        , lat''
+                        , "&mlon="
+                        , lon''
+                        , "#map=14/"
+                        , lat''
+                        , "/"
+                        , lon''
+                        ]
                   , [
                        mkN 5 sc
                     ]
