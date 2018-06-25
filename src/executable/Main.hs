@@ -17,6 +17,7 @@ main =
         [] ->
           putStrLn "args"
         h:_ ->
-          let rs :: [VFR_Waypoint]; rs = Fuzzy.original <$> searchFuzzyCodeName h "" "" False
+          let rs = searchFuzzyCodeName h "" "" False
               s = rs >>= \r -> renderVFR_Waypoint r ++ "\n"
-          in  putStrLn s
+          in  do  putStrLn renderVFR_WaypointHeader
+                  putStrLn s
