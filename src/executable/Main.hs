@@ -1,13 +1,28 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Main(
   main
 ) where
 
-import Control.Applicative((<**>))
+import Control.Applicative(pure, (<*>), (<**>))
+import Control.Category((.))
 import Data.Aviation.VFR_Waypoints.Render(renderVFR_Waypoint, render0ResultsOr, render0ResultsList, renderVFR_WaypointHeader, runColour)
 import Data.Aviation.VFR_Waypoints.Search(searchIndexCode, searchIndexName, searchIndexCodeName, searchFuzzyCode, searchFuzzyName, searchFuzzyCodeName)
+import Data.Bool(Bool(True, False), not)
+import Data.Eq(Eq)
+import Data.Function(($))
+import Data.Functor((<$>), fmap)
+import Data.Int(Int)
+import Data.List(filter, (++))
+import Data.Maybe(Maybe(Nothing, Just))
+import Data.Ord(Ord((>=)))
 import Data.Semigroup((<>))
+import Data.String(String)
 import Options.Applicative(Parser, execParser, info, helper, fullDesc, header, option, maybeReader, short, long, value, metavar, help, switch, strOption)
+import Prelude(Show(show))
+import System.IO(IO, putStrLn)
 import Text.Fuzzy(Fuzzy(Fuzzy))
+import Text.Read(reads)
 
 main ::
   IO ()

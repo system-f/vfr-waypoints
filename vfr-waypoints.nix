@@ -1,11 +1,9 @@
-{ mkDerivation, base, checkers, containers, fuzzy, hedgehog, lens
-, monoid-subclasses, optparse-applicative, QuickCheck, stdenv
-, tasty, tasty-hedgehog, tasty-hunit, tasty-quickcheck
-, transformers
+{ mkDerivation, base, containers, fuzzy, lens, monoid-subclasses
+, optparse-applicative, stdenv
 }:
 mkDerivation {
   pname = "vfr-waypoints";
-  version = "0.1.0.0";
+  version = "0.1.0.1";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
@@ -14,10 +12,6 @@ mkDerivation {
   ];
   executableHaskellDepends = [
     base fuzzy lens optparse-applicative
-  ];
-  testHaskellDepends = [
-    base checkers hedgehog lens QuickCheck tasty tasty-hedgehog
-    tasty-hunit tasty-quickcheck transformers
   ];
   homepage = "https://github.com/qfpl/vfr-waypoints";
   description = "VFR waypoints, as published in the AIP (ERSA)";

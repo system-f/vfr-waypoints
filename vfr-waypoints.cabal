@@ -1,7 +1,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                  vfr-waypoints
-version:               0.1.0.0
+version:               0.1.0.1
 synopsis:              VFR waypoints, as published in the AIP (ERSA)
 description:       
   <<http://i.imgur.com/uZnp9ke.png>>
@@ -48,32 +48,13 @@ executable vfr-waypoints
 
   main-is:             Main.hs
 
-  build-depends:        base                 >= 4.8      && < 4.11                    
-                      , lens                 >= 4.15     && < 4.17
-                      , fuzzy                >= 0.1.0.0  && < 0.2
-                      , optparse-applicative >= 0.14.2.0 && < 0.15
+  build-depends:        base                 >= 4.8     && < 4.11
+                      , lens                 >= 4.15    && < 4.17
+                      , fuzzy                >= 0.1.0.0 && < 0.2
+                      , optparse-applicative >= 0.13.2  && < 0.15
                       , vfr-waypoints
                     
   ghc-options:         -Wall
-
-test-suite             tests
-  build-depends:       QuickCheck       >= 2.9.2 && < 2.12
-                     , base             >= 4.8   && < 4.11
-                     , checkers         >= 0.4.6 && < 0.5
-                     , hedgehog         >= 0.5   && < 0.6
-                     , lens             >= 4.15  && < 4.17
-                     , tasty            >= 0.11  && < 1.1
-                     , tasty-hunit      >= 0.9   && < 0.11
-                     , tasty-hedgehog   >= 0.1   && < 0.3
-                     , tasty-quickcheck >= 0.8.4 && < 0.11
-                     , transformers     >= 0.4.1 && < 5.5
-                     , vfr-waypoints
-
-  type:                exitcode-stdio-1.0
-
-  main-is:             Tests.hs
-
-  hs-source-dirs:      test
 
   default-language:    Haskell2010
 
