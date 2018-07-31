@@ -1,3 +1,10 @@
+0.1.0.2
+
+* add `minus` function.
+* add `one` and `one'` values.
+* add `list` iso.
+* depend on `geodetic-types` with new instances.
+
 0.1.0.1
 
 * Delete tests (there weren't any).
