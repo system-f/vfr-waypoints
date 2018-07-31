@@ -6,17 +6,26 @@
 module Data.Aviation.VFR_Waypoints where
 
 import Control.Category(Category((.), id))
-import Control.Lens(Rewrapped, Wrapped(..), Cons(_Cons), Snoc(_Snoc), Each(each), Ixed(ix), Index, IxValue, AsEmpty(_Empty), Reversing(reversing), Lens', iso, prism', cons, snoc, _1, _2, (%~), _Wrapped, ( # ), (^?))
-import Data.Eq(Eq)
+import Control.Lens(Rewrapped, Wrapped(..), _Wrapped, Cons(_Cons), Snoc(_Snoc), Each(each), Ixed(ix), Index, IxValue, AsEmpty(_Empty), Reversing(reversing), Lens', Fold, Getter, iso, prism', cons, snoc, _1, _2, (%~), ( # ), (^?), to)
+import Data.Bool((&&))
+import Data.Eq(Eq((==)))
+import Data.Foldable(sum)
 import Data.Functor(fmap, (<$>))
 import Data.Int(Int)
+import Data.List(splitAt, zipWith)
 import Data.Maybe(Maybe(Just, Nothing))
 import Data.Monoid(Monoid(mappend, mempty))
-import Data.Ord(Ord)
+import Data.Ord(Ord((<)))
 import Data.Semigroup(Semigroup((<>)))
 import Data.String(String)
-import Data.Traversable
-import Prelude(Double, Show)
+import Data.Traversable(traverse)
+import qualified Geodetics.Types.Latitude as GLatitude(FoldLatitude(_FoldLatitude), GetLatitude(_GetLatitude), Latitude(Latitude))
+import qualified Geodetics.Types.Longitude as GLongitude(FoldLongitude(_FoldLongitude), GetLongitude(_GetLongitude), Longitude(Longitude))
+import Numeric(floatToDigits)
+import Numeric.Units.Dimensional((*~), (/~))
+import Numeric.Units.Dimensional.SIUnits(degree)
+import Numeric.Units.Dimensional.Quantities(Angle)
+import Prelude(Double, Show, Num(abs, (-), (+), (*)), RealFloat, Floating, Integral, Enum, fromIntegral, (/), (^), (**), round)
 
 data Latitude =
   Latitude
@@ -84,6 +93,38 @@ instance HasLongitude Longitude where
     = (fmap (\ y1_avLK -> ((Longitude x1_avLH) y1_avLK) x3_avLJ))
         (f_avLG x2_avLI)
 
+class FoldLatitude a where
+  _FoldLatitude ::
+    Fold a Latitude
+
+instance FoldLatitude Latitude where
+  _FoldLatitude =
+    id
+
+class FoldLatitude a => GetLatitude a where
+  _GetLatitude ::
+    Getter a Latitude
+
+instance GetLatitude Latitude where
+  _GetLatitude =
+    id
+
+class FoldLongitude a where
+  _FoldLongitude ::
+    Fold a Longitude
+
+instance FoldLongitude Longitude where
+  _FoldLongitude =
+    id
+
+class FoldLongitude a => GetLongitude a where
+  _GetLongitude ::
+    Getter a Longitude
+
+instance GetLongitude Longitude where
+  _GetLongitude =
+    id
+
 data VFR_Waypoint =
   VFR_Waypoint
     String
@@ -92,15 +133,150 @@ data VFR_Waypoint =
     Latitude
     Longitude
   deriving (Eq, Ord, Show)
-{-
-instance HasLat VFR_Waypoint where
-  latitude =
-    lat . latitude
 
-instance HasLon VFR_Waypoint where
-  longitude =
-    lon . longitude
--}
+-- | To hell with floating-point numbers.
+--
+-- >>> splitFloat10 (0 :: Double) :: (Int, Int, Double)
+-- (1,0,0.0)
+--
+-- >>> splitFloat10 (0.1 :: Double) :: (Int, Int, Double)
+-- (1,0,0.1)
+--
+-- >>> splitFloat10 (1.1 :: Double) :: (Int, Int, Double)
+-- (1,1,0.1)
+--
+-- >>> splitFloat10 (0.01 :: Double) :: (Int, Int, Double)
+-- (1,0,0.1)
+--
+-- >>> splitFloat10 (1.01 :: Double) :: (Int, Int, Double)
+-- (1,1,1.0e-2)
+--
+-- >>> splitFloat10 (10.01 :: Double) :: (Int, Int, Double)
+-- (1,10,1.0e-2)
+--
+-- >>> splitFloat10 (123.0 :: Double) :: (Int, Int, Double)
+-- (1,123,0.0)
+--
+-- >>> splitFloat10 (123.456 :: Double) :: (Int, Int, Double)
+-- (1,123,0.456)
+--
+-- >>> splitFloat10 (-0.1 :: Double) :: (Int, Int, Double)
+-- (-1,0,0.1)
+--
+-- >>> splitFloat10 (-1.1 :: Double) :: (Int, Int, Double)
+--(-1,1,0.1)
+--
+-- >>> splitFloat10 (-0.01 :: Double) :: (Int, Int, Double)
+-- (-1,0,0.1)
+--
+-- >>> splitFloat10 (-1.01 :: Double) :: (Int, Int, Double)
+-- (-1,1,1.0e-2)
+--
+-- >>> splitFloat10 (-10.01 :: Double) :: (Int, Int, Double)
+-- (-1,10,1.0e-2)
+--
+-- >>> splitFloat10 (-123.0 :: Double) :: (Int, Int, Double)
+-- (-1,123,0.0)
+--
+-- >>> splitFloat10 (-123.456 :: Double) :: (Int, Int, Double)
+-- (-1,123,0.456)
+splitFloat10 ::
+  (RealFloat a, Num i', Num i, Enum m, Floating m) =>
+  a
+  -> (i', i, m)
+splitFloat10 x =
+  let n = if x < 0 then (-1) else 1
+      (d, z) = floatToDigits 10 (abs x)
+      (e, y) = splitAt z d
+      sumz f a b = sum (zipWith f a b)
+      p = sumz (\t w -> fromIntegral t * 10 ^ w) e [z-1,z-2..]
+      q = sumz (\t w -> fromIntegral t * 10 ** w) y [-1,-2..]
+  in  (n, p, q)
+
+toAngle ::
+  (Integral a1, Integral a2, Ord a3, Floating a3) =>
+  (a1, a2, a3)
+  -> Angle a3
+toAngle (a, b, x) =
+  let a' = fromIntegral a
+      (.?.) = if a' < 0 then (-) else (+)
+  in  (a' .?. (fromIntegral b/60 + x/60)) *~ degree
+
+fromAngle ::
+  Angle Double
+  -> (Int, Int, Double)
+fromAngle x =
+  let (n, i, m) = splitFloat10 (x /~ degree) :: (Int, Int, Double)
+      (i', m') = (n * i, if n == 0 then fromIntegral n * m else m)
+      (o, j, s) = splitFloat10 (m' * 60) :: (Int, Int, Double)
+      (j', s') = (o * j, if n == 0 && o == 0 then fromIntegral o * s else s)
+      t = fromIntegral (round (s' * 10) :: Int) / 10
+  in  (i', j', t)
+
+instance GLatitude.FoldLatitude Latitude where
+  _FoldLatitude =
+    to (\(Latitude a b x) -> GLatitude.Latitude (toAngle (a, b, x)))
+
+instance GLatitude.FoldLatitude VFR_Waypoint where
+  _FoldLatitude =
+    latitude . GLatitude._FoldLatitude
+
+instance GLatitude.GetLatitude Latitude where
+  _GetLatitude =
+    to (\(Latitude a b x) -> GLatitude.Latitude (toAngle (a, b, x)))
+
+instance GLatitude.GetLatitude VFR_Waypoint where
+  _GetLatitude =
+    latitude . GLatitude._GetLatitude
+
+instance FoldLatitude GLatitude.Latitude where
+  _FoldLatitude =
+    to (\(GLatitude.Latitude x) -> let (n, i, m) = fromAngle x in  Latitude n i m)
+
+instance FoldLatitude VFR_Waypoint where
+  _FoldLatitude =
+    _FoldLatitude . latitude
+
+instance GetLatitude GLatitude.Latitude where
+  _GetLatitude =
+    to (\(GLatitude.Latitude x) -> let (n, i, m) = fromAngle x in  Latitude n i m)
+
+instance GetLatitude VFR_Waypoint where
+  _GetLatitude =
+    _GetLatitude . latitude
+
+instance GLongitude.FoldLongitude Longitude where
+  _FoldLongitude =
+    to (\(Longitude a b x) -> GLongitude.Longitude (toAngle (a, b, x)))
+
+instance GLongitude.FoldLongitude VFR_Waypoint where
+  _FoldLongitude =
+    longitude . GLongitude._FoldLongitude
+
+instance GLongitude.GetLongitude Longitude where
+  _GetLongitude =
+    to (\(Longitude a b x) -> GLongitude.Longitude (toAngle (a, b, x)))
+
+instance GLongitude.GetLongitude VFR_Waypoint where
+  _GetLongitude =
+    longitude . GLongitude._GetLongitude
+
+instance FoldLongitude GLongitude.Longitude where
+  _FoldLongitude =
+    to (\(GLongitude.Longitude x) -> let (n, i, m) = fromAngle x in  Longitude n i m)
+    
+instance FoldLongitude VFR_Waypoint where
+  _FoldLongitude =
+    _FoldLongitude . longitude
+
+instance GetLongitude GLongitude.Longitude where
+  _GetLongitude =
+    to (\(GLongitude.Longitude x) -> let (n, i, m) = fromAngle x in  Longitude n i m)
+
+instance GetLongitude VFR_Waypoint where
+  _GetLongitude =
+    _GetLongitude . longitude
+
 class HasVFR_Waypoint a where
   vfr_waypoint ::
     Lens' a VFR_Waypoint
@@ -134,6 +310,18 @@ class HasVFR_Waypoint a where
   lon =
     vfr_waypoint . lon
   {-# INLINE lon #-}
+
+instance HasLatitude VFR_Waypoint where
+  latitude f (VFR_Waypoint n s c lt ln) =
+    fmap
+      (\lt' -> VFR_Waypoint n s c lt' ln)
+      (f lt)
+
+instance HasLongitude VFR_Waypoint where
+  longitude f (VFR_Waypoint n s c lt ln) =
+    fmap
+      (\ln' -> VFR_Waypoint n s c lt ln')
+      (f ln)
 
 instance HasVFR_Waypoint VFR_Waypoint where
   {-# INLINE name #-}
