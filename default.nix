@@ -30,8 +30,8 @@ let
     geodetic-types = pkgs.fetchFromGitHub {
       owner = "qfpl";
       repo = "geodetic-types";
-      rev = "b9cf90cbd4be0a8942ba5f8c1b6244c739ce5ff2";
-      sha256 = "0zaid43yl0jyl614n8q5hsg34hgzkkyr6d6ksbvzirs29kp9bq3j";
+      rev = "6e41e9c638a1349743842056a400797f60122f13";
+      sha256 = "1gb6b4dcs3d2rv19gp2kg1rlaccvirr5gphh47q3h57rnnv9rnki";
     };
 
   };
