@@ -1,14 +1,16 @@
-{ mkDerivation, base, containers, fuzzy, lens, monoid-subclasses
-, optparse-applicative, stdenv
+{ mkDerivation, base, containers, dimensional, fuzzy
+, geodetic-types, lens, monoid-subclasses, optparse-applicative
+, stdenv
 }:
 mkDerivation {
   pname = "vfr-waypoints";
-  version = "0.1.0.1";
+  version = "0.1.0.2";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base containers fuzzy lens monoid-subclasses
+    base containers dimensional fuzzy geodetic-types lens
+    monoid-subclasses
   ];
   executableHaskellDepends = [
     base fuzzy lens optparse-applicative

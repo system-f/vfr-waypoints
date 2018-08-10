@@ -5,19 +5,43 @@ let
                        then pkgs.haskellPackages
                        else pkgs.haskell.packages.${compiler};
 
-  tasty-hedgehog-github = pkgs.callPackage (pkgs.fetchFromGitHub {
-    owner = "qfpl";
-    repo = "tasty-hedgehog";
-    rev = "5da389f5534943b430300a213c5ffb5d0e13459e";
-    sha256 = "04pmr9q70gakd327sywpxr7qp8jnl3b0y2sqxxxcj6zj2q45q38m";
-  }) {};
+  sources = {
+    hedgehog = pkgs.fetchFromGitHub {
+      owner  = "hedgehogqa";
+      repo   = "haskell-hedgehog";
+      rev    = "0.6";
+      sha256 = "101bxgnxdmjg6x5jdjgbzayb747lxv8yv28bjg0kr6xw4kqi8kpw";
+    };
+
+    tasty-hedgehog = pkgs.fetchFromGitHub {
+      owner  = "qfpl";
+      repo   = "tasty-hedgehog";
+      rev    = "9797ca980e547c160b5e9e3f07d7b0d1d5c40fee";
+      sha256 = "039r8hay6cyq762ajn89nj4bfgz50br15x4nkracw3kzdyikn5xh";
+    };
+
+    dimensional = pkgs.fetchFromGitHub {
+      owner = "bjornbm";
+      repo = "dimensional";
+      rev = "8e1aa6ebd23cdd4b515f1ea44a9820f96ec71083";
+      sha256 = "1g6l128fc5grnivqjll74ppr24jw66yhvi0hbiyp66zpgs9a65bx";
+    };
+
+    geodetic-types = pkgs.fetchFromGitHub {
+      owner = "qfpl";
+      repo = "geodetic-types";
+      rev = "b9cf90cbd4be0a8942ba5f8c1b6244c739ce5ff2";
+      sha256 = "0zaid43yl0jyl614n8q5hsg34hgzkkyr6d6ksbvzirs29kp9bq3j";
+    };
+
+  };
 
   modifiedHaskellPackages = haskellPackages.override {
     overrides = self: super: {
-      tasty-hedgehog =
-        if super ? tasty-hedgehog
-        then super.tasty-hedgehog
-        else tasty-hedgehog-github;
+      hedgehog = super.callCabal2nix "hedgehog" "${sources.hedgehog}/hedgehog" {};
+      tasty-hedgehog = super.callCabal2nix "tasty-hedgehog" "${sources.tasty-hedgehog}" {};
+      dimensional = super.callCabal2nix "dimensional" "${sources.dimensional}" {};
+      geodetic-types = import sources.geodetic-types { inherit nixpkgs compiler; };
     };
   };
 
