@@ -6,20 +6,6 @@ let
                        else pkgs.haskell.packages.${compiler};
 
   sources = {
-    hedgehog = pkgs.fetchFromGitHub {
-      owner  = "hedgehogqa";
-      repo   = "haskell-hedgehog";
-      rev    = "0.6";
-      sha256 = "101bxgnxdmjg6x5jdjgbzayb747lxv8yv28bjg0kr6xw4kqi8kpw";
-    };
-
-    tasty-hedgehog = pkgs.fetchFromGitHub {
-      owner  = "qfpl";
-      repo   = "tasty-hedgehog";
-      rev    = "9797ca980e547c160b5e9e3f07d7b0d1d5c40fee";
-      sha256 = "039r8hay6cyq762ajn89nj4bfgz50br15x4nkracw3kzdyikn5xh";
-    };
-
     dimensional = pkgs.fetchFromGitHub {
       owner = "bjornbm";
       repo = "dimensional";
@@ -30,16 +16,16 @@ let
     geodetic-types = pkgs.fetchFromGitHub {
       owner = "qfpl";
       repo = "geodetic-types";
-      rev = "6e41e9c638a1349743842056a400797f60122f13";
-      sha256 = "1gb6b4dcs3d2rv19gp2kg1rlaccvirr5gphh47q3h57rnnv9rnki";
+      rev = "28475c8a3d2ae2aeefa9f37c5fd23344d5c2bd8c";
+      sha256 = "1myq5x5i4nvhxy2728f1y3w8myaha36iid6hqgn2a3qy3xpwagpx";
     };
-
   };
 
   modifiedHaskellPackages = haskellPackages.override {
     overrides = self: super: {
-      hedgehog = super.callCabal2nix "hedgehog" "${sources.hedgehog}/hedgehog" {};
-      tasty-hedgehog = super.callCabal2nix "tasty-hedgehog" "${sources.tasty-hedgehog}" {};
+      hedgehog       = self.callHackage "hedgehog" "0.6" {};
+      tasty-hedgehog = self.callHackage "tasty-hedgehog" "0.2.0.0" {};
+      concurrent-output = pkgs.haskell.lib.doJailbreak super.concurrent-output;
       dimensional = super.callCabal2nix "dimensional" "${sources.dimensional}" {};
       geodetic-types = import sources.geodetic-types { inherit nixpkgs compiler; };
     };

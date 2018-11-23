@@ -18,7 +18,7 @@
             "keepnr": 5,
             "inputs": {
                 "vfr-waypoints": { "type": "git", "value": "https://github.com/qfpl/vfr-waypoints", "emailresponsible": false },
-                "nixpkgs": { "type": "git", "value": "https://github.com/NixOS/nixpkgs.git release-17.09", "emailresponsible": false }
+                "nixpkgs": { "type": "git", "value": "https://github.com/NixOS/nixpkgs.git release-18.09", "emailresponsible": false }
             }
         }
     }
