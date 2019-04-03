@@ -1,3 +1,7 @@
+0.1.0.3
+
+* Use VERSION macro to print version.
+
 0.1.0.2
 
 * add `minus` function.

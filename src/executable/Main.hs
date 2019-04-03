@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE CPP #-}
 
 module Main(
   main
@@ -31,7 +32,7 @@ main =
         execParser
           (info (parserOptions <**> helper) (
             fullDesc <>
-            header "vfr-waypoints for searching VFR waypoints"
+            header ("vfr-waypoints " <> VERSION_vfr_waypoints <> " for searching VFR waypoints")
           )
         )
   in  do  Options c h m t x <- opts
