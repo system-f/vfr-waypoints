@@ -4,7 +4,7 @@ name:                  vfr-waypoints
 version:               0.1.0.2
 synopsis:              VFR waypoints, as published in the AIP (ERSA)
 description:       
-  <<http://i.imgur.com/uZnp9ke.png>>
+  <<https://raw.githubusercontent.com/qfpl/assets/master/data61-transparent-bg.png>>
   .
   VFR waypoints, as published in the AIP (ERSA)
 license:               BSD3
